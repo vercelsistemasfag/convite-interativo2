@@ -1,0 +1,33 @@
+{
+  "name": "celebre-convite-interativo",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "dev:vinext": "vinext dev",
+    "build": "next build",
+    "build:vinext": "vinext build",
+    "start": "next start",
+    "start:vinext": "vinext start",
+    "check:vinext": "vinext check",
+    "deploy": "vinext-cloudflare deploy",
+    "deploy:preview": "vinext-cloudflare deploy --preview",
+    "cf-typegen": "wrangler types"
+  },
+  "dependencies": {
+    "@vinext/cloudflare": "1.0.0-beta.8",
+    "next": "16.3.3",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-server-dom-webpack": "19.2.8",
+    "vinext": "1.0.0-beta.8"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "1.53.1",
+    "@vitejs/plugin-react": "latest",
+    "@vitejs/plugin-rsc": "0.5.34",
+    "vite": "8.2.2",
+    "wrangler": "4.125.0"
+  }
+}
