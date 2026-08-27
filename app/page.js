@@ -66,7 +66,7 @@ function CategoryIcon({ type }) {
 
 function BrandHeader({ compact = false }) {
   return <div className={`brand-header ${compact ? 'compact' : ''}`}>
-    <img src="/brand/celebra-logo.png" alt="Celebra Convite Interativo" />
+    <img src="/brand/celebra-logo-v2.png" alt="Celebra Convite Interativo" />
   </div>;
 }
 
