@@ -49,6 +49,8 @@ export default function Home() {
   const [form, setForm] = useState({ name: '', age: '', date: '', time: '', place: '', city: '', message: '' });
   const [features, setFeatures] = useState(initialFeatures);
   const [copied, setCopied] = useState(false);
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [activePanel, setActivePanel] = useState(null);
 
   const selected = useMemo(() => celebrations.find((item) => item.id === celebration), [celebration]);
   const progress = (step / 5) * 100;
@@ -103,19 +105,69 @@ export default function Home() {
       </section>}
 
       {step === 5 && <section className="stage preview-stage">
-        <button className="back" onClick={back}>← Voltar</button><div className="eyebrow">Experiência padrão · Aniversário</div><h1>Agora é um convite que acontece.</h1><p className="lead">Role a prévia como seu convidado faria. Os elementos abaixo são interface real, não uma imagem estática.</p>
-        <div className="experience-wrap"><article className="birthday-invite">
-          <section className="invite-hero"><div className="hero-orbit"></div><div className="hero-spark s1">✦</div><div className="hero-spark s2">✧</div><div className="hero-spark s3">•</div><div className="celebra-sign">Celebra <small>CONVITE INTERATIVO</small></div><div className="glass-orb"><span>Hoje<br/>é dia de</span><em>celebrar!</em></div><p className="hero-line">E você faz parte dessa história</p><span className="scroll-cue">⌄</span></section>
-          <section className="person-section"><div className="portrait-art"><div className="portrait-glow"></div><div className="portrait-monogram">{displayName.charAt(0).toUpperCase()}</div><span>✦</span></div><div className="person-copy"><small>UMA NOVA FASE</small><h2>{displayName}</h2>{selected?.id==='aniversario' && <div className="age-line"><i>faz</i><strong>{displayAge}!</strong></div>}<p>{form.message || 'Uma nova fase, muitas histórias para viver e momentos para guardar.'}</p></div></section>
-          <section className="event-section"><div><span className="line-icon">□</span><small>QUANDO</small><strong>{shortDate(form.date)}</strong><p>{form.time ? `ÀS ${form.time}` : 'ÀS 19H00'}</p></div><div><span className="line-icon">⌖</span><small>ONDE</small><strong>{form.place || 'Espaço Jardim'}</strong><p>{form.city || 'Novo Hamburgo · RS'}</p></div></section>
-          <section className="quote-section"><b>“</b><p>A vida é feita de ciclos<br/>e de pessoas especiais que tornam<br/>cada momento inesquecível.</p><em>Obrigada por fazer parte disso!</em><span>◆</span></section>
-          {features.includes('rsvp') && <section className="action-section dark"><span className="action-symbol">♡</span><h3>CONFIRME SUA PRESENÇA</h3><p>Sua presença torna esse dia ainda mais especial!</p><button>Confirmar presença</button></section>}
-          {(features.includes('gifts')||features.includes('collective')) && <section className="gifts-section"><span className="section-symbol">♢</span><h3>PRESENTES</h3><p>Sua presença já é o nosso maior presente.<br/>Se quiser nos presentear, escolha como preferir:</p><div className="gift-grid">{features.includes('collective')&&<button><b>♡</b><strong>Presente coletivo</strong><small>Contribua para um presente especial</small><em>Quero contribuir →</em></button>}{features.includes('gifts')&&<button><b>♢</b><strong>Lista de presentes</strong><small>Escolha um item da nossa lista</small><em>Ver lista →</em></button>}</div></section>}
-          {features.includes('music') && <section className="music-section"><div className="vinyl"><i></i><span>♫</span></div><div><small>♫ TRILHA SONORA</small><h3>Entre no clima!</h3><p>Sugira uma música para tocar na festa.</p><button>♫ Sugerir uma música</button></div></section>}
-          <footer className="invite-footer"><p>Mal posso esperar para comemorar com você!</p><span>♡</span><small>FEITO COM CELEBRA</small></footer>
-        </article></div>
-        <div className="publish-card"><div><strong>Primeiro modelo visual implementado</strong><p>Depois de conectarmos o banco, cada convite terá seu próprio link público.</p></div><code>celebra.app/e/{displayName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-')}-K7M4</code></div>
-        <button className="primary" onClick={sharePreview}>Compartilhar prévia</button><button className="secondary" onClick={()=>setStep(1)}>Criar outro convite</button>
+        <button className="back" onClick={back}>← Voltar</button>
+        <div className="eyebrow">Experiência padrão · Aniversário</div>
+        <h1>Abra o convite. Depois, participe.</h1>
+        <p className="lead">A capa concentra o impacto visual. Ao abrir, data, local e ações aparecem juntas para reduzir a rolagem no celular.</p>
+
+        <div className="experience-wrap">
+          <article className={`compact-invite ${inviteOpen ? 'open' : ''}`}>
+            {!inviteOpen && <button type="button" className="compact-cover" onClick={() => setInviteOpen(true)}>
+              <div className="compact-cover-brand">Celebra <small>CONVITE INTERATIVO</small></div>
+              <div className="compact-cover-stars">✦ ✧ ✦</div>
+              <div className="compact-cover-frame">
+                <small>HOJE É DIA DE</small>
+                <h2>{displayName}</h2>
+                {selected?.id === 'aniversario' && <strong>faz {displayAge}!</strong>}
+                <span>{shortDate(form.date)}</span>
+              </div>
+              <div className="tap-open"><b>Toque para abrir</b><span>⌄</span></div>
+            </button>}
+
+            {inviteOpen && <div className="compact-inside">
+              <div className="inside-header">
+                <div><small>VOCÊ ESTÁ CONVIDADO</small><h2>{displayName} <em>{selected?.id === 'aniversario' ? `${displayAge}!` : ''}</em></h2></div>
+                <button type="button" onClick={() => { setInviteOpen(false); setActivePanel(null); }}>Fechar</button>
+              </div>
+
+              <div className="inside-info">
+                <div><span>□</span><b>{shortDate(form.date)}</b><small>{form.time || '19h00'}</small></div>
+                <div><span>⌖</span><b>{form.place || 'Espaço Jardim'}</b><small>{form.city || 'Novo Hamburgo · RS'}</small></div>
+              </div>
+
+              {features.includes('rsvp') && <button type="button" className="inside-primary" onClick={() => setActivePanel('rsvp')}>
+                <span>✓</span><div><b>Confirmar presença</b><small>Avise que você vai participar</small></div><i>›</i>
+              </button>}
+
+              <div className="inside-actions">
+                {features.includes('music') && <button type="button" onClick={() => setActivePanel('music')}><span>♫</span><b>Sugerir música</b></button>}
+                {features.includes('gifts') && <button type="button" onClick={() => setActivePanel('gifts')}><span>♢</span><b>Presentes</b></button>}
+                {features.includes('collective') && <button type="button" onClick={() => setActivePanel('collective')}><span>♡</span><b>Presente coletivo</b></button>}
+                {features.includes('location') && <button type="button" onClick={() => setActivePanel('location')}><span>⌖</span><b>Como chegar</b></button>}
+                {features.includes('calendar') && <button type="button" onClick={() => setActivePanel('calendar')}><span>□</span><b>Adicionar à agenda</b></button>}
+                {features.includes('polls') && <button type="button" onClick={() => setActivePanel('polls')}><span>▥</span><b>Enquete</b></button>}
+              </div>
+
+              <div className="inside-note"><span>“</span><p>{form.message || 'Uma nova fase, muitas histórias para viver e momentos para guardar. Vai ser ainda melhor com você por perto.'}</p></div>
+              <footer className="inside-footer">✦ Celebra · convite interativo</footer>
+
+              {activePanel && <div className="inside-panel">
+                <button type="button" className="inside-panel-close" onClick={() => setActivePanel(null)}>×</button>
+                {activePanel === 'rsvp' && <><span className="inside-panel-icon">✓</span><h3>Confirmar presença</h3><p>A confirmação será feita aqui, sem sair do convite.</p><button type="button" className="inside-panel-action">Vou participar!</button></>}
+                {activePanel === 'music' && <><span className="inside-panel-icon">♫</span><h3>Sugira uma música</h3><p>A busca Deezer ficará neste painel, com preview quando disponível e sugestão manual como alternativa.</p><div className="inside-search">Pesquisar música ou artista… <b>⌕</b></div></>}
+                {activePanel === 'gifts' && <><span className="inside-panel-icon">♢</span><h3>Lista de presentes</h3><p>Os presentes escolhidos pelo anfitrião aparecerão aqui.</p><button type="button" className="inside-panel-action">Ver lista</button></>}
+                {activePanel === 'collective' && <><span className="inside-panel-icon">♡</span><h3>Presente coletivo</h3><p>Viagem de aniversário</p><div className="inside-goal"><i /></div><b className="inside-goal-text">68% da meta alcançada</b><button type="button" className="inside-panel-action">Contribuir via Pix</button></>}
+                {activePanel === 'location' && <><span className="inside-panel-icon">⌖</span><h3>Como chegar</h3><p>{form.place || 'Espaço Jardim'} · {form.city || 'Novo Hamburgo · RS'}</p><button type="button" className="inside-panel-action">Abrir no mapa</button></>}
+                {activePanel === 'calendar' && <><span className="inside-panel-icon">□</span><h3>Salvar a data</h3><p>{formatDate(form.date)} {form.time ? `às ${form.time}` : 'às 19h00'}.</p><button type="button" className="inside-panel-action">Adicionar à agenda</button></>}
+                {activePanel === 'polls' && <><span className="inside-panel-icon">▥</span><h3>Enquete da festa</h3><p>Uma pergunta rápida pode aparecer aqui.</p><button type="button" className="inside-panel-action">Responder</button></>}
+              </div>}
+            </div>}
+          </article>
+        </div>
+
+        <div className="publish-card"><div><strong>Modelo compacto para mobile</strong><p>O convidado encontra as funções principais logo depois de abrir o cartão.</p></div><code>celebra.app/e/{displayName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-')}-K7M4</code></div>
+        <button className="primary" onClick={sharePreview}>Compartilhar prévia</button>
+        <button className="secondary" onClick={() => { setInviteOpen(false); setActivePanel(null); setStep(1); }}>Criar outro convite</button>
       </section>}
     </main>
   );
