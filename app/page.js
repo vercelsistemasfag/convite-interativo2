@@ -70,6 +70,10 @@ function BrandHeader({ compact = false }) {
   </div>;
 }
 
+function StepDots({n}) { return <div className="native-dots">{[1,2,3,4,5].map(x=><i key={x} className={x<=n?'on':''}></i>)}<span>{n}/5</span></div> }
+function ControlTitle({icon,text}) { return <h3 className="control-title"><i>{icon}</i>{text}</h3> }
+function MiniDialog({text,close}) { return <div className="mini-dialog" onClick={close}><div onClick={e=>e.stopPropagation()}><button onClick={close}>×</button><strong>{text}</strong><p>Esta função será conectada ao backend na próxima fase.</p></div></div> }
+
 export default function Home() {
   const [step, setStep] = useState(0);
   const [category, setCategory] = useState('aniversario');
@@ -141,51 +145,42 @@ export default function Home() {
         <div className="progress-row" aria-label="Etapa 2 de 5"><b></b><i className="active"></i><i></i><i></i><i></i><span>2/5</span></div>
       </section>}
 
-      {step >= 2 && <section className={`screen-frame step-${step + 1}`} aria-label={`Tela ${step + 1} do Celebra`}>
-        <img className="approved-art" src={screens[step]} alt="Interface aprovada do aplicativo Celebra" draggable="false" />
+      {step === 2 && <section className="html-screen native-page">
+        <button className="back-button" onClick={() => go(1)}>‹</button><BrandHeader compact />
+        <h1>Deixe com a sua cara</h1><div className="gold-divider"><span></span><b>◆</b><span></span></div>
+        <p className="page-subtitle">Escolha um estilo para começar. Você poderá personalizar na próxima etapa.</p>
+        <div className="cover-grid">{covers.map((name,i)=><button key={name} className={`cover-card ${cover===i?'selected':''}`} onClick={()=>setCover(i)}><div className={`cover-art cover-${i}`}><span>{selectedCategory.label}</span><b>{name}</b><i>◆</i></div><strong>{name}</strong>{cover===i&&<em>✓</em>}</button>)}</div>
+        <div className="nav-actions"><button onClick={()=>go(1)}>← Voltar</button><button className="next" onClick={()=>go(3)}>Continuar →</button></div><StepDots n={3}/>
+      </section>}
 
-        {step === 2 && <>
-          <button className="hotspot clean" style={pct(51, 60, 88, 86)} onClick={() => go(1)} aria-label="Voltar" />
-          {[[0,63,462],[1,369,462],[2,675,462],[3,63,854],[4,369,854],[5,675,854]].map(([i,x,y]) => <button key={i} className={`hotspot select-mark ${cover === i ? 'selected' : ''}`} style={pct(x,y,280,368)} onClick={() => setCover(i)} aria-label={`Capa ${covers[i]}`}><span>✓</span></button>)}
-          <button className="hotspot clean" style={pct(543,1370,415,70)} onClick={() => go(3)} aria-label="Continuar" />
-        </>}
+      {step === 3 && <section className="html-screen native-page personalize-page">
+        <button className="back-button" onClick={() => go(2)}>‹</button><BrandHeader compact />
+        <h1>Personalize seu convite</h1><div className="gold-divider"><span></span><b>◆</b><span></span></div><p className="page-subtitle">Deixe seu convite com a sua cara!</p>
+        <div className="personalize-layout"><div className="controls-col">
+          <ControlTitle icon="◉" text="Cores principais"/><div className="color-row">{['#6a0735','#ff654e','#c78c2a','#17345f','#638b7b','#9c739b'].map((c,i)=><button key={c} style={{background:c}} className={color===i?'selected':''} onClick={()=>setColor(i)}/>)}</div>
+          <ControlTitle icon="Aa" text="Tipografia"/><div className="font-row">{['Clássica','Moderna','Elegante','Divertida'].map((x,i)=><button key={x} className={font===i?'selected':''} onClick={()=>setFont(i)}><b className={`font-${i}`}>Aa</b><span>{x}</span></button>)}</div>
+          <ControlTitle icon="✧" text="Elementos decorativos"/><div className="decor-row">{['✦','❧','♡','⋰','🎈','⌁'].map((x,i)=><button key={i} className={decor===i?'selected':''} onClick={()=>setDecor(i)}>{x}</button>)}</div>
+          <ControlTitle icon="▧" text="Imagem de fundo (opcional)"/><label className="upload-native">↑<span>Enviar</span><input type="file" accept="image/png,image/jpeg"/></label>
+        </div><div className="invite-preview"><span>Prévia do convite</span><div className={`preview-card preview-${cover}`}><small>✦ ✦ ✦</small><h2>Vamos<br/><i>Celebrar!</i></h2><p>{details.title||'Aniversário da Mariana'}</p><p>▣ {details.date||'20/07/2025'}　◷ {details.time||'19:00'}</p><p>⌖ {details.place||'Salão de Festas'}</p><b>Conto com você!</b></div><button onClick={()=>setCover((cover+1)%covers.length)}>↻ Trocar modelo</button></div></div>
+        <div className="ai-panel"><div><strong>🪄 Personalização com IA ✨</strong><small>Recurso opcional</small></div><p>Para sua imagem encaixar perfeitamente no convite, siga os passos abaixo.</p><div className="ai-steps"><button onClick={handleAiCopy}><b>1</b><strong>Copiar instruções</strong><span>{aiCopied?'Copiado ✓':'Copiar instruções'}</span></button><div><b>2</b><strong>Colar no ChatGPT</strong><span>Cole e descreva o que deseja mudar.</span></div><a href={aiCopied?'https://chatgpt.com/':undefined} target="_blank" onClick={(e)=>{if(!aiCopied){e.preventDefault();setDialog('Primeiro copie as instruções.')}}}><b>3</b><strong>Abrir ChatGPT</strong><span>Abrir ChatGPT ↗</span></a></div></div>
+        <div className="nav-actions"><button onClick={()=>go(2)}>← Voltar</button><button className="next" onClick={()=>go(4)}>Continuar →</button></div><StepDots n={4}/>
+        {dialog&&<MiniDialog text={dialog} close={()=>setDialog(null)}/>} 
+      </section>}
 
-        {step === 3 && <>
-          <button className="hotspot clean" style={pct(48,46,78,74)} onClick={() => go(2)} aria-label="Voltar" />
-          {[0,1,2,3,4,5].map((i) => <button key={`c${i}`} className={`dot-hit ${color === i ? 'on' : ''}`} style={pct(81+i*79,427,56,56)} onClick={() => setColor(i)} aria-label={`Cor ${i+1}`} />)}
-          {[0,1,2,3].map((i) => <button key={`f${i}`} className={`choice-hit ${font === i ? 'on' : ''}`} style={pct(55+i*123,580,106,98)} onClick={() => setFont(i)} aria-label={`Tipografia ${i+1}`} />)}
-          {[0,1,2,3,4,5].map((i) => <button key={`d${i}`} className={`choice-hit ${decor === i ? 'on' : ''}`} style={pct(55+i*79,764,66,78)} onClick={() => setDecor(i)} aria-label={`Elemento decorativo ${i+1}`} />)}
-          <label className="file-hit" style={pct(55,917,73,87)} aria-label="Enviar imagem de fundo"><input type="file" accept="image/png,image/jpeg" /></label>
-          <button className="hotspot ai-copy" style={pct(84,1260,247,54)} onClick={handleAiCopy} aria-label="Copiar instruções para IA"><span>{aiCopied ? 'Copiado ✓' : ''}</span></button>
-          <a className={`hotspot ai-open ${aiCopied ? 'ready' : ''}`} style={pct(683,1260,246,54)} href={aiCopied ? 'https://chatgpt.com/' : undefined} target="_blank" rel="noreferrer" onClick={(e) => { if (!aiCopied) { e.preventDefault(); setDialog('Primeiro toque em “Copiar instruções”. Depois o botão para abrir o ChatGPT será liberado.'); } }} aria-label="Abrir ChatGPT" />
-          <button className="hotspot clean" style={pct(541,1390,426,67)} onClick={() => go(4)} aria-label="Continuar" />
-        </>}
+      {step === 4 && <section className="html-screen native-page resources-page">
+        <button className="back-button" onClick={() => go(3)}>‹</button><BrandHeader compact /><h1>O que seus convidados<br/>poderão fazer</h1><div className="gold-divider"><span></span><b>◆</b><span></span></div><p className="page-subtitle">Selecione os recursos que deseja disponibilizar no seu convite</p>
+        <div className="feature-list">{features.map(([id,label],i)=><button key={id} className={enabled.includes(id)?'on':''} onClick={()=>toggleFeature(id)}><i>{['▣','♫','🎁','♧','⌖','▦'][i]}</i><span><strong>{label}</strong><small>{['Seus convidados confirmam a presença no evento.','Seus convidados sugerem músicas para o evento.','Compartilhe sua lista de presentes online.','Permita contribuições para um presente em grupo.','Exiba o endereço e facilite a chegada.','Adicione o evento à agenda com um clique.'][i]}</small></span><b>{enabled.includes(id)?'✓':''}</b></button>)}</div>
+        <div className="tip-box">✦ <span><strong>Você pode alterar depois</strong><small>Todos os recursos podem ser ativados ou desativados a qualquer momento.</small></span><em>Dica</em></div>
+        <div className="nav-actions"><button onClick={()=>go(3)}>← Voltar</button><button className="next" onClick={()=>go(5)}>Finalizar e publicar →</button></div><StepDots n={5}/>
+      </section>}
 
-        {step === 4 && <>
-          <button className="hotspot clean" style={pct(48,44,78,76)} onClick={() => go(3)} aria-label="Voltar" />
-          {[['rsvp',111,431],['music',111,568],['gifts',111,706],['collective',111,843],['location',111,979],['calendar',111,1116]].map(([id,x,y]) => <button key={id} className={`hotspot feature-toggle ${enabled.includes(id) ? 'on' : ''}`} style={pct(x,y,802,124)} onClick={() => toggleFeature(id)} aria-label={`Alternar ${features.find(([fid]) => fid === id)?.[1]}`}><span>{enabled.includes(id) ? '✓' : ''}</span></button>)}
-          <button className="hotspot clean" style={pct(478,1382,436,72)} onClick={() => go(5)} aria-label="Finalizar e publicar" />
-        </>}
-
-        {step === 5 && <>
-          <button className="hotspot clean" style={pct(33,45,66,65)} onClick={() => go(4)} aria-label="Fechar e voltar" />
-          <button className="hotspot clean" style={pct(797,45,192,65)} onClick={() => go(1)} aria-label="Editar convite" />
-          <div className={`flip-stage ${inviteOpen ? 'open' : ''}`} style={pct(263,258,491,681)} onPointerDown={(e) => { pointerStart.current = e.clientX; }} onPointerUp={(e) => { if (pointerStart.current !== null && pointerStart.current - e.clientX > 34) setInviteOpen(true); pointerStart.current = null; }}>
-            <div className="card-inside"><small>CONVITE ABERTO</small><h2>{details.title || 'Aniversário da Juliana'}</h2><p>{details.date || '20 de julho de 2025'} {details.time ? `• ${details.time}` : '• 19h30'}</p><p>{details.place || 'Espaço Florescer'}</p><div className="inside-feature-grid">{features.filter(([id]) => enabled.includes(id)).map(([id,label]) => <button key={id} onClick={() => openFeature(label)}>{label}</button>)}</div><button className="close-card" onClick={() => setInviteOpen(false)}>Fechar convite</button></div>
-            <button className="flip-cover" onClick={() => setInviteOpen((v) => !v)} aria-label={inviteOpen ? 'Fechar convite' : 'Abrir convite'}><img src="/ui/convite-capa-crop.png" alt="Capa do convite aprovado" draggable="false" /></button>
-          </div>
-          {[['Confirmar presença',108],['Sugestão de músicas',241],['Lista de presentes',374],['Presente coletivo',507],['Como chegar',640],['Adicionar à agenda',773]].map(([name,x]) => <button key={name} className="hotspot clean" style={pct(x,1008,123,120)} onClick={() => openFeature(name)} aria-label={name} />)}
-          <button className="hotspot clean" style={pct(768,1227,145,51)} onClick={handleLinkCopy} aria-label="Copiar link" />
-          <button className="hotspot clean" style={pct(108,1326,175,52)} onClick={() => shareInvite('whatsapp')} aria-label="Compartilhar no WhatsApp" />
-          <button className="hotspot clean" style={pct(309,1326,180,52)} onClick={() => shareInvite()} aria-label="Compartilhar no Instagram" />
-          <button className="hotspot clean" style={pct(510,1326,180,52)} onClick={() => shareInvite()} aria-label="Compartilhar no Facebook" />
-          <button className="hotspot clean" style={pct(708,1326,205,52)} onClick={() => shareInvite()} aria-label="Mais opções de compartilhamento" />
-          <button className="hotspot clean" style={pct(89,1411,370,64)} onClick={() => go(0)} aria-label="Ir para meus convites" />
-          <button className="hotspot clean" style={pct(494,1411,441,64)} onClick={() => setInviteOpen(true)} aria-label="Ver prévia completa" />
-        </>}
-
-        {dialog && <div className="dialog-backdrop" onClick={() => setDialog(null)} role="presentation"><div className="dialog-card" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true"><button onClick={() => setDialog(null)}>×</button><strong>{dialog}</strong><p>Esta é uma demonstração do fluxo interativo. A integração definitiva será conectada na próxima fase do backend.</p></div></div>}
-        {linkCopied && <div className="toast">Link copiado ✓</div>}
+      {step === 5 && <section className="html-screen native-page publish-page">
+        <button className="back-button" onClick={() => go(4)}>‹</button><BrandHeader compact /><h1>Seu convite está pronto!</h1><div className="gold-divider"><span></span><b>◆</b><span></span></div><p className="page-subtitle">Toque no convite para abrir e fechar como um convite físico.</p>
+        <div className={`native-flip ${inviteOpen?'open':''}`}><div className="native-inside"><h2>{details.title||'Aniversário da Juliana'}</h2><p>{details.date||'20 de julho de 2025'} • {details.time||'19h30'}</p><p>{details.place||'Espaço Florescer'}</p><div>{features.filter(([id])=>enabled.includes(id)).map(([id,l])=><button key={id} onClick={()=>openFeature(l)}>{l}</button>)}</div></div><button className="native-cover" onClick={()=>setInviteOpen(!inviteOpen)}><img src="/ui/convite-capa-crop.png" alt="Capa do convite"/></button></div>
+        <div className="published-features">{features.filter(([id])=>enabled.includes(id)).map(([id,l])=><button key={id} onClick={()=>openFeature(l)}>{l}</button>)}</div>
+        <div className="share-box"><label>Link do convite</label><div><input readOnly value={inviteLink}/><button onClick={handleLinkCopy}>{linkCopied?'Copiado ✓':'Copiar'}</button></div><div className="share-buttons"><button onClick={()=>shareInvite('whatsapp')}>WhatsApp</button><button onClick={()=>shareInvite()}>Compartilhar</button></div></div>
+        <div className="nav-actions"><button onClick={()=>go(0)}>← Meus convites</button><button className="next" onClick={()=>setInviteOpen(true)}>Ver prévia completa →</button></div>
+        {dialog&&<MiniDialog text={dialog} close={()=>setDialog(null)}/>} 
       </section>}
     </main>
   );
