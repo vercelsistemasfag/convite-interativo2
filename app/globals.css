@@ -66,3 +66,12 @@
 .font-sample>span{font-weight:800;letter-spacing:-.045em}
 .published-invite{position:absolute!important;inset:0!important;overflow:hidden!important;background-size:cover!important;background-position:center!important;color:var(--invite-text,#f4e7d7)!important}
 .published-object{position:absolute;z-index:3;max-width:88%;white-space:nowrap;text-align:center;line-height:1.05;color:var(--invite-text,#f4e7d7);transform-origin:center center}.published-text{font-weight:800;letter-spacing:-.035em;text-shadow:0 2px 5px #0006}.published-decor{filter:drop-shadow(0 3px 4px #0005)}
+
+/* V11.1 — controles menores, redimensionamento por alça e reaplicação contextual */
+.object-control{width:17px!important;height:17px!important;min-width:17px!important;border-width:1.5px!important;font-size:10px!important;box-shadow:0 1px 4px #0005!important}
+.object-delete{right:-9px!important;top:-9px!important}
+.object-rotate{right:-9px!important;bottom:-9px!important;font-size:9px!important}
+.object-resize{left:-9px!important;bottom:-9px!important;background:#fff!important;color:#6a0735!important;border-color:#6a0735!important;font-size:9px!important;cursor:nwse-resize!important}
+.floating-text.selected .object-content[contenteditable="true"]{outline:none;cursor:text;user-select:text;-webkit-user-select:text;min-width:1ch}
+.field-apply-row{display:flex;gap:6px;align-items:stretch}.field-apply-row input{flex:1;min-width:0}.field-apply-row>button{flex:0 0 auto;max-width:92px;padding:0 7px;border:1px solid #8b3459;border-radius:8px;background:#fff8f5;color:#68133d;font-size:9px;font-weight:800;line-height:1.05}
+.form-row .field-apply-row{flex-direction:column}.form-row .field-apply-row>button{max-width:none;min-height:28px}
