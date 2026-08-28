@@ -79,6 +79,14 @@ const defaultInvite = {
   category: 'aniversario',
   details: { title: '', message: 'Vamos celebrar!', date: '', time: '', place: '' },
   floatingElements: [],
+  floatingTexts: [
+    { id:'message', type:'message', x:50, y:29, size:34, rotate:0, visible:true },
+    { id:'title', type:'title', x:50, y:42, size:22, rotate:0, visible:true },
+    { id:'date', type:'date', x:37, y:56, size:14, rotate:0, visible:true },
+    { id:'time', type:'time', x:67, y:56, size:14, rotate:0, visible:true },
+    { id:'place', type:'place', x:50, y:66, size:14, rotate:0, visible:true },
+    { id:'closing', type:'closing', x:50, y:79, size:15, rotate:0, visible:true },
+  ],
   cover: 0,
   background: 0,
   color: 0,
@@ -105,7 +113,7 @@ export default function Home() {
   const [step, setStep] = useState(0);
   const [invite, setInvite] = useState(defaultInvite);
   const [hydrated, setHydrated] = useState(false);
-  const { category, details, cover, background = 0, color, fontColor = '#f4e7d7', font, floatingElements = [], enabled } = invite;
+  const { category, details, cover, background = 0, color, fontColor = '#f4e7d7', font, floatingElements = [], floatingTexts = defaultInvite.floatingTexts, enabled } = invite;
   const [aiCopied, setAiCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
@@ -113,7 +121,11 @@ export default function Home() {
   const [customBg, setCustomBg] = useState('');
   const [activeEditorPanel, setActiveEditorPanel] = useState(null);
   const pointerStart = useRef(null);
+  const activePointers = useRef(new Map());
+  const gestureStart = useRef(null);
+  const rotateStart = useRef(null);
   const previewRef = useRef(null);
+  const [selectedObject, setSelectedObject] = useState(null);
 
   useEffect(() => {
     try {
@@ -125,6 +137,7 @@ export default function Home() {
           ...parsed,
           details: { ...current.details, ...(parsed.details || {}) },
           enabled: Array.isArray(parsed.enabled) ? parsed.enabled : current.enabled,
+          floatingTexts: Array.isArray(parsed.floatingTexts) ? parsed.floatingTexts : current.floatingTexts,
         }));
       }
     } catch {}
@@ -162,23 +175,67 @@ export default function Home() {
   function addFloatingElement(type, glyph) {
     const item = { id: `${Date.now()}-${Math.random()}`, type, glyph, x: 50, y: 24, size: 44, rotate: 0 };
     patchInvite({ floatingElements: [...floatingElements, item] });
+    setSelectedObject(`decor:${item.id}`);
   }
   function updateFloatingElement(id, patch) {
-    patchInvite({ floatingElements: floatingElements.map(el => el.id === id ? { ...el, ...patch } : el) });
+    setInvite(current => ({...current, floatingElements:(current.floatingElements||[]).map(el=>el.id===id?{...el,...patch}:el)}));
   }
-  function removeFloatingElement(id) { patchInvite({ floatingElements: floatingElements.filter(el => el.id !== id) }); }
-  function startElementDrag(e, id) {
-    e.preventDefault(); e.currentTarget.setPointerCapture?.(e.pointerId);
-    pointerStart.current = { id };
+  function updateFloatingText(id, patch) {
+    setInvite(current => ({...current, floatingTexts:(current.floatingTexts||defaultInvite.floatingTexts).map(el=>el.id===id?{...el,...patch}:el)}));
   }
-  function moveElementDrag(e, id) {
-    if (!pointerStart.current || pointerStart.current.id !== id || !previewRef.current) return;
-    const r = previewRef.current.getBoundingClientRect();
-    const x = Math.max(4, Math.min(96, ((e.clientX-r.left)/r.width)*100));
-    const y = Math.max(4, Math.min(96, ((e.clientY-r.top)/r.height)*100));
-    updateFloatingElement(id,{x,y});
+  function removeObject(kind,id) {
+    if(kind==='decor') setInvite(current=>({...current,floatingElements:(current.floatingElements||[]).filter(el=>el.id!==id)}));
+    else updateFloatingText(id,{visible:false});
+    setSelectedObject(null);
   }
-  function endElementDrag(){ pointerStart.current=null; }
+  function restoreText(id){ updateFloatingText(id,{visible:true}); setSelectedObject(`text:${id}`); }
+  function getObject(kind,id){ return kind==='decor' ? floatingElements.find(x=>x.id===id) : floatingTexts.find(x=>x.id===id); }
+  function patchObject(kind,id,patch){ kind==='decor' ? updateFloatingElement(id,patch) : updateFloatingText(id,patch); }
+  function pointDistance(a,b){ return Math.hypot(a.x-b.x,a.y-b.y); }
+  function startObjectGesture(e,kind,id){
+    if(e.target.closest?.('.object-control')) return;
+    e.preventDefault(); e.stopPropagation();
+    setSelectedObject(`${kind}:${id}`);
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+    activePointers.current.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    const obj=getObject(kind,id); if(!obj) return;
+    if(activePointers.current.size===1) pointerStart.current={kind,id,pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,x:obj.x,y:obj.y};
+    if(activePointers.current.size===2){ const pts=[...activePointers.current.values()]; gestureStart.current={kind,id,distance:pointDistance(pts[0],pts[1]),size:obj.size}; pointerStart.current=null; }
+  }
+  function moveObjectGesture(e,kind,id){
+    if(!activePointers.current.has(e.pointerId)||!previewRef.current) return;
+    activePointers.current.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    const r=previewRef.current.getBoundingClientRect();
+    if(activePointers.current.size>=2 && gestureStart.current?.id===id){
+      const pts=[...activePointers.current.values()].slice(0,2), dist=pointDistance(pts[0],pts[1]);
+      const min=kind==='text'?10:22, max=kind==='text'?64:110;
+      patchObject(kind,id,{size:Math.max(min,Math.min(max,gestureStart.current.size*(dist/Math.max(1,gestureStart.current.distance))))}); return;
+    }
+    const d=pointerStart.current;
+    if(d?.id===id&&d.pointerId===e.pointerId){
+      const x=Math.max(3,Math.min(97,d.x+((e.clientX-d.startX)/r.width)*100));
+      const y=Math.max(3,Math.min(97,d.y+((e.clientY-d.startY)/r.height)*100));
+      patchObject(kind,id,{x,y});
+    }
+  }
+  function endObjectGesture(e){ activePointers.current.delete(e.pointerId); if(activePointers.current.size<2) gestureStart.current=null; if(activePointers.current.size===0) pointerStart.current=null; }
+  function startRotate(e,kind,id){
+    e.preventDefault(); e.stopPropagation(); setSelectedObject(`${kind}:${id}`);
+    const obj=getObject(kind,id), r=previewRef.current?.getBoundingClientRect(); if(!obj||!r)return;
+    const cx=r.left+r.width*obj.x/100, cy=r.top+r.height*obj.y/100;
+    rotateStart.current={kind,id,pointerId:e.pointerId,cx,cy,startAngle:Math.atan2(e.clientY-cy,e.clientX-cx)*180/Math.PI,rotate:obj.rotate||0};
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+  }
+  function moveRotate(e){ const d=rotateStart.current;if(!d||d.pointerId!==e.pointerId)return; const a=Math.atan2(e.clientY-d.cy,e.clientX-d.cx)*180/Math.PI;patchObject(d.kind,d.id,{rotate:d.rotate+a-d.startAngle}); }
+  function endRotate(){ rotateStart.current=null; }
+  function textValue(type){ return ({message:previewMessage,title:previewTitle,date:`▣ ${previewDate}`,time:`◷ ${previewTime}`,place:`⌖ ${previewPlace}`,closing:'Conto com você!'})[type]||''; }
+  function FloatingObject({kind,item,children}){
+    if(item.visible===false)return null; const selected=selectedObject===`${kind}:${item.id}`;
+    return <div className={`floating-object ${kind==='text'?'floating-text':'floating-decor'} ${selected?'selected':''}`} style={{left:`${item.x}%`,top:`${item.y}%`,fontSize:`${item.size}px`,transform:`translate(-50%,-50%) rotate(${item.rotate||0}deg)`}} onPointerDown={e=>startObjectGesture(e,kind,item.id)} onPointerMove={e=>moveObjectGesture(e,kind,item.id)} onPointerUp={endObjectGesture} onPointerCancel={endObjectGesture}>
+      <div className="object-content">{children}</div>
+      {selected&&<><button type="button" className="object-control object-delete" aria-label="Excluir" onPointerDown={e=>{e.stopPropagation();e.preventDefault();removeObject(kind,item.id)}}>×</button><button type="button" className="object-control object-rotate" aria-label="Girar" onPointerDown={e=>startRotate(e,kind,item.id)} onPointerMove={moveRotate} onPointerUp={endRotate} onPointerCancel={endRotate}>↻</button></>}
+    </div>;
+  }
 
   async function handleAiCopy() {
     const ok = await copyText(aiPrompt);
@@ -215,9 +272,9 @@ export default function Home() {
         <h1>Personalize seu convite</h1><div className="gold-divider"><span></span><b>◆</b><span></span></div><p className="page-subtitle">Edite os dados e o visual. A prévia muda na hora.</p>
 
         <div className="editor-preview-top">
-          <div ref={previewRef} className={`preview-card editor-live font-preview-${font}`} style={{...previewStyle, backgroundImage:`linear-gradient(rgba(20,8,16,.12),rgba(20,8,16,.12)), url(${customBg || backgrounds[background]})`}}>
-            <small>{previewSub}</small><h2>{previewMessage}</h2><p className="preview-title">{previewTitle}</p><p>▣ {previewDate}　◷ {previewTime}</p><p>⌖ {previewPlace}</p><b>Conto com você!</b>
-            {floatingElements.map(el=><button type="button" key={el.id} className="floating-decor" aria-label={`Mover ${el.type}`} style={{left:`${el.x}%`,top:`${el.y}%`,fontSize:`${el.size}px`,transform:`translate(-50%,-50%) rotate(${el.rotate}deg)`}} onPointerDown={(e)=>startElementDrag(e,el.id)} onPointerMove={(e)=>moveElementDrag(e,el.id)} onPointerUp={endElementDrag} onPointerCancel={endElementDrag}>{el.glyph}</button>)}
+          <div ref={previewRef} className={`preview-card editor-live font-preview-${font}`} onPointerDown={(e)=>{if(e.target===e.currentTarget)setSelectedObject(null)}} style={{...previewStyle, backgroundImage:`linear-gradient(rgba(20,8,16,.12),rgba(20,8,16,.12)), url(${customBg || backgrounds[background]})`}}>
+            {floatingTexts.map(el=><FloatingObject key={el.id} kind="text" item={el}>{textValue(el.type)}</FloatingObject>)}
+            {floatingElements.map(el=><FloatingObject key={el.id} kind="decor" item={el}>{el.glyph}</FloatingObject>)}
           </div>
         </div>
 
@@ -241,19 +298,20 @@ export default function Home() {
             <label className="field-block"><span><b>Frase do convite</b></span><input placeholder="Ex.: Vamos celebrar!" value={details.message || ''} onChange={(e)=>patchDetails({message:e.target.value})}/></label>
             <div className="form-row"><label className="field-block"><span><b>Data</b></span><input type="date" value={details.date} onChange={(e)=>patchDetails({date:e.target.value})}/></label><label className="field-block"><span><b>Horário</b></span><input type="time" value={details.time} onChange={(e)=>patchDetails({time:e.target.value})}/></label></div>
             <label className="field-block"><span><b>Local</b></span><input placeholder="Ex.: Salão de Festas" value={details.place} onChange={(e)=>patchDetails({place:e.target.value})}/></label>
+            <div className="text-visibility"><strong>Textos na arte</strong><p>Itens apagados podem ser recolocados com um toque.</p>{floatingTexts.map(el=><button type="button" key={el.id} className={el.visible===false?'off':'on'} onClick={()=>el.visible===false?restoreText(el.id):setSelectedObject(`text:${el.id}`)}><span>{({message:'Frase',title:'Título',date:'Data',time:'Horário',place:'Local',closing:'Fechamento'})[el.type]}</span><b>{el.visible===false?'+ Adicionar':'✓ Na arte'}</b></button>)}</div>
           </div>}
 
           {activeEditorPanel === 'fundos' && <div className="editor-section editor-section-active"><ControlTitle icon="▧" text="Fundos do convite"/><div className="background-grid">{backgrounds.map((src,i)=><button key={src} className={background===i&&!customBg?'selected':''} onClick={()=>{patchInvite({background:i,cover:i});setCustomBg('')}}><img src={src} alt={covers[i]}/><span>{covers[i]}</span></button>)}</div>
             <label className="upload-wide">＋ Enviar minha imagem<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e)=>{const f=e.target.files?.[0];if(f){setCustomBg(URL.createObjectURL(f))}}}/></label>
           </div>}
 
-          {activeEditorPanel === 'fontes' && <div className="editor-section editor-section-active"><ControlTitle icon="Aa" text="Fontes marcantes"/><p className="section-hint">Seis estilos bem diferentes para escolher rápido.</p><div className="font-choice-list">{[['Clássica','Celebre momentos incríveis!'],['Moderna','Celebre momentos incríveis!'],['Editorial','Celebre momentos incríveis!'],['Manuscrita','Celebre momentos incríveis!'],['Impacto','CELEBRE MOMENTOS INCRÍVEIS!'],['Decorada','Celebre momentos incríveis!']].map(([x,sample],i)=><button key={x} className={`font-sample font-preview-${i} ${font===i?'selected':''}`} onClick={()=>patchInvite({font:i})}><span>{sample}</span><small>{x}</small>{font===i&&<b>✓</b>}</button>)}</div></div>}
+          {activeEditorPanel === 'fontes' && <div className="editor-section editor-section-active"><ControlTitle icon="Aa" text="Fontes compactas"/><p className="section-hint">Fontes modernas, encorpadas e pensadas para preencher bem o convite.</p><div className="font-choice-list">{[['Moderna','Celebre momentos incríveis!'],['Geométrica','Celebre momentos incríveis!'],['Compacta','Celebre momentos incríveis!'],['Amigável','Celebre momentos incríveis!'],['Impacto','CELEBRE MOMENTOS INCRÍVEIS!'],['Urbana','Celebre momentos incríveis!']].map(([x,sample],i)=><button key={x} className={`font-sample font-preview-${i} ${font===i?'selected':''}`} onClick={()=>patchInvite({font:i})}><span>{sample}</span><small>{x}</small>{font===i&&<b>✓</b>}</button>)}</div></div>}
           {activeEditorPanel === 'cores' && <div className="editor-section editor-section-active">
             <ControlTitle icon="◉" text="Cores do convite"/>
             <div className="color-control-group"><strong>Cor da fonte</strong><p>Altera a cor de todos os textos do convite.</p><div className="color-row font-color-row">{['#ffffff','#f4e7d7','#e7bd6a','#6a0735','#17345f','#231f20','#ff654e'].map((c,i)=><button aria-label={`Cor da fonte ${i+1}`} key={c} style={{background:c}} className={fontColor.toLowerCase()===c?'selected':''} onClick={()=>patchInvite({fontColor:c})}/>)}</div><label className="custom-color-picker"><span>Escolher outra cor</span><input type="color" value={fontColor} onChange={(e)=>patchInvite({fontColor:e.target.value})}/><b style={{background:fontColor}}></b></label></div>
             <div className="color-control-group accent-group"><strong>Cor de destaque</strong><p>Usada em bordas e detalhes decorativos.</p><div className="color-row">{['#6a0735','#ff654e','#c78c2a','#17345f','#638b7b','#9c739b'].map((c,i)=><button aria-label={`Cor de destaque ${i+1}`} key={c} style={{background:c}} className={color===i?'selected':''} onClick={()=>patchInvite({color:i})}/>)}</div></div>
           </div>}
-          {activeEditorPanel === 'elementos' && <div className="editor-section editor-section-active"><ControlTitle icon="✦" text="Elementos flutuantes"/><p className="section-hint">Toque para adicionar. Depois arraste o elemento diretamente no convite.</p><div className="element-catalog">{elementCatalog.map(([type,glyph,label])=><button key={type} onClick={()=>addFloatingElement(type,glyph)}><b>{glyph}</b><span>{label}</span></button>)}</div>{floatingElements.length>0&&<div className="element-manager"><strong>Elementos adicionados</strong>{floatingElements.map(el=><div key={el.id}><span>{el.glyph}</span><label>Tamanho<input type="range" min="26" max="86" value={el.size} onChange={e=>updateFloatingElement(el.id,{size:Number(e.target.value)})}/></label><button onClick={()=>updateFloatingElement(el.id,{rotate:(el.rotate+15)%360})}>↻ Girar</button><button className="remove" onClick={()=>removeFloatingElement(el.id)}>×</button></div>)}</div>}</div>}
+          {activeEditorPanel === 'elementos' && <div className="editor-section editor-section-active"><ControlTitle icon="✦" text="Elementos flutuantes"/><p className="section-hint">Toque para adicionar. Na arte: arraste para mover, use pinça para redimensionar e a alça ↻ para girar.</p><div className="element-catalog">{elementCatalog.map(([type,glyph,label])=><button key={type} onClick={()=>addFloatingElement(type,glyph)}><b>{glyph}</b><span>{label}</span></button>)}</div></div>}
         </div>
 
         <div className="ai-panel ai-panel-v9"><div><strong>✨ Personalização com IA</strong><small>Opcional</small></div><p>Quer criar um fundo exclusivo? Copie o comando pronto e abra o ChatGPT. Depois, cole o comando e descreva o visual que deseja.</p><div className="ai-steps ai-two"><button onClick={handleAiCopy}><b>1</b><strong>{aiCopied?'Comando copiado ✓':'Copiar comando'}</strong><span>Leva o formato correto do Celebra.</span></button><a href="https://chatgpt.com/" target="_blank" rel="noreferrer"><b>2</b><strong>Abrir ChatGPT</strong><span>Cole o comando e peça sua imagem.</span></a></div></div>
@@ -268,7 +326,7 @@ export default function Home() {
 
       {step === 3 && <section className="html-screen native-page publish-page">
         <button className="back-button" onClick={() => go(2)}>‹</button><BrandHeader compact /><h1>Seu convite está pronto!</h1><div className="gold-divider"><span></span><b>◆</b><span></span></div><p className="page-subtitle">Confira e compartilhe seu convite interativo.</p>
-        <div className={`native-flip ${inviteOpen?'open':''}`}><div className={`native-inside font-preview-${font}`} style={previewStyle}><small>{previewSub}</small><h2>{previewTitle}</h2><p>{previewMessage}</p><p>{previewDateLong} • {previewTime}</p><p>{previewPlace}</p><div>{features.filter(([id])=>enabled.includes(id)).map(([id,l])=><button key={id} onClick={()=>openFeature(l)}>{l}</button>)}</div></div><button className="native-cover" onClick={()=>setInviteOpen(!inviteOpen)}><img src={customBg || backgrounds[background]} alt="Capa do convite"/></button></div>
+        <div className={`native-flip ${inviteOpen?'open':''}`}><div className={`native-inside published-invite font-preview-${font}`} style={{...previewStyle,backgroundImage:`linear-gradient(rgba(20,8,16,.12),rgba(20,8,16,.12)), url(${customBg || backgrounds[background]})`}}>{floatingTexts.filter(el=>el.visible!==false).map(el=><div key={el.id} className="published-object published-text" style={{left:`${el.x}%`,top:`${el.y}%`,fontSize:`${el.size}px`,transform:`translate(-50%,-50%) rotate(${el.rotate||0}deg)`}}>{textValue(el.type)}</div>)}{floatingElements.map(el=><div key={el.id} className="published-object published-decor" style={{left:`${el.x}%`,top:`${el.y}%`,fontSize:`${el.size}px`,transform:`translate(-50%,-50%) rotate(${el.rotate||0}deg)`}}>{el.glyph}</div>)}</div><button className="native-cover" onClick={()=>setInviteOpen(!inviteOpen)}><img src={customBg || backgrounds[background]} alt="Capa do convite"/></button></div>
         <div className="published-features">{features.filter(([id])=>enabled.includes(id)).map(([id,l])=><button key={id} onClick={()=>openFeature(l)}>{l}</button>)}</div>
         <div className="share-box"><label>Link do convite</label><div><input readOnly value={inviteLink}/><button onClick={handleLinkCopy}>{linkCopied?'Copiado ✓':'Copiar'}</button></div><div className="share-buttons"><button onClick={()=>shareInvite('whatsapp')}>WhatsApp</button><button onClick={()=>shareInvite()}>Compartilhar</button></div></div>
         <div className="nav-actions"><button onClick={()=>go(1)}>← Editar convite</button><button className="next" onClick={()=>setInviteOpen(true)}>Ver convite →</button></div>
