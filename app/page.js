@@ -81,6 +81,7 @@ const defaultInvite = {
   cover: 0,
   background: 0,
   color: 0,
+  fontColor: '#f4e7d7',
   font: 0,
   decor: 0,
   enabled: features.map(([id]) => id),
@@ -103,12 +104,13 @@ export default function Home() {
   const [step, setStep] = useState(0);
   const [invite, setInvite] = useState(defaultInvite);
   const [hydrated, setHydrated] = useState(false);
-  const { category, details, cover, background = 0, color, font, decor, enabled } = invite;
+  const { category, details, cover, background = 0, color, fontColor = '#f4e7d7', font, decor, enabled } = invite;
   const [aiCopied, setAiCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [dialog, setDialog] = useState(null);
   const [customBg, setCustomBg] = useState('');
+  const [activeEditorPanel, setActiveEditorPanel] = useState(null);
   const pointerStart = useRef(null);
 
   useEffect(() => {
@@ -142,11 +144,11 @@ export default function Home() {
   const previewHost = details.host || 'Seu anfitrião';
   const previewColors = ['#6a0735','#ff654e','#c78c2a','#17345f','#638b7b','#9c739b'];
   const previewDecor = ['✦','❧','♡','⋰','🎈','⌁'];
-  const previewStyle = { '--preview-accent': previewColors[color], '--preview-accent-soft': `${previewColors[color]}33` };
+  const previewStyle = { '--preview-accent': previewColors[color], '--preview-accent-soft': `${previewColors[color]}33`, '--invite-text': fontColor };
   const inviteLink = typeof window !== 'undefined' ? `${window.location.origin}/c/convite-demo` : 'https://celebra.app/c/convite-demo';
   const aiPrompt = `Crie uma imagem de fundo para convite digital da Celebra no formato vertical 9:16 (1080x1920 px). Categoria: ${selectedCategory.label}. Subcategoria: ${details.sub || selectedCategory.subs[0]}. Estilo escolhido: ${covers[cover]}. Preserve uma área central livre e limpa para textos e botões do aplicativo. Não inclua palavras, logotipos, datas, molduras com texto ou marcas d'água. Evite elementos importantes no centro; concentre a composição nas bordas e cantos. Use acabamento sofisticado, alta definição e composição adequada para tela de celular.`;
 
-  function go(n) { setStep(Math.max(0, Math.min(3, n))); setInviteOpen(false); setDialog(null); window?.scrollTo?.({ top: 0, behavior: 'smooth' }); }
+  function go(n) { setStep(Math.max(0, Math.min(3, n))); setInviteOpen(false); setDialog(null); setActiveEditorPanel(null); window?.scrollTo?.({ top: 0, behavior: 'smooth' }); }
   function patchInvite(patch) { setInvite((current) => ({ ...current, ...patch })); }
   function patchDetails(patch) { setInvite((current) => ({ ...current, details: { ...current.details, ...patch } })); }
   function toggleFeature(id) { setInvite((current) => ({ ...current, enabled: current.enabled.includes(id) ? current.enabled.filter((x) => x !== id) : [...current.enabled, id] })); }
@@ -192,25 +194,41 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="editor-tabs">
-          <a href="#texto">Aa <span>Texto</span></a><a href="#fundos">▧ <span>Fundos</span></a><a href="#fontes">𝓕 <span>Fontes</span></a><a href="#cores">◉ <span>Cores</span></a><a href="#elementos">✦ <span>Elementos</span></a>
+        <div className="editor-tabs" aria-label="Ferramentas de personalização">
+          {[
+            ['texto','Aa','Texto'],
+            ['fundos','▧','Fundos'],
+            ['fontes','𝓕','Fontes'],
+            ['cores','◉','Cores'],
+            ['elementos','✦','Elementos']
+          ].map(([id,icon,label]) => (
+            <button key={id} type="button" className={activeEditorPanel===id?'active':''} aria-expanded={activeEditorPanel===id} onClick={()=>setActiveEditorPanel(current=>current===id?null:id)}>
+              {icon}<span>{label}</span>
+            </button>
+          ))}
         </div>
 
-        <div className="editor-section" id="texto"><ControlTitle icon="✎" text="Textos e informações"/>
-          <label className="field-block"><span><b>Título do evento</b></span><input placeholder="Ex.: Aniversário da Mariana" value={details.title} onChange={(e)=>patchDetails({title:e.target.value})}/></label>
-          <label className="field-block"><span><b>Tipo da celebração</b></span><select value={details.sub} onChange={(e)=>patchDetails({sub:e.target.value})}><option value="">Selecione</option>{selectedCategory.subs.map(s=><option key={s}>{s}</option>)}</select></label>
-          <div className="form-row"><label className="field-block"><span><b>Data</b></span><input type="date" value={details.date} onChange={(e)=>patchDetails({date:e.target.value})}/></label><label className="field-block"><span><b>Horário</b></span><input type="time" value={details.time} onChange={(e)=>patchDetails({time:e.target.value})}/></label></div>
-          <label className="field-block"><span><b>Local</b></span><input placeholder="Ex.: Salão de Festas" value={details.place} onChange={(e)=>patchDetails({place:e.target.value})}/></label>
-          <label className="field-block"><span><b>Anfitrião</b></span><input placeholder="Ex.: Mariana e família" value={details.host} onChange={(e)=>patchDetails({host:e.target.value})}/></label>
-        </div>
+        <div className={`editor-panel-slot ${activeEditorPanel?'open':''}`}>
+          {activeEditorPanel === 'texto' && <div className="editor-section editor-section-active"><ControlTitle icon="✎" text="Textos e informações"/>
+            <label className="field-block"><span><b>Título do evento</b></span><input placeholder="Ex.: Aniversário da Mariana" value={details.title} onChange={(e)=>patchDetails({title:e.target.value})}/></label>
+            <label className="field-block"><span><b>Tipo da celebração</b></span><select value={details.sub} onChange={(e)=>patchDetails({sub:e.target.value})}><option value="">Selecione</option>{selectedCategory.subs.map(s=><option key={s}>{s}</option>)}</select></label>
+            <div className="form-row"><label className="field-block"><span><b>Data</b></span><input type="date" value={details.date} onChange={(e)=>patchDetails({date:e.target.value})}/></label><label className="field-block"><span><b>Horário</b></span><input type="time" value={details.time} onChange={(e)=>patchDetails({time:e.target.value})}/></label></div>
+            <label className="field-block"><span><b>Local</b></span><input placeholder="Ex.: Salão de Festas" value={details.place} onChange={(e)=>patchDetails({place:e.target.value})}/></label>
+            <label className="field-block"><span><b>Anfitrião</b></span><input placeholder="Ex.: Mariana e família" value={details.host} onChange={(e)=>patchDetails({host:e.target.value})}/></label>
+          </div>}
 
-        <div className="editor-section" id="fundos"><ControlTitle icon="▧" text="Fundos do convite"/><div className="background-grid">{backgrounds.map((src,i)=><button key={src} className={background===i&&!customBg?'selected':''} onClick={()=>{patchInvite({background:i,cover:i});setCustomBg('')}}><img src={src} alt={covers[i]}/><span>{covers[i]}</span></button>)}</div>
-          <label className="upload-wide">＋ Enviar minha imagem<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e)=>{const f=e.target.files?.[0];if(f){setCustomBg(URL.createObjectURL(f))}}}/></label>
-        </div>
+          {activeEditorPanel === 'fundos' && <div className="editor-section editor-section-active"><ControlTitle icon="▧" text="Fundos do convite"/><div className="background-grid">{backgrounds.map((src,i)=><button key={src} className={background===i&&!customBg?'selected':''} onClick={()=>{patchInvite({background:i,cover:i});setCustomBg('')}}><img src={src} alt={covers[i]}/><span>{covers[i]}</span></button>)}</div>
+            <label className="upload-wide">＋ Enviar minha imagem<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e)=>{const f=e.target.files?.[0];if(f){setCustomBg(URL.createObjectURL(f))}}}/></label>
+          </div>}
 
-        <div className="editor-section" id="fontes"><ControlTitle icon="Aa" text="Tipografia"/><div className="font-row font-row-v9">{['Playfair','Montserrat','Cormorant','Trebuchet'].map((x,i)=><button key={x} className={font===i?'selected':''} onClick={()=>patchInvite({font:i})}><b className={`font-${i}`}>Aa</b><span>{x}</span></button>)}</div></div>
-        <div className="editor-section" id="cores"><ControlTitle icon="◉" text="Cor de destaque"/><div className="color-row">{['#6a0735','#ff654e','#c78c2a','#17345f','#638b7b','#9c739b'].map((c,i)=><button aria-label={`Cor ${i+1}`} key={c} style={{background:c}} className={color===i?'selected':''} onClick={()=>patchInvite({color:i})}/>)}</div></div>
-        <div className="editor-section" id="elementos"><ControlTitle icon="✦" text="Elementos decorativos"/><div className="decor-row decor-v9">{['✦','❧','♡','⋰','●','⌁'].map((x,i)=><button key={i} className={decor===i?'selected':''} onClick={()=>patchInvite({decor:i})}>{x}</button>)}</div></div>
+          {activeEditorPanel === 'fontes' && <div className="editor-section editor-section-active"><ControlTitle icon="Aa" text="Tipografia"/><div className="font-row font-row-v9">{['Playfair','Montserrat','Cormorant','Trebuchet'].map((x,i)=><button key={x} className={font===i?'selected':''} onClick={()=>patchInvite({font:i})}><b className={`font-${i}`}>Aa</b><span>{x}</span></button>)}</div></div>}
+          {activeEditorPanel === 'cores' && <div className="editor-section editor-section-active">
+            <ControlTitle icon="◉" text="Cores do convite"/>
+            <div className="color-control-group"><strong>Cor da fonte</strong><p>Altera a cor de todos os textos do convite.</p><div className="color-row font-color-row">{['#ffffff','#f4e7d7','#e7bd6a','#6a0735','#17345f','#231f20','#ff654e'].map((c,i)=><button aria-label={`Cor da fonte ${i+1}`} key={c} style={{background:c}} className={fontColor.toLowerCase()===c?'selected':''} onClick={()=>patchInvite({fontColor:c})}/>)}</div><label className="custom-color-picker"><span>Escolher outra cor</span><input type="color" value={fontColor} onChange={(e)=>patchInvite({fontColor:e.target.value})}/><b style={{background:fontColor}}></b></label></div>
+            <div className="color-control-group accent-group"><strong>Cor de destaque</strong><p>Usada em bordas e detalhes decorativos.</p><div className="color-row">{['#6a0735','#ff654e','#c78c2a','#17345f','#638b7b','#9c739b'].map((c,i)=><button aria-label={`Cor de destaque ${i+1}`} key={c} style={{background:c}} className={color===i?'selected':''} onClick={()=>patchInvite({color:i})}/>)}</div></div>
+          </div>}
+          {activeEditorPanel === 'elementos' && <div className="editor-section editor-section-active"><ControlTitle icon="✦" text="Elementos decorativos"/><div className="decor-row decor-v9">{['✦','❧','♡','⋰','●','⌁'].map((x,i)=><button key={i} className={decor===i?'selected':''} onClick={()=>patchInvite({decor:i})}>{x}</button>)}</div></div>}
+        </div>
 
         <div className="ai-panel ai-panel-v9"><div><strong>✨ Personalização com IA</strong><small>Opcional</small></div><p>Quer criar um fundo exclusivo? Copie o comando pronto e abra o ChatGPT. Depois, cole o comando e descreva o visual que deseja.</p><div className="ai-steps ai-two"><button onClick={handleAiCopy}><b>1</b><strong>{aiCopied?'Comando copiado ✓':'Copiar comando'}</strong><span>Leva o formato correto do Celebra.</span></button><a href="https://chatgpt.com/" target="_blank" rel="noreferrer"><b>2</b><strong>Abrir ChatGPT</strong><span>Cole o comando e peça sua imagem.</span></a></div></div>
         <div className="nav-actions"><button onClick={()=>go(0)}>← Voltar</button><button className="next" onClick={()=>go(2)}>Continuar →</button></div><StepDots n={2}/>
