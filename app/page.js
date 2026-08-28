@@ -65,6 +65,16 @@ function CategoryIcon({ type }) {
   return <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M10 18h18l-3 16c-1 6-12 6-13 0zM36 18h18l-2 16c-2 6-13 6-14 0zM20 41l-4 14M44 41l4 14M12 55h9M43 55h9"/><path d="M31 7v6M27 10h8M49 5v6M46 8h6"/></svg>;
 }
 
+function FeatureIcon({ type }) {
+  const common = { viewBox:'0 0 24 24', 'aria-hidden':'true' };
+  if (type === 'rsvp') return <svg {...common}><path d="M8 12.5l2.4 2.4L16 9.3"/><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z"/></svg>;
+  if (type === 'music') return <svg {...common}><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg>;
+  if (type === 'gifts') return <svg {...common}><path d="M4 10h16v10H4zM3 7h18v3H3zM12 7v13"/><path d="M12 7H8.5A2.5 2.5 0 1 1 11 4.5V7zm0 0h3.5A2.5 2.5 0 1 0 13 4.5V7z"/></svg>;
+  if (type === 'collective') return <svg {...common}><path d="M5 9h14v10H5zM7 9V6h10v3"/><path d="M9 14h6M12 11v6"/></svg>;
+  if (type === 'location') return <svg {...common}><path d="M12 21s6-5.4 6-11a6 6 0 1 0-12 0c0 5.6 6 11 6 11z"/><circle cx="12" cy="10" r="2"/></svg>;
+  return <svg {...common}><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 9h16M8 13h3M8 16h6"/></svg>;
+}
+
 function BrandHeader({ compact = false }) {
   return <div className={`brand-header ${compact ? 'compact' : ''}`}>
     <img src="/brand/celebra-logo-v2.png" alt="Celebra Convite Interativo" />
@@ -73,7 +83,7 @@ function BrandHeader({ compact = false }) {
 
 function StepDots({n}) { return <div className="native-dots">{[1,2,3,4,5].map(x=><i key={x} className={x<=n?'on':''}></i>)}<span>{n}/5</span></div> }
 function ControlTitle({icon,text}) { return <h3 className="control-title"><i>{icon}</i>{text}</h3> }
-function MiniDialog({text,close}) { return <div className="mini-dialog" onClick={close}><div onClick={e=>e.stopPropagation()}><button onClick={close}>×</button><strong>{text}</strong><p>Esta função será conectada ao backend na próxima fase.</p></div></div> }
+function MiniDialog({text,close}) { return <div className="mini-dialog" onClick={close}><div onClick={e=>e.stopPropagation()}><button onClick={close}>×</button><strong>{text}</strong></div></div> }
 
 const defaultInvite = {
   category: 'aniversario',
@@ -94,6 +104,11 @@ const defaultInvite = {
   font: 0,
   decor: 0,
   enabled: features.map(([id]) => id),
+  featureConfig: {
+    gifts: { url: '' },
+    collective: { pixKey: '', receiver: '' },
+    location: { address: '' },
+  },
 };
 
 function formatDateBR(value) {
@@ -113,11 +128,14 @@ export default function Home() {
   const [step, setStep] = useState(0);
   const [invite, setInvite] = useState(defaultInvite);
   const [hydrated, setHydrated] = useState(false);
-  const { category, details, cover, background = 0, color, fontColor = '#f4e7d7', font, floatingElements = [], floatingTexts = defaultInvite.floatingTexts, enabled } = invite;
+  const { category, details, cover, background = 0, color, fontColor = '#f4e7d7', font, floatingElements = [], floatingTexts = defaultInvite.floatingTexts, enabled, featureConfig = defaultInvite.featureConfig } = invite;
   const [aiCopied, setAiCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [dialog, setDialog] = useState(null);
+  const [activeFeature, setActiveFeature] = useState(null);
+  const [configError, setConfigError] = useState('');
+  const [guestForm, setGuestForm] = useState({ name:'', attendance:'yes', companions:'0', song:'' });
   const [customBg, setCustomBg] = useState('');
   const [activeEditorPanel, setActiveEditorPanel] = useState(null);
   const pointerStart = useRef(null);
@@ -136,6 +154,13 @@ export default function Home() {
           details: { ...current.details, ...(parsed.details || {}) },
           enabled: Array.isArray(parsed.enabled) ? parsed.enabled : current.enabled,
           floatingTexts: Array.isArray(parsed.floatingTexts) ? parsed.floatingTexts : current.floatingTexts,
+          featureConfig: {
+            ...current.featureConfig,
+            ...(parsed.featureConfig || {}),
+            gifts: { ...current.featureConfig.gifts, ...(parsed.featureConfig?.gifts || {}) },
+            collective: { ...current.featureConfig.collective, ...(parsed.featureConfig?.collective || {}) },
+            location: { ...current.featureConfig.location, ...(parsed.featureConfig?.location || {}) },
+          },
         }));
       }
     } catch {}
@@ -163,7 +188,19 @@ export default function Home() {
   function go(n) { setStep(Math.max(0, Math.min(3, n))); setInviteOpen(false); setDialog(null); setActiveEditorPanel(null); window?.scrollTo?.({ top: 0, behavior: 'smooth' }); }
   function patchInvite(patch) { setInvite((current) => ({ ...current, ...patch })); }
   function patchDetails(patch) { setInvite((current) => ({ ...current, details: { ...current.details, ...patch } })); }
-  function toggleFeature(id) { setInvite((current) => ({ ...current, enabled: current.enabled.includes(id) ? current.enabled.filter((x) => x !== id) : [...current.enabled, id] })); }
+  function toggleFeature(id) { setInvite((current) => ({ ...current, enabled: current.enabled.includes(id) ? current.enabled.filter((x) => x !== id) : [...current.enabled, id] })); setConfigError(''); }
+  function patchFeatureConfig(id, patch) { setInvite(current => ({...current, featureConfig:{...current.featureConfig,[id]:{...(current.featureConfig?.[id]||{}),...patch}}})); setConfigError(''); }
+  function featureConfigured(id) {
+    if(id==='gifts') return Boolean(featureConfig.gifts?.url?.trim());
+    if(id==='collective') return Boolean(featureConfig.collective?.pixKey?.trim() && featureConfig.collective?.receiver?.trim());
+    if(id==='location') return Boolean(featureConfig.location?.address?.trim());
+    return true;
+  }
+  function finishResources(){
+    const missing=enabled.filter(id=>!featureConfigured(id));
+    if(missing.length){ setConfigError('Preencha os campos obrigatórios ou desative o recurso que não deseja usar.'); return; }
+    go(3);
+  }
   function clearDraft() { setInvite(defaultInvite); setStep(0); try { window.localStorage.removeItem('celebra:invite-draft:v1'); } catch {} }
 
   const elementCatalog = [
@@ -252,7 +289,28 @@ export default function Home() {
     if (navigator.share) { try { await navigator.share({ title: 'Convite Celebra', text, url: inviteLink }); } catch {} }
     else { await copyText(`${text} ${inviteLink}`); setDialog('Link do convite copiado para compartilhar.'); }
   }
-  function openFeature(name) { setDialog(name); }
+  function downloadCalendar(){
+    const start=(details.date||'2025-07-20').replaceAll('-','')+'T'+(details.time||'19:00').replace(':','')+'00';
+    const ics=`BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nDTSTART:${start}\nSUMMARY:${previewTitle}\nLOCATION:${featureConfig.location?.address||previewPlace}\nDESCRIPTION:Convite Celebra\nEND:VEVENT\nEND:VCALENDAR`;
+    const blob=new Blob([ics],{type:'text/calendar;charset=utf-8'}), url=URL.createObjectURL(blob), a=document.createElement('a');
+    a.href=url;a.download='convite-celebra.ics';a.click();setTimeout(()=>URL.revokeObjectURL(url),500);
+  }
+  function openFeature(id) {
+    if(id==='gifts' && featureConfig.gifts?.url){ window.open(featureConfig.gifts.url,'_blank','noopener,noreferrer'); return; }
+    if(id==='location' && featureConfig.location?.address){ window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(featureConfig.location.address)}`,'_blank','noopener,noreferrer'); return; }
+    if(id==='calendar'){ downloadCalendar(); return; }
+    setActiveFeature(id); setDialog(null);
+  }
+  async function copyPix(){ const ok=await copyText(featureConfig.collective?.pixKey||''); if(ok)setDialog('Chave Pix copiada.'); }
+  function saveGuestAction(kind){
+    if(!guestForm.name.trim()){ setDialog('Informe seu nome antes de enviar.'); return; }
+    const action={id:`${Date.now()}-${Math.random()}`,event_id:'convite-demo',type:kind,name:guestForm.name.trim(),attendance:kind==='rsvp'?guestForm.attendance:null,companions:kind==='rsvp'?Number(guestForm.companions||0):null,song:kind==='music'?guestForm.song.trim():null,created_at:new Date().toISOString()};
+    if(kind==='music'&&!action.song){ setDialog('Informe a música que deseja sugerir.'); return; }
+    try{const current=JSON.parse(localStorage.getItem('celebra:guest-actions:v1')||'[]');localStorage.setItem('celebra:guest-actions:v1',JSON.stringify([...current,action]));}catch{}
+    setActiveFeature(null); setDialog(kind==='rsvp'?'Confirmação registrada.':'Sugestão registrada.'); setGuestForm({name:'',attendance:'yes',companions:'0',song:''});
+  }
+  function backendEventPayload(){ return {event:{id:'convite-demo',category,title:previewTitle,message:previewMessage,date:details.date,time:details.time,place:previewPlace,enabled_features:enabled,feature_config:featureConfig,design:{background,font,fontColor,color,floatingTexts,floatingElements}},tables:{rsvps:['event_id','name','attendance','companions','created_at'],music_suggestions:['event_id','name','song','created_at']}}; }
+
 
   return (
     <main className="prototype-shell">
@@ -321,17 +379,46 @@ export default function Home() {
 
       {step === 2 && <section className="html-screen native-page resources-page">
         <button className="back-button" onClick={() => go(1)}>‹</button><BrandHeader compact /><h1>O que seus convidados<br/>poderão fazer</h1><div className="gold-divider"><span></span><b>◆</b><span></span></div><p className="page-subtitle">Ative somente os recursos que quiser oferecer.</p>
-        <div className="feature-list">{features.map(([id,label],i)=><button key={id} className={enabled.includes(id)?'on':''} onClick={()=>toggleFeature(id)}><i>{['▣','♫','🎁','♧','⌖','▦'][i]}</i><span><strong>{label}</strong><small>{['Confirmação de presença.','Sugestões para a trilha sonora.','Link para sua lista de presentes.','Contribuição para presente coletivo.','Endereço e rota do evento.','Evento salvo na agenda.'][i]}</small></span><b>{enabled.includes(id)?'✓':''}</b></button>)}</div>
-        <div className="nav-actions"><button onClick={()=>go(1)}>← Voltar</button><button className="next" onClick={()=>go(3)}>Finalizar →</button></div><StepDots n={3}/>
+        <div className="feature-list">{features.map(([id,label])=>{
+          const on=enabled.includes(id), needs=['gifts','collective','location'].includes(id), ready=featureConfigured(id);
+          const descriptions={rsvp:'Confirmações organizadas no painel do anfitrião.',music:'Sugestões reunidas no painel do anfitrião.',gifts:'Abra a lista de presentes escolhida.',collective:'Compartilhe os dados do Pix com segurança.',location:'Abra a rota com o endereço completo.',calendar:'Salve o evento automaticamente na agenda.'};
+          return <div key={id} className={`feature-item ${on?'on':''}`}>
+            <button type="button" className="feature-main" onClick={()=>toggleFeature(id)}><i><FeatureIcon type={id}/></i><span><strong>{label}</strong><small>{descriptions[id]}</small></span><b>{on?'✓':''}</b></button>
+            {on&&needs&&<div className="feature-config">
+              {id==='gifts'&&<label><span>Link da lista <em>obrigatório</em></span><input type="url" placeholder="https://..." value={featureConfig.gifts?.url||''} onChange={e=>patchFeatureConfig('gifts',{url:e.target.value})}/></label>}
+              {id==='collective'&&<><label><span>Chave Pix <em>obrigatório</em></span><input placeholder="CPF, e-mail, telefone ou chave aleatória" value={featureConfig.collective?.pixKey||''} onChange={e=>patchFeatureConfig('collective',{pixKey:e.target.value})}/></label><label><span>Nome do recebedor <em>obrigatório</em></span><input placeholder="Nome que aparecerá para o convidado" value={featureConfig.collective?.receiver||''} onChange={e=>patchFeatureConfig('collective',{receiver:e.target.value})}/></label></>}
+              {id==='location'&&<label><span>Endereço completo <em>obrigatório</em></span><input placeholder="Rua, número, bairro, cidade e estado" value={featureConfig.location?.address||''} onChange={e=>patchFeatureConfig('location',{address:e.target.value})}/></label>}
+              <div className={`config-status ${ready?'ready':''}`}>{ready?'✓ Configurado':'Preencha para publicar'} <button type="button" onClick={()=>toggleFeature(id)}>Remover recurso</button></div>
+            </div>}
+          </div>;
+        })}</div>
+        {configError&&<div className="resource-warning">{configError}</div>}
+        <div className="backend-note"><FeatureIcon type="rsvp"/><span><strong>Painel do anfitrião preparado</strong><small>Confirmações e músicas serão salvas por evento quando conectarmos o banco de dados.</small></span></div>
+        <div className="nav-actions"><button onClick={()=>go(1)}>← Voltar</button><button className="next" onClick={finishResources}>Finalizar →</button></div><StepDots n={3}/>
       </section>}
 
       {step === 3 && <section className="html-screen native-page publish-page">
-        <button className="back-button" onClick={() => go(2)}>‹</button><BrandHeader compact /><h1>Seu convite está pronto!</h1><div className="gold-divider"><span></span><b>◆</b><span></span></div><p className="page-subtitle">Confira e compartilhe seu convite interativo.</p>
-        <div className={`native-flip ${inviteOpen?'open':''}`}><div className={`native-inside published-invite font-preview-${font}`} style={{...previewStyle,backgroundImage:`linear-gradient(rgba(20,8,16,.12),rgba(20,8,16,.12)), url(${customBg || backgrounds[background]})`}}>{floatingTexts.filter(el=>el.visible!==false).map(el=><div key={el.id} className="published-object published-text" style={{left:`${el.x}%`,top:`${el.y}%`,fontSize:`${el.size}px`,transform:`translate(-50%,-50%)`}}>{textValue(el)}</div>)}{floatingElements.map(el=><div key={el.id} className="published-object published-decor" style={{left:`${el.x}%`,top:`${el.y}%`,fontSize:`${el.size}px`,transform:`translate(-50%,-50%)`}}>{el.glyph}</div>)}</div><button className="native-cover" onClick={()=>setInviteOpen(!inviteOpen)}><img src={customBg || backgrounds[background]} alt="Capa do convite"/></button></div>
-        <div className="published-features">{features.filter(([id])=>enabled.includes(id)).map(([id,l])=><button key={id} onClick={()=>openFeature(l)}>{l}</button>)}</div>
+        <button className="back-button" onClick={() => go(2)}>‹</button><BrandHeader compact /><h1>Seu convite está pronto!</h1><div className="gold-divider"><span></span><b>◆</b><span></span></div><p className="page-subtitle">Toque na capa para abrir. Dentro, seus convidados encontram tudo em uma única página.</p>
+        <div className={`book-stage ${inviteOpen?'open':''}`}>
+          <div className="book-page">
+            <button type="button" className="book-close" aria-label="Fechar convite" onClick={()=>setInviteOpen(false)}>‹</button>
+            <div className="book-page-head"><span>✦</span><strong>INTERAJA COM O CONVITE</strong><small>Escolha uma opção</small></div>
+            <div className="book-actions">{features.filter(([id])=>enabled.includes(id)).map(([id,label])=><button type="button" key={id} onClick={()=>openFeature(id)}><i><FeatureIcon type={id}/></i><span>{label}</span><b>›</b></button>)}</div>
+            <div className="book-signature">Celebra <span>• convite interativo •</span></div>
+          </div>
+          <button type="button" className="book-cover" aria-label={inviteOpen?'Fechar convite':'Abrir convite'} onClick={()=>setInviteOpen(v=>!v)} style={{...previewStyle,backgroundImage:`linear-gradient(rgba(20,8,16,.12),rgba(20,8,16,.12)), url(${customBg || backgrounds[background]})`}}>
+            {floatingTexts.filter(el=>el.visible!==false).map(el=><div key={el.id} className={`published-object published-text font-preview-${font}`} style={{left:`${el.x}%`,top:`${el.y}%`,fontSize:`${el.size}px`,transform:`translate(-50%,-50%)`}}>{textValue(el)}</div>)}
+            {floatingElements.map(el=><div key={el.id} className="published-object published-decor" style={{left:`${el.x}%`,top:`${el.y}%`,fontSize:`${el.size}px`,transform:`translate(-50%,-50%)`}}>{el.glyph}</div>)}
+            <span className="book-open-hint">Toque para abrir <b>›</b></span>
+          </button>
+        </div>
         <div className="share-box"><label>Link do convite</label><div><input readOnly value={inviteLink}/><button onClick={handleLinkCopy}>{linkCopied?'Copiado ✓':'Copiar'}</button></div><div className="share-buttons"><button onClick={()=>shareInvite('whatsapp')}>WhatsApp</button><button onClick={()=>shareInvite()}>Compartilhar</button></div></div>
         <div className="nav-actions"><button onClick={()=>go(1)}>← Editar convite</button><button className="next" onClick={()=>setInviteOpen(true)}>Ver convite →</button></div>
+        {activeFeature==='rsvp'&&<div className="feature-dialog"><div><button className="dialog-x" onClick={()=>setActiveFeature(null)}>×</button><FeatureIcon type="rsvp"/><h3>Confirmar presença</h3><label>Seu nome<input value={guestForm.name} onChange={e=>setGuestForm(v=>({...v,name:e.target.value}))}/></label><div className="rsvp-choice"><button className={guestForm.attendance==='yes'?'on':''} onClick={()=>setGuestForm(v=>({...v,attendance:'yes'}))}>Vou participar</button><button className={guestForm.attendance==='no'?'on':''} onClick={()=>setGuestForm(v=>({...v,attendance:'no'}))}>Não vou</button></div><label>Acompanhantes<input type="number" min="0" max="20" value={guestForm.companions} onChange={e=>setGuestForm(v=>({...v,companions:e.target.value}))}/></label><button className="dialog-primary" onClick={()=>saveGuestAction('rsvp')}>Enviar confirmação</button></div></div>}
+        {activeFeature==='music'&&<div className="feature-dialog"><div><button className="dialog-x" onClick={()=>setActiveFeature(null)}>×</button><FeatureIcon type="music"/><h3>Sugerir uma música</h3><label>Seu nome<input value={guestForm.name} onChange={e=>setGuestForm(v=>({...v,name:e.target.value}))}/></label><label>Música ou artista<input placeholder="Ex.: Dancing Queen — ABBA" value={guestForm.song} onChange={e=>setGuestForm(v=>({...v,song:e.target.value}))}/></label><button className="dialog-primary" onClick={()=>saveGuestAction('music')}>Enviar sugestão</button></div></div>}
+        {activeFeature==='collective'&&<div className="feature-dialog"><div><button className="dialog-x" onClick={()=>setActiveFeature(null)}>×</button><FeatureIcon type="collective"/><h3>Presente coletivo</h3><p>Contribua diretamente para <strong>{featureConfig.collective?.receiver}</strong>.</p><div className="pix-key">{featureConfig.collective?.pixKey}</div><button className="dialog-primary" onClick={copyPix}>Copiar chave Pix</button></div></div>}
         {dialog&&<MiniDialog text={dialog} close={()=>setDialog(null)}/>} 
+        <script type="application/json" id="celebra-backend-contract" dangerouslySetInnerHTML={{__html:JSON.stringify(backendEventPayload())}} />
       </section>}
     </main>
   );
