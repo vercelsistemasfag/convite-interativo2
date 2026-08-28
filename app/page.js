@@ -26,7 +26,7 @@ const features = [
   ['rsvp', 'Confirmar presença'],
   ['music', 'Sugestão de músicas'],
   ['gifts', 'Lista de presentes'],
-  ['collective', 'Presente coletivo'],
+  ['collective', 'Pix Presente'],
   ['location', 'Como chegar'],
   ['calendar', 'Adicionar à agenda'],
 ];
@@ -105,7 +105,7 @@ const defaultInvite = {
   decor: 0,
   enabled: features.map(([id]) => id),
   featureConfig: {
-    gifts: { url: '' },
+    gifts: { items: ['', '', ''] },
     collective: { pixKey: '', receiver: '' },
     location: { address: '' },
   },
@@ -135,7 +135,7 @@ export default function Home() {
   const [dialog, setDialog] = useState(null);
   const [activeFeature, setActiveFeature] = useState(null);
   const [configError, setConfigError] = useState('');
-  const [guestForm, setGuestForm] = useState({ name:'', attendance:'yes', companions:'0', song:'' });
+  const [guestForm, setGuestForm] = useState({ name:'', attendance:'yes', companions:'0', songs:['', '', ''] });
   const [customBg, setCustomBg] = useState('');
   const [activeEditorPanel, setActiveEditorPanel] = useState(null);
   const pointerStart = useRef(null);
@@ -157,7 +157,7 @@ export default function Home() {
           featureConfig: {
             ...current.featureConfig,
             ...(parsed.featureConfig || {}),
-            gifts: { ...current.featureConfig.gifts, ...(parsed.featureConfig?.gifts || {}) },
+            gifts: { ...current.featureConfig.gifts, ...(parsed.featureConfig?.gifts || {}), items: Array.isArray(parsed.featureConfig?.gifts?.items) ? parsed.featureConfig.gifts.items : current.featureConfig.gifts.items },
             collective: { ...current.featureConfig.collective, ...(parsed.featureConfig?.collective || {}) },
             location: { ...current.featureConfig.location, ...(parsed.featureConfig?.location || {}) },
           },
@@ -191,7 +191,7 @@ export default function Home() {
   function toggleFeature(id) { setInvite((current) => ({ ...current, enabled: current.enabled.includes(id) ? current.enabled.filter((x) => x !== id) : [...current.enabled, id] })); setConfigError(''); }
   function patchFeatureConfig(id, patch) { setInvite(current => ({...current, featureConfig:{...current.featureConfig,[id]:{...(current.featureConfig?.[id]||{}),...patch}}})); setConfigError(''); }
   function featureConfigured(id) {
-    if(id==='gifts') return Boolean(featureConfig.gifts?.url?.trim());
+    if(id==='gifts') return Boolean((featureConfig.gifts?.items||[]).some(item=>item.trim()));
     if(id==='collective') return Boolean(featureConfig.collective?.pixKey?.trim() && featureConfig.collective?.receiver?.trim());
     if(id==='location') return Boolean(featureConfig.location?.address?.trim());
     return true;
@@ -296,7 +296,6 @@ export default function Home() {
     a.href=url;a.download='convite-celebra.ics';a.click();setTimeout(()=>URL.revokeObjectURL(url),500);
   }
   function openFeature(id) {
-    if(id==='gifts' && featureConfig.gifts?.url){ window.open(featureConfig.gifts.url,'_blank','noopener,noreferrer'); return; }
     if(id==='location' && featureConfig.location?.address){ window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(featureConfig.location.address)}`,'_blank','noopener,noreferrer'); return; }
     if(id==='calendar'){ downloadCalendar(); return; }
     setActiveFeature(id); setDialog(null);
@@ -304,12 +303,13 @@ export default function Home() {
   async function copyPix(){ const ok=await copyText(featureConfig.collective?.pixKey||''); if(ok)setDialog('Chave Pix copiada.'); }
   function saveGuestAction(kind){
     if(!guestForm.name.trim()){ setDialog('Informe seu nome antes de enviar.'); return; }
-    const action={id:`${Date.now()}-${Math.random()}`,event_id:'convite-demo',type:kind,name:guestForm.name.trim(),attendance:kind==='rsvp'?guestForm.attendance:null,companions:kind==='rsvp'?Number(guestForm.companions||0):null,song:kind==='music'?guestForm.song.trim():null,created_at:new Date().toISOString()};
-    if(kind==='music'&&!action.song){ setDialog('Informe a música que deseja sugerir.'); return; }
+    const songs=kind==='music'?(guestForm.songs||[]).map(song=>song.trim()).filter(Boolean):[];
+    const action={id:`${Date.now()}-${Math.random()}`,event_id:'convite-demo',type:kind,name:guestForm.name.trim(),attendance:kind==='rsvp'?guestForm.attendance:null,companions:kind==='rsvp'?Number(guestForm.companions||0):null,songs,created_at:new Date().toISOString()};
+    if(kind==='music'&&!songs.length){ setDialog('Informe pelo menos uma música que deseja sugerir.'); return; }
     try{const current=JSON.parse(localStorage.getItem('celebra:guest-actions:v1')||'[]');localStorage.setItem('celebra:guest-actions:v1',JSON.stringify([...current,action]));}catch{}
-    setActiveFeature(null); setDialog(kind==='rsvp'?'Confirmação registrada.':'Sugestão registrada.'); setGuestForm({name:'',attendance:'yes',companions:'0',song:''});
+    setActiveFeature(null); setDialog(kind==='rsvp'?'Confirmação registrada.':'Sugestão registrada.'); setGuestForm({name:'',attendance:'yes',companions:'0',songs:['', '', '']});
   }
-  function backendEventPayload(){ return {event:{id:'convite-demo',category,title:previewTitle,message:previewMessage,date:details.date,time:details.time,place:previewPlace,enabled_features:enabled,feature_config:featureConfig,design:{background,font,fontColor,color,floatingTexts,floatingElements}},tables:{rsvps:['event_id','name','attendance','companions','created_at'],music_suggestions:['event_id','name','song','created_at']}}; }
+  function backendEventPayload(){ return {event:{id:'convite-demo',category,title:previewTitle,message:previewMessage,date:details.date,time:details.time,place:previewPlace,enabled_features:enabled,feature_config:featureConfig,design:{background,font,fontColor,color,floatingTexts,floatingElements}},tables:{rsvps:['event_id','name','attendance','companions','created_at'],music_suggestions:['event_id','name','songs','created_at']}}; }
 
 
   return (
@@ -381,11 +381,11 @@ export default function Home() {
         <button className="back-button" onClick={() => go(1)}>‹</button><BrandHeader compact /><h1>O que seus convidados<br/>poderão fazer</h1><div className="gold-divider"><span></span><b>◆</b><span></span></div><p className="page-subtitle">Ative somente os recursos que quiser oferecer.</p>
         <div className="feature-list">{features.map(([id,label])=>{
           const on=enabled.includes(id), needs=['gifts','collective','location'].includes(id), ready=featureConfigured(id);
-          const descriptions={rsvp:'Confirmações organizadas no painel do anfitrião.',music:'Sugestões reunidas no painel do anfitrião.',gifts:'Abra a lista de presentes escolhida.',collective:'Compartilhe os dados do Pix com segurança.',location:'Abra a rota com o endereço completo.',calendar:'Salve o evento automaticamente na agenda.'};
+          const descriptions={rsvp:'Confirmações organizadas no painel do anfitrião.',music:'Sugestões reunidas no painel do anfitrião.',gifts:'Abra a lista de presentes escolhida.',collective:'Compartilhe os dados do Pix Presente com segurança.',location:'Abra a rota com o endereço completo.',calendar:'Salve o evento automaticamente na agenda.'};
           return <div key={id} className={`feature-item ${on?'on':''}`}>
             <button type="button" className="feature-main" onClick={()=>toggleFeature(id)}><i><FeatureIcon type={id}/></i><span><strong>{label}</strong><small>{descriptions[id]}</small></span><b>{on?'✓':''}</b></button>
             {on&&needs&&<div className="feature-config">
-              {id==='gifts'&&<label><span>Link da lista <em>obrigatório</em></span><input type="url" placeholder="https://..." value={featureConfig.gifts?.url||''} onChange={e=>patchFeatureConfig('gifts',{url:e.target.value})}/></label>}
+              {id==='gifts'&&<div className="manual-list-config"><span className="manual-list-title">Sugestões de presente <em>obrigatório</em></span><small>Digite pelo menos uma sugestão. Os convidados verão esta lista dentro do convite.</small>{(featureConfig.gifts?.items||['','','']).map((item,index)=><div className="manual-line" key={`gift-${index}`}><input placeholder={`Sugestão ${index+1}`} value={item} onChange={e=>{const items=[...(featureConfig.gifts?.items||['','',''])];items[index]=e.target.value;patchFeatureConfig('gifts',{items})}}/>{index===(featureConfig.gifts?.items||['','','']).length-1&&<button type="button" aria-label="Adicionar outra sugestão" onClick={()=>patchFeatureConfig('gifts',{items:[...(featureConfig.gifts?.items||['','','']),'']})}>＋</button>}</div>)}</div>}
               {id==='collective'&&<><label><span>Chave Pix <em>obrigatório</em></span><input placeholder="CPF, e-mail, telefone ou chave aleatória" value={featureConfig.collective?.pixKey||''} onChange={e=>patchFeatureConfig('collective',{pixKey:e.target.value})}/></label><label><span>Nome do recebedor <em>obrigatório</em></span><input placeholder="Nome que aparecerá para o convidado" value={featureConfig.collective?.receiver||''} onChange={e=>patchFeatureConfig('collective',{receiver:e.target.value})}/></label></>}
               {id==='location'&&<label><span>Endereço completo <em>obrigatório</em></span><input placeholder="Rua, número, bairro, cidade e estado" value={featureConfig.location?.address||''} onChange={e=>patchFeatureConfig('location',{address:e.target.value})}/></label>}
               <div className={`config-status ${ready?'ready':''}`}>{ready?'✓ Configurado':'Preencha para publicar'} <button type="button" onClick={()=>toggleFeature(id)}>Remover recurso</button></div>
@@ -415,8 +415,9 @@ export default function Home() {
         <div className="share-box"><label>Link do convite</label><div><input readOnly value={inviteLink}/><button onClick={handleLinkCopy}>{linkCopied?'Copiado ✓':'Copiar'}</button></div><div className="share-buttons"><button onClick={()=>shareInvite('whatsapp')}>WhatsApp</button><button onClick={()=>shareInvite()}>Compartilhar</button></div></div>
         <div className="nav-actions"><button onClick={()=>go(1)}>← Editar convite</button><button className="next" onClick={()=>setInviteOpen(true)}>Ver convite →</button></div>
         {activeFeature==='rsvp'&&<div className="feature-dialog"><div><button className="dialog-x" onClick={()=>setActiveFeature(null)}>×</button><FeatureIcon type="rsvp"/><h3>Confirmar presença</h3><label>Seu nome<input value={guestForm.name} onChange={e=>setGuestForm(v=>({...v,name:e.target.value}))}/></label><div className="rsvp-choice"><button className={guestForm.attendance==='yes'?'on':''} onClick={()=>setGuestForm(v=>({...v,attendance:'yes'}))}>Vou participar</button><button className={guestForm.attendance==='no'?'on':''} onClick={()=>setGuestForm(v=>({...v,attendance:'no'}))}>Não vou</button></div><label>Acompanhantes<input type="number" min="0" max="20" value={guestForm.companions} onChange={e=>setGuestForm(v=>({...v,companions:e.target.value}))}/></label><button className="dialog-primary" onClick={()=>saveGuestAction('rsvp')}>Enviar confirmação</button></div></div>}
-        {activeFeature==='music'&&<div className="feature-dialog"><div><button className="dialog-x" onClick={()=>setActiveFeature(null)}>×</button><FeatureIcon type="music"/><h3>Sugerir uma música</h3><label>Seu nome<input value={guestForm.name} onChange={e=>setGuestForm(v=>({...v,name:e.target.value}))}/></label><label>Música ou artista<input placeholder="Ex.: Dancing Queen — ABBA" value={guestForm.song} onChange={e=>setGuestForm(v=>({...v,song:e.target.value}))}/></label><button className="dialog-primary" onClick={()=>saveGuestAction('music')}>Enviar sugestão</button></div></div>}
-        {activeFeature==='collective'&&<div className="feature-dialog"><div><button className="dialog-x" onClick={()=>setActiveFeature(null)}>×</button><FeatureIcon type="collective"/><h3>Presente coletivo</h3><p>Contribua diretamente para <strong>{featureConfig.collective?.receiver}</strong>.</p><div className="pix-key">{featureConfig.collective?.pixKey}</div><button className="dialog-primary" onClick={copyPix}>Copiar chave Pix</button></div></div>}
+        {activeFeature==='music'&&<div className="feature-dialog"><div><button className="dialog-x" onClick={()=>setActiveFeature(null)}>×</button><FeatureIcon type="music"/><h3>Sugerir músicas</h3><label>Seu nome<input value={guestForm.name} onChange={e=>setGuestForm(v=>({...v,name:e.target.value}))}/></label><div className="guest-manual-list"><span>Digite suas sugestões</span><small>Preencha uma ou mais linhas.</small>{(guestForm.songs||['','','']).map((song,index)=><div className="manual-line" key={`song-${index}`}><input placeholder={`Música ou artista ${index+1}`} value={song} onChange={e=>setGuestForm(v=>{const songs=[...(v.songs||['','',''])];songs[index]=e.target.value;return {...v,songs}})}/>{index===(guestForm.songs||['','','']).length-1&&<button type="button" aria-label="Adicionar outra música" onClick={()=>setGuestForm(v=>({...v,songs:[...(v.songs||['','','']),'']}))}>＋</button>}</div>)}</div><button className="dialog-primary" onClick={()=>saveGuestAction('music')}>Enviar sugestões</button></div></div>}
+        {activeFeature==='gifts'&&<div className="feature-dialog"><div><button className="dialog-x" onClick={()=>setActiveFeature(null)}>×</button><FeatureIcon type="gifts"/><h3>Lista de presentes</h3><p>Algumas sugestões escolhidas pelo anfitrião:</p><div className="gift-suggestion-list">{(featureConfig.gifts?.items||[]).filter(item=>item.trim()).map((item,index)=><div key={`published-gift-${index}`}><b>{index+1}</b><span>{item}</span></div>)}</div></div></div>}
+        {activeFeature==='collective'&&<div className="feature-dialog"><div><button className="dialog-x" onClick={()=>setActiveFeature(null)}>×</button><FeatureIcon type="collective"/><h3>Pix Presente</h3><p>Envie seu presente diretamente para <strong>{featureConfig.collective?.receiver}</strong>.</p><div className="pix-key">{featureConfig.collective?.pixKey}</div><button className="dialog-primary" onClick={copyPix}>Copiar chave Pix</button></div></div>}
         {dialog&&<MiniDialog text={dialog} close={()=>setDialog(null)}/>} 
         <script type="application/json" id="celebra-backend-contract" dangerouslySetInnerHTML={{__html:JSON.stringify(backendEventPayload())}} />
       </section>}
