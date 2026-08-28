@@ -20,7 +20,8 @@ const categories = [
   { id: 'reveillon', label: 'Réveillon', color: '#ff6a55', subs: ['Ano-Novo', 'Festa da virada'], icon: 'glasses' },
 ];
 
-const covers = ['Clássico', 'Elegante', 'Romântico', 'Noturno', 'Minimalista', 'Divertido'];
+const covers = ['Bordô Dourado', 'Floral Rosé', 'Abstrato', 'Festa Noturna', 'Tropical', 'Arquitetônico'];
+const backgrounds = ['/backgrounds/3931.png','/backgrounds/3932.png','/backgrounds/3933.png','/backgrounds/3934.png','/backgrounds/3935.png','/backgrounds/3936.png'];
 const features = [
   ['rsvp', 'Confirmar presença'],
   ['music', 'Sugestão de músicas'],
@@ -78,6 +79,7 @@ const defaultInvite = {
   category: 'aniversario',
   details: { title: '', sub: '', date: '', time: '', place: '', host: '' },
   cover: 0,
+  background: 0,
   color: 0,
   font: 0,
   decor: 0,
@@ -101,11 +103,12 @@ export default function Home() {
   const [step, setStep] = useState(0);
   const [invite, setInvite] = useState(defaultInvite);
   const [hydrated, setHydrated] = useState(false);
-  const { category, details, cover, color, font, decor, enabled } = invite;
+  const { category, details, cover, background = 0, color, font, decor, enabled } = invite;
   const [aiCopied, setAiCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [dialog, setDialog] = useState(null);
+  const [customBg, setCustomBg] = useState('');
   const pointerStart = useRef(null);
 
   useEffect(() => {
@@ -143,7 +146,7 @@ export default function Home() {
   const inviteLink = typeof window !== 'undefined' ? `${window.location.origin}/c/convite-demo` : 'https://celebra.app/c/convite-demo';
   const aiPrompt = `Crie uma imagem de fundo para convite digital da Celebra no formato vertical 9:16 (1080x1920 px). Categoria: ${selectedCategory.label}. Subcategoria: ${details.sub || selectedCategory.subs[0]}. Estilo escolhido: ${covers[cover]}. Preserve uma área central livre e limpa para textos e botões do aplicativo. Não inclua palavras, logotipos, datas, molduras com texto ou marcas d'água. Evite elementos importantes no centro; concentre a composição nas bordas e cantos. Use acabamento sofisticado, alta definição e composição adequada para tela de celular.`;
 
-  function go(n) { setStep(Math.max(0, Math.min(5, n))); setInviteOpen(false); setDialog(null); window?.scrollTo?.({ top: 0, behavior: 'smooth' }); }
+  function go(n) { setStep(Math.max(0, Math.min(3, n))); setInviteOpen(false); setDialog(null); window?.scrollTo?.({ top: 0, behavior: 'smooth' }); }
   function patchInvite(patch) { setInvite((current) => ({ ...current, ...patch })); }
   function patchDetails(patch) { setInvite((current) => ({ ...current, details: { ...current.details, ...patch } })); }
   function toggleFeature(id) { setInvite((current) => ({ ...current, enabled: current.enabled.includes(id) ? current.enabled.filter((x) => x !== id) : [...current.enabled, id] })); }
@@ -179,60 +182,52 @@ export default function Home() {
         </div>
       </section>}
 
-      {step === 1 && <section className="html-screen details-html" aria-label="Conte os detalhes">
-        <button className="back-button" onClick={() => go(0)} aria-label="Voltar">‹</button>
-        <BrandHeader compact />
-        <h1>Conte os detalhes</h1>
-        <div className="gold-divider"><span></span><b>◆</b><span></span></div>
-        <form className="details-form" onSubmit={(e) => { e.preventDefault(); go(2); }}>
-          <label className="field-block"><span>◇ <b>Título do evento</b></span><input placeholder="Ex.: Aniversário da Mariana" value={details.title} onChange={(e) => patchDetails({ title: e.target.value })}/></label>
-          <label className="field-block"><span>✧ <b>Subcategoria do evento</b></span><select value={details.sub} onChange={(e) => patchDetails({ sub: e.target.value })}><option value="">Selecione a subcategoria</option>{selectedCategory.subs.map((s) => <option key={s}>{s}</option>)}</select></label>
-          <div className="form-row">
-            <label className="field-block"><span>▣ <b>Data do evento</b></span><input type="date" value={details.date} onChange={(e) => patchDetails({ date: e.target.value })}/></label>
-            <label className="field-block"><span>◷ <b>Horário</b></span><input type="time" value={details.time} onChange={(e) => patchDetails({ time: e.target.value })}/></label>
+      {step === 1 && <section className="html-screen native-page personalize-page editor-v9">
+        <button className="back-button" onClick={() => go(0)}>‹</button><BrandHeader compact />
+        <h1>Personalize seu convite</h1><div className="gold-divider"><span></span><b>◆</b><span></span></div><p className="page-subtitle">Edite os dados e o visual. A prévia muda na hora.</p>
+
+        <div className="editor-preview-top">
+          <div className={`preview-card editor-live font-preview-${font}`} style={{...previewStyle, backgroundImage:`linear-gradient(rgba(20,8,16,.12),rgba(20,8,16,.12)), url(${customBg || backgrounds[background]})`}}>
+            <small>{previewDecor[decor]}　{previewSub}　{previewDecor[decor]}</small><h2>Vamos<br/><i>Celebrar!</i></h2><p className="preview-title">{previewTitle}</p><p>▣ {previewDate}　◷ {previewTime}</p><p>⌖ {previewPlace}</p><p className="preview-host">Por {previewHost}</p><b>Conto com você!</b>
           </div>
-          <label className="field-block"><span>⌖ <b>Local do evento</b></span><input placeholder="Ex.: Salão de Festas do Condomínio" value={details.place} onChange={(e) => patchDetails({ place: e.target.value })}/></label>
-          <label className="field-block"><span>♙ <b>Nome do anfitrião</b></span><input placeholder="Ex.: Mariana Silva" value={details.host} onChange={(e) => patchDetails({ host: e.target.value })}/></label>
-          <button className="primary-cta" type="submit">Continuar <span>→</span></button>
-        </form>
-        <div className="progress-row" aria-label="Etapa 2 de 5"><b></b><i className="active"></i><i></i><i></i><i></i><span>2/5</span></div>
+        </div>
+
+        <div className="editor-tabs">
+          <a href="#texto">Aa <span>Texto</span></a><a href="#fundos">▧ <span>Fundos</span></a><a href="#fontes">𝓕 <span>Fontes</span></a><a href="#cores">◉ <span>Cores</span></a><a href="#elementos">✦ <span>Elementos</span></a>
+        </div>
+
+        <div className="editor-section" id="texto"><ControlTitle icon="✎" text="Textos e informações"/>
+          <label className="field-block"><span><b>Título do evento</b></span><input placeholder="Ex.: Aniversário da Mariana" value={details.title} onChange={(e)=>patchDetails({title:e.target.value})}/></label>
+          <label className="field-block"><span><b>Tipo da celebração</b></span><select value={details.sub} onChange={(e)=>patchDetails({sub:e.target.value})}><option value="">Selecione</option>{selectedCategory.subs.map(s=><option key={s}>{s}</option>)}</select></label>
+          <div className="form-row"><label className="field-block"><span><b>Data</b></span><input type="date" value={details.date} onChange={(e)=>patchDetails({date:e.target.value})}/></label><label className="field-block"><span><b>Horário</b></span><input type="time" value={details.time} onChange={(e)=>patchDetails({time:e.target.value})}/></label></div>
+          <label className="field-block"><span><b>Local</b></span><input placeholder="Ex.: Salão de Festas" value={details.place} onChange={(e)=>patchDetails({place:e.target.value})}/></label>
+          <label className="field-block"><span><b>Anfitrião</b></span><input placeholder="Ex.: Mariana e família" value={details.host} onChange={(e)=>patchDetails({host:e.target.value})}/></label>
+        </div>
+
+        <div className="editor-section" id="fundos"><ControlTitle icon="▧" text="Fundos do convite"/><div className="background-grid">{backgrounds.map((src,i)=><button key={src} className={background===i&&!customBg?'selected':''} onClick={()=>{patchInvite({background:i,cover:i});setCustomBg('')}}><img src={src} alt={covers[i]}/><span>{covers[i]}</span></button>)}</div>
+          <label className="upload-wide">＋ Enviar minha imagem<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e)=>{const f=e.target.files?.[0];if(f){setCustomBg(URL.createObjectURL(f))}}}/></label>
+        </div>
+
+        <div className="editor-section" id="fontes"><ControlTitle icon="Aa" text="Tipografia"/><div className="font-row font-row-v9">{['Playfair','Montserrat','Cormorant','Trebuchet'].map((x,i)=><button key={x} className={font===i?'selected':''} onClick={()=>patchInvite({font:i})}><b className={`font-${i}`}>Aa</b><span>{x}</span></button>)}</div></div>
+        <div className="editor-section" id="cores"><ControlTitle icon="◉" text="Cor de destaque"/><div className="color-row">{['#6a0735','#ff654e','#c78c2a','#17345f','#638b7b','#9c739b'].map((c,i)=><button aria-label={`Cor ${i+1}`} key={c} style={{background:c}} className={color===i?'selected':''} onClick={()=>patchInvite({color:i})}/>)}</div></div>
+        <div className="editor-section" id="elementos"><ControlTitle icon="✦" text="Elementos decorativos"/><div className="decor-row decor-v9">{['✦','❧','♡','⋰','●','⌁'].map((x,i)=><button key={i} className={decor===i?'selected':''} onClick={()=>patchInvite({decor:i})}>{x}</button>)}</div></div>
+
+        <div className="ai-panel ai-panel-v9"><div><strong>✨ Personalização com IA</strong><small>Opcional</small></div><p>Quer criar um fundo exclusivo? Copie o comando pronto e abra o ChatGPT. Depois, cole o comando e descreva o visual que deseja.</p><div className="ai-steps ai-two"><button onClick={handleAiCopy}><b>1</b><strong>{aiCopied?'Comando copiado ✓':'Copiar comando'}</strong><span>Leva o formato correto do Celebra.</span></button><a href="https://chatgpt.com/" target="_blank" rel="noreferrer"><b>2</b><strong>Abrir ChatGPT</strong><span>Cole o comando e peça sua imagem.</span></a></div></div>
+        <div className="nav-actions"><button onClick={()=>go(0)}>← Voltar</button><button className="next" onClick={()=>go(2)}>Continuar →</button></div><StepDots n={2}/>
       </section>}
 
-      {step === 2 && <section className="html-screen native-page">
-        <button className="back-button" onClick={() => go(1)}>‹</button><BrandHeader compact />
-        <h1>Deixe com a sua cara</h1><div className="gold-divider"><span></span><b>◆</b><span></span></div>
-        <p className="page-subtitle">Escolha um estilo para começar. Você poderá personalizar na próxima etapa.</p>
-        <div className="cover-grid">{covers.map((name,i)=><button key={name} className={`cover-card ${cover===i?'selected':''}`} onClick={()=>patchInvite({ cover: i })}><div className={`cover-art cover-${i}`}><span>{selectedCategory.label}</span><b>{name}</b><i>◆</i></div><strong>{name}</strong>{cover===i&&<em>✓</em>}</button>)}</div>
-        <div className="nav-actions"><button onClick={()=>go(1)}>← Voltar</button><button className="next" onClick={()=>go(3)}>Continuar →</button></div><StepDots n={3}/>
+      {step === 2 && <section className="html-screen native-page resources-page">
+        <button className="back-button" onClick={() => go(1)}>‹</button><BrandHeader compact /><h1>O que seus convidados<br/>poderão fazer</h1><div className="gold-divider"><span></span><b>◆</b><span></span></div><p className="page-subtitle">Ative somente os recursos que quiser oferecer.</p>
+        <div className="feature-list">{features.map(([id,label],i)=><button key={id} className={enabled.includes(id)?'on':''} onClick={()=>toggleFeature(id)}><i>{['▣','♫','🎁','♧','⌖','▦'][i]}</i><span><strong>{label}</strong><small>{['Confirmação de presença.','Sugestões para a trilha sonora.','Link para sua lista de presentes.','Contribuição para presente coletivo.','Endereço e rota do evento.','Evento salvo na agenda.'][i]}</small></span><b>{enabled.includes(id)?'✓':''}</b></button>)}</div>
+        <div className="nav-actions"><button onClick={()=>go(1)}>← Voltar</button><button className="next" onClick={()=>go(3)}>Finalizar →</button></div><StepDots n={3}/>
       </section>}
 
-      {step === 3 && <section className="html-screen native-page personalize-page">
-        <button className="back-button" onClick={() => go(2)}>‹</button><BrandHeader compact />
-        <h1>Personalize seu convite</h1><div className="gold-divider"><span></span><b>◆</b><span></span></div><p className="page-subtitle">Deixe seu convite com a sua cara!</p>
-        <div className="personalize-layout"><div className="controls-col">
-          <ControlTitle icon="◉" text="Cores principais"/><div className="color-row">{['#6a0735','#ff654e','#c78c2a','#17345f','#638b7b','#9c739b'].map((c,i)=><button key={c} style={{background:c}} className={color===i?'selected':''} onClick={()=>patchInvite({ color: i })}/>)}</div>
-          <ControlTitle icon="Aa" text="Tipografia"/><div className="font-row">{['Clássica','Moderna','Elegante','Divertida'].map((x,i)=><button key={x} className={font===i?'selected':''} onClick={()=>patchInvite({ font: i })}><b className={`font-${i}`}>Aa</b><span>{x}</span></button>)}</div>
-          <ControlTitle icon="✧" text="Elementos decorativos"/><div className="decor-row">{['✦','❧','♡','⋰','🎈','⌁'].map((x,i)=><button key={i} className={decor===i?'selected':''} onClick={()=>patchInvite({ decor: i })}>{x}</button>)}</div>
-          <ControlTitle icon="▧" text="Imagem de fundo (opcional)"/><label className="upload-native">↑<span>Enviar</span><input type="file" accept="image/png,image/jpeg"/></label>
-        </div><div className="invite-preview"><span>Prévia do convite</span><div className={`preview-card preview-${cover} font-preview-${font}`} style={previewStyle}><small>{previewDecor[decor]}　{previewSub}　{previewDecor[decor]}</small><h2>Vamos<br/><i>Celebrar!</i></h2><p className="preview-title">{previewTitle}</p><p>▣ {previewDate}　◷ {previewTime}</p><p>⌖ {previewPlace}</p><p className="preview-host">Por {previewHost}</p><b>Conto com você!</b></div><button onClick={()=>patchInvite({ cover: (cover+1)%covers.length })}>↻ Trocar modelo</button></div></div>
-        <div className="ai-panel"><div><strong>🪄 Personalização com IA ✨</strong><small>Recurso opcional</small></div><p>Para sua imagem encaixar perfeitamente no convite, siga os passos abaixo.</p><div className="ai-steps"><button onClick={handleAiCopy}><b>1</b><strong>Copiar instruções</strong><span>{aiCopied?'Copiado ✓':'Copiar instruções'}</span></button><div><b>2</b><strong>Colar no ChatGPT</strong><span>Cole e descreva o que deseja mudar.</span></div><a href={aiCopied?'https://chatgpt.com/':undefined} target="_blank" onClick={(e)=>{if(!aiCopied){e.preventDefault();setDialog('Primeiro copie as instruções.')}}}><b>3</b><strong>Abrir ChatGPT</strong><span>Abrir ChatGPT ↗</span></a></div></div>
-        <div className="nav-actions"><button onClick={()=>go(2)}>← Voltar</button><button className="next" onClick={()=>go(4)}>Continuar →</button></div><StepDots n={4}/>
-        {dialog&&<MiniDialog text={dialog} close={()=>setDialog(null)}/>} 
-      </section>}
-
-      {step === 4 && <section className="html-screen native-page resources-page">
-        <button className="back-button" onClick={() => go(3)}>‹</button><BrandHeader compact /><h1>O que seus convidados<br/>poderão fazer</h1><div className="gold-divider"><span></span><b>◆</b><span></span></div><p className="page-subtitle">Selecione os recursos que deseja disponibilizar no seu convite</p>
-        <div className="feature-list">{features.map(([id,label],i)=><button key={id} className={enabled.includes(id)?'on':''} onClick={()=>toggleFeature(id)}><i>{['▣','♫','🎁','♧','⌖','▦'][i]}</i><span><strong>{label}</strong><small>{['Seus convidados confirmam a presença no evento.','Seus convidados sugerem músicas para o evento.','Compartilhe sua lista de presentes online.','Permita contribuições para um presente em grupo.','Exiba o endereço e facilite a chegada.','Adicione o evento à agenda com um clique.'][i]}</small></span><b>{enabled.includes(id)?'✓':''}</b></button>)}</div>
-        <div className="tip-box">✦ <span><strong>Você pode alterar depois</strong><small>Todos os recursos podem ser ativados ou desativados a qualquer momento.</small></span><em>Dica</em></div>
-        <div className="nav-actions"><button onClick={()=>go(3)}>← Voltar</button><button className="next" onClick={()=>go(5)}>Finalizar e publicar →</button></div><StepDots n={5}/>
-      </section>}
-
-      {step === 5 && <section className="html-screen native-page publish-page">
-        <button className="back-button" onClick={() => go(4)}>‹</button><BrandHeader compact /><h1>Seu convite está pronto!</h1><div className="gold-divider"><span></span><b>◆</b><span></span></div><p className="page-subtitle">Toque no convite para abrir e fechar como um convite físico.</p>
-        <div className={`native-flip ${inviteOpen?'open':''}`}><div className={`native-inside font-preview-${font}`} style={previewStyle}><small>{previewSub}</small><h2>{previewTitle}</h2><p>{previewDateLong} • {previewTime}</p><p>{previewPlace}</p><p>Por {previewHost}</p><div>{features.filter(([id])=>enabled.includes(id)).map(([id,l])=><button key={id} onClick={()=>openFeature(l)}>{l}</button>)}</div></div><button className="native-cover" onClick={()=>setInviteOpen(!inviteOpen)}><img src="/ui/convite-capa-crop.png" alt="Capa do convite" style={{filter:`hue-rotate(${color*12}deg) saturate(${1 + color*0.03})`}}/></button></div>
+      {step === 3 && <section className="html-screen native-page publish-page">
+        <button className="back-button" onClick={() => go(2)}>‹</button><BrandHeader compact /><h1>Seu convite está pronto!</h1><div className="gold-divider"><span></span><b>◆</b><span></span></div><p className="page-subtitle">Confira e compartilhe seu convite interativo.</p>
+        <div className={`native-flip ${inviteOpen?'open':''}`}><div className={`native-inside font-preview-${font}`} style={previewStyle}><small>{previewSub}</small><h2>{previewTitle}</h2><p>{previewDateLong} • {previewTime}</p><p>{previewPlace}</p><p>Por {previewHost}</p><div>{features.filter(([id])=>enabled.includes(id)).map(([id,l])=><button key={id} onClick={()=>openFeature(l)}>{l}</button>)}</div></div><button className="native-cover" onClick={()=>setInviteOpen(!inviteOpen)}><img src={customBg || backgrounds[background]} alt="Capa do convite"/></button></div>
         <div className="published-features">{features.filter(([id])=>enabled.includes(id)).map(([id,l])=><button key={id} onClick={()=>openFeature(l)}>{l}</button>)}</div>
         <div className="share-box"><label>Link do convite</label><div><input readOnly value={inviteLink}/><button onClick={handleLinkCopy}>{linkCopied?'Copiado ✓':'Copiar'}</button></div><div className="share-buttons"><button onClick={()=>shareInvite('whatsapp')}>WhatsApp</button><button onClick={()=>shareInvite()}>Compartilhar</button></div></div>
-        <div className="nav-actions"><button onClick={()=>go(0)}>← Meus convites</button><button className="next" onClick={()=>setInviteOpen(true)}>Ver prévia completa →</button></div>
+        <div className="nav-actions"><button onClick={()=>go(1)}>← Editar convite</button><button className="next" onClick={()=>setInviteOpen(true)}>Ver convite →</button></div>
         {dialog&&<MiniDialog text={dialog} close={()=>setDialog(null)}/>} 
       </section>}
     </main>
