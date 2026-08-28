@@ -121,13 +121,9 @@ export default function Home() {
   const [customBg, setCustomBg] = useState('');
   const [activeEditorPanel, setActiveEditorPanel] = useState(null);
   const pointerStart = useRef(null);
-  const activePointers = useRef(new Map());
-  const gestureStart = useRef(null);
-  const rotateStart = useRef(null);
   const resizeStart = useRef(null);
   const previewRef = useRef(null);
   const [selectedObject, setSelectedObject] = useState(null);
-  const [interactionMode, setInteractionMode] = useState('move');
 
   useEffect(() => {
     try {
@@ -195,60 +191,49 @@ export default function Home() {
   function patchObject(kind,id,patch){ kind==='decor' ? updateFloatingElement(id,patch) : updateFloatingText(id,patch); }
   function selectObject(kind,id){
     const key=`${kind}:${id}`;
-    if(selectedObject!==key){ setSelectedObject(key); setInteractionMode('move'); }
+    if(selectedObject!==key) setSelectedObject(key);
   }
   function startObjectGesture(e,kind,id){
-    if(e.target.closest?.('.object-control,.object-modebar')) return;
+    if(e.target.closest?.('.object-control')) return;
     const key=`${kind}:${id}`;
-    if(selectedObject!==key){ e.preventDefault(); e.stopPropagation(); setSelectedObject(key); setInteractionMode('move'); return; }
-    if(interactionMode==='edit' && kind==='text') return;
+    if(selectedObject!==key){ e.preventDefault(); e.stopPropagation(); setSelectedObject(key); return; }
     e.preventDefault(); e.stopPropagation();
     e.currentTarget.setPointerCapture?.(e.pointerId);
     const obj=getObject(kind,id), r=previewRef.current?.getBoundingClientRect(); if(!obj||!r)return;
-    if(interactionMode==='move') pointerStart.current={kind,id,pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,x:obj.x,y:obj.y};
-    if(interactionMode==='rotate'){
-      const cx=r.left+r.width*obj.x/100, cy=r.top+r.height*obj.y/100;
-      rotateStart.current={kind,id,pointerId:e.pointerId,cx,cy,startAngle:Math.atan2(e.clientY-cy,e.clientX-cx)*180/Math.PI,rotate:obj.rotate||0};
-    }
-    if(interactionMode==='resize'){
-      const cx=r.left+r.width*obj.x/100, cy=r.top+r.height*obj.y/100;
-      resizeStart.current={kind,id,pointerId:e.pointerId,cx,cy,distance:Math.max(1,Math.hypot(e.clientX-cx,e.clientY-cy)),size:obj.size};
-    }
+    pointerStart.current={kind,id,pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,x:obj.x,y:obj.y};
   }
   function moveObjectGesture(e,kind,id){
     if(!previewRef.current) return;
+    const d=pointerStart.current; if(!d||d.id!==id||d.pointerId!==e.pointerId)return;
     const r=previewRef.current.getBoundingClientRect();
-    if(interactionMode==='move'){
-      const d=pointerStart.current; if(!d||d.id!==id||d.pointerId!==e.pointerId)return;
-      const x=Math.max(3,Math.min(97,d.x+((e.clientX-d.startX)/r.width)*100));
-      const y=Math.max(3,Math.min(97,d.y+((e.clientY-d.startY)/r.height)*100));
-      patchObject(kind,id,{x,y}); return;
-    }
-    if(interactionMode==='rotate'){
-      const d=rotateStart.current; if(!d||d.id!==id||d.pointerId!==e.pointerId)return;
-      const a=Math.atan2(e.clientY-d.cy,e.clientX-d.cx)*180/Math.PI; patchObject(kind,id,{rotate:d.rotate+a-d.startAngle}); return;
-    }
-    if(interactionMode==='resize'){
-      const d=resizeStart.current; if(!d||d.id!==id||d.pointerId!==e.pointerId)return;
-      const dist=Math.max(1,Math.hypot(e.clientX-d.cx,e.clientY-d.cy)); const min=kind==='text'?10:22,max=kind==='text'?72:110;
-      patchObject(kind,id,{size:Math.max(min,Math.min(max,d.size*(dist/d.distance)))});
-    }
+    const x=Math.max(3,Math.min(97,d.x+((e.clientX-d.startX)/r.width)*100));
+    const y=Math.max(3,Math.min(97,d.y+((e.clientY-d.startY)/r.height)*100));
+    patchObject(kind,id,{x,y});
   }
-  function endObjectGesture(){ pointerStart.current=null; rotateStart.current=null; resizeStart.current=null; }
+  function startResize(e,kind,id){
+    e.preventDefault(); e.stopPropagation();
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+    const obj=getObject(kind,id), r=previewRef.current?.getBoundingClientRect(); if(!obj||!r)return;
+    const cx=r.left+r.width*obj.x/100, cy=r.top+r.height*obj.y/100;
+    resizeStart.current={kind,id,pointerId:e.pointerId,cx,cy,distance:Math.max(1,Math.hypot(e.clientX-cx,e.clientY-cy)),size:obj.size};
+  }
+  function moveResize(e,kind,id){
+    const d=resizeStart.current; if(!d||d.id!==id||d.pointerId!==e.pointerId)return;
+    e.preventDefault(); e.stopPropagation();
+    const dist=Math.max(1,Math.hypot(e.clientX-d.cx,e.clientY-d.cy));
+    const min=kind==='text'?10:22,max=kind==='text'?72:110;
+    patchObject(kind,id,{size:Math.max(min,Math.min(max,d.size*(dist/d.distance)))});
+  }
+  function endObjectGesture(){ pointerStart.current=null; resizeStart.current=null; }
   function textValue(item){ if(Object.prototype.hasOwnProperty.call(item,'text')) return item.text; return ({message:previewMessage,title:previewTitle,date:`▣ ${previewDate}`,time:`◷ ${previewTime}`,place:`⌖ ${previewPlace}`,closing:'Conto com você!'})[item.type]||''; }
   function FloatingObject({kind,item,children}){
-    if(item.visible===false)return null; const selected=selectedObject===`${kind}:${item.id}`;
-    const editable=kind==='text'&&selected&&interactionMode==='edit';
-    return <div className={`floating-object ${kind==='text'?'floating-text':'floating-decor'} ${selected?'selected':''} mode-${selected?interactionMode:'idle'}`} style={{left:`${item.x}%`,top:`${item.y}%`,fontSize:`${item.size}px`,transform:`translate(-50%,-50%) rotate(${item.rotate||0}deg)`}} onPointerDown={e=>startObjectGesture(e,kind,item.id)} onPointerMove={e=>moveObjectGesture(e,kind,item.id)} onPointerUp={endObjectGesture} onPointerCancel={endObjectGesture}>
-      <div className="object-content" contentEditable={editable} suppressContentEditableWarning onBlur={kind==='text'?e=>updateFloatingText(item.id,{text:e.currentTarget.textContent||''}):undefined}>{children}</div>
+    if(item.visible===false)return null;
+    const selected=selectedObject===`${kind}:${item.id}`;
+    return <div className={`floating-object ${kind==='text'?'floating-text':'floating-decor'} ${selected?'selected':''}`} style={{left:`${item.x}%`,top:`${item.y}%`,fontSize:`${item.size}px`,transform:`translate(-50%,-50%)`}} onPointerDown={e=>startObjectGesture(e,kind,item.id)} onPointerMove={e=>moveObjectGesture(e,kind,item.id)} onPointerUp={endObjectGesture} onPointerCancel={endObjectGesture}>
+      <div className="object-content">{children}</div>
       {selected&&<>
         <button type="button" className="object-control object-delete" aria-label="Excluir" onPointerDown={e=>{e.stopPropagation();e.preventDefault();removeObject(kind,item.id)}}>×</button>
-        <div className="object-modebar" onPointerDown={e=>e.stopPropagation()}>
-          <button type="button" className={interactionMode==='move'?'active':''} aria-label="Mover" onClick={()=>setInteractionMode('move')}>✥</button>
-          {kind==='text'&&<button type="button" className={interactionMode==='edit'?'active':''} aria-label="Editar texto" onClick={()=>setInteractionMode('edit')}>✎</button>}
-          <button type="button" className={interactionMode==='resize'?'active':''} aria-label="Redimensionar" onClick={()=>setInteractionMode('resize')}>↘</button>
-          <button type="button" className={interactionMode==='rotate'?'active':''} aria-label="Girar" onClick={()=>setInteractionMode('rotate')}>↻</button>
-        </div>
+        <button type="button" className="object-control object-resize" aria-label="Redimensionar" onPointerDown={e=>startResize(e,kind,item.id)} onPointerMove={e=>moveResize(e,kind,item.id)} onPointerUp={endObjectGesture} onPointerCancel={endObjectGesture}>↘</button>
       </>}
     </div>;
   }
@@ -310,11 +295,11 @@ export default function Home() {
 
         <div className={`editor-panel-slot ${activeEditorPanel?'open':''}`}>
           {activeEditorPanel === 'texto' && <div className="editor-section editor-section-active"><ControlTitle icon="✎" text="Textos e informações"/>
-            <p className="section-hint">Toque em um texto na arte para selecionar. Toque novamente sobre ele para editar diretamente.</p>
-            <label className="field-block"><span><b>Título do evento</b></span><div className="field-apply-row"><input placeholder="Ex.: Aniversário da Mariana" value={details.title} onChange={(e)=>patchDetails({title:e.target.value})}/>{floatingTexts.find(x=>x.id==='title')?.visible===false&&<button type="button" onClick={()=>applyTextAgain('title',details.title||selectedCategory.label)}>Aplicar novamente</button>}</div></label>
-            <label className="field-block"><span><b>Frase do convite</b></span><div className="field-apply-row"><input placeholder="Ex.: Vamos celebrar!" value={details.message || ''} onChange={(e)=>patchDetails({message:e.target.value})}/>{floatingTexts.find(x=>x.id==='message')?.visible===false&&<button type="button" onClick={()=>applyTextAgain('message',details.message||'Vamos celebrar!')}>Aplicar novamente</button>}</div></label>
-            <div className="form-row"><label className="field-block"><span><b>Data</b></span><div className="field-apply-row"><input type="date" value={details.date} onChange={(e)=>patchDetails({date:e.target.value})}/>{floatingTexts.find(x=>x.id==='date')?.visible===false&&<button type="button" onClick={()=>applyTextAgain('date',`▣ ${formatDateBR(details.date)}`)}>Aplicar novamente</button>}</div></label><label className="field-block"><span><b>Horário</b></span><div className="field-apply-row"><input type="time" value={details.time} onChange={(e)=>patchDetails({time:e.target.value})}/>{floatingTexts.find(x=>x.id==='time')?.visible===false&&<button type="button" onClick={()=>applyTextAgain('time',`◷ ${details.time||'19:00'}`)}>Aplicar novamente</button>}</div></label></div>
-            <label className="field-block"><span><b>Local</b></span><div className="field-apply-row"><input placeholder="Ex.: Salão de Festas" value={details.place} onChange={(e)=>patchDetails({place:e.target.value})}/>{floatingTexts.find(x=>x.id==='place')?.visible===false&&<button type="button" onClick={()=>applyTextAgain('place',`⌖ ${details.place||'Salão de Festas'}`)}>Aplicar novamente</button>}</div></label>
+            <p className="section-hint">Edite o conteúdo somente nos campos abaixo. Na arte, toque para selecionar, arraste para mover e use a seta para redimensionar.</p>
+            <label className="field-block"><span><b>Título do evento</b></span><div className="field-apply-row"><input placeholder="Ex.: Aniversário da Mariana" value={details.title} onChange={(e)=>patchDetails({title:e.target.value})}/><button type="button" onClick={()=>applyTextAgain('title',details.title||selectedCategory.label)}>Aplicar novamente</button></div></label>
+            <label className="field-block"><span><b>Frase do convite</b></span><div className="field-apply-row"><input placeholder="Ex.: Vamos celebrar!" value={details.message || ''} onChange={(e)=>patchDetails({message:e.target.value})}/><button type="button" onClick={()=>applyTextAgain('message',details.message||'Vamos celebrar!')}>Aplicar novamente</button></div></label>
+            <div className="form-row"><label className="field-block"><span><b>Data</b></span><div className="field-apply-row"><input type="date" value={details.date} onChange={(e)=>patchDetails({date:e.target.value})}/><button type="button" onClick={()=>applyTextAgain('date',`▣ ${formatDateBR(details.date)}`)}>Aplicar novamente</button></div></label><label className="field-block"><span><b>Horário</b></span><div className="field-apply-row"><input type="time" value={details.time} onChange={(e)=>patchDetails({time:e.target.value})}/><button type="button" onClick={()=>applyTextAgain('time',`◷ ${details.time||'19:00'}`)}>Aplicar novamente</button></div></label></div>
+            <label className="field-block"><span><b>Local</b></span><div className="field-apply-row"><input placeholder="Ex.: Salão de Festas" value={details.place} onChange={(e)=>patchDetails({place:e.target.value})}/><button type="button" onClick={()=>applyTextAgain('place',`⌖ ${details.place||'Salão de Festas'}`)}>Aplicar novamente</button></div></label>
           </div>}
 
           {activeEditorPanel === 'fundos' && <div className="editor-section editor-section-active"><ControlTitle icon="▧" text="Fundos do convite"/><div className="background-grid">{backgrounds.map((src,i)=><button key={src} className={background===i&&!customBg?'selected':''} onClick={()=>{patchInvite({background:i,cover:i});setCustomBg('')}}><img src={src} alt={covers[i]}/><span>{covers[i]}</span></button>)}</div>
@@ -327,7 +312,7 @@ export default function Home() {
             <div className="color-control-group"><strong>Cor da fonte</strong><p>Altera a cor de todos os textos do convite.</p><div className="color-row font-color-row">{['#ffffff','#f4e7d7','#e7bd6a','#6a0735','#17345f','#231f20','#ff654e'].map((c,i)=><button aria-label={`Cor da fonte ${i+1}`} key={c} style={{background:c}} className={fontColor.toLowerCase()===c?'selected':''} onClick={()=>patchInvite({fontColor:c})}/>)}</div><label className="custom-color-picker"><span>Escolher outra cor</span><input type="color" value={fontColor} onChange={(e)=>patchInvite({fontColor:e.target.value})}/><b style={{background:fontColor}}></b></label></div>
             <div className="color-control-group accent-group"><strong>Cor de destaque</strong><p>Usada em bordas e detalhes decorativos.</p><div className="color-row">{['#6a0735','#ff654e','#c78c2a','#17345f','#638b7b','#9c739b'].map((c,i)=><button aria-label={`Cor de destaque ${i+1}`} key={c} style={{background:c}} className={color===i?'selected':''} onClick={()=>patchInvite({color:i})}/>)}</div></div>
           </div>}
-          {activeEditorPanel === 'elementos' && <div className="editor-section editor-section-active"><ControlTitle icon="✦" text="Elementos flutuantes"/><p className="section-hint">Toque para adicionar. Na arte: arraste para mover, use pinça no ícone para redimensionar e a alça ↻ para girar.</p><div className="element-catalog">{elementCatalog.map(([type,glyph,label])=><button key={type} onClick={()=>addFloatingElement(type,glyph)}><b>{glyph}</b><span>{label}</span></button>)}</div></div>}
+          {activeEditorPanel === 'elementos' && <div className="editor-section editor-section-active"><ControlTitle icon="✦" text="Elementos flutuantes"/><p className="section-hint">Toque para adicionar. Na arte, toque no ícone para selecionar, arraste a caixa para mover e use a seta no canto para redimensionar.</p><div className="element-catalog">{elementCatalog.map(([type,glyph,label])=><button key={type} onClick={()=>addFloatingElement(type,glyph)}><b>{glyph}</b><span>{label}</span></button>)}</div></div>}
         </div>
 
         <div className="ai-panel ai-panel-v9"><div><strong>✨ Personalização com IA</strong><small>Opcional</small></div><p>Quer criar um fundo exclusivo? Copie o comando pronto e abra o ChatGPT. Depois, cole o comando e descreva o visual que deseja.</p><div className="ai-steps ai-two"><button onClick={handleAiCopy}><b>1</b><strong>{aiCopied?'Comando copiado ✓':'Copiar comando'}</strong><span>Leva o formato correto do Celebra.</span></button><a href="https://chatgpt.com/" target="_blank" rel="noreferrer"><b>2</b><strong>Abrir ChatGPT</strong><span>Cole o comando e peça sua imagem.</span></a></div></div>
@@ -342,7 +327,7 @@ export default function Home() {
 
       {step === 3 && <section className="html-screen native-page publish-page">
         <button className="back-button" onClick={() => go(2)}>‹</button><BrandHeader compact /><h1>Seu convite está pronto!</h1><div className="gold-divider"><span></span><b>◆</b><span></span></div><p className="page-subtitle">Confira e compartilhe seu convite interativo.</p>
-        <div className={`native-flip ${inviteOpen?'open':''}`}><div className={`native-inside published-invite font-preview-${font}`} style={{...previewStyle,backgroundImage:`linear-gradient(rgba(20,8,16,.12),rgba(20,8,16,.12)), url(${customBg || backgrounds[background]})`}}>{floatingTexts.filter(el=>el.visible!==false).map(el=><div key={el.id} className="published-object published-text" style={{left:`${el.x}%`,top:`${el.y}%`,fontSize:`${el.size}px`,transform:`translate(-50%,-50%) rotate(${el.rotate||0}deg)`}}>{textValue(el)}</div>)}{floatingElements.map(el=><div key={el.id} className="published-object published-decor" style={{left:`${el.x}%`,top:`${el.y}%`,fontSize:`${el.size}px`,transform:`translate(-50%,-50%) rotate(${el.rotate||0}deg)`}}>{el.glyph}</div>)}</div><button className="native-cover" onClick={()=>setInviteOpen(!inviteOpen)}><img src={customBg || backgrounds[background]} alt="Capa do convite"/></button></div>
+        <div className={`native-flip ${inviteOpen?'open':''}`}><div className={`native-inside published-invite font-preview-${font}`} style={{...previewStyle,backgroundImage:`linear-gradient(rgba(20,8,16,.12),rgba(20,8,16,.12)), url(${customBg || backgrounds[background]})`}}>{floatingTexts.filter(el=>el.visible!==false).map(el=><div key={el.id} className="published-object published-text" style={{left:`${el.x}%`,top:`${el.y}%`,fontSize:`${el.size}px`,transform:`translate(-50%,-50%)`}}>{textValue(el)}</div>)}{floatingElements.map(el=><div key={el.id} className="published-object published-decor" style={{left:`${el.x}%`,top:`${el.y}%`,fontSize:`${el.size}px`,transform:`translate(-50%,-50%)`}}>{el.glyph}</div>)}</div><button className="native-cover" onClick={()=>setInviteOpen(!inviteOpen)}><img src={customBg || backgrounds[background]} alt="Capa do convite"/></button></div>
         <div className="published-features">{features.filter(([id])=>enabled.includes(id)).map(([id,l])=><button key={id} onClick={()=>openFeature(l)}>{l}</button>)}</div>
         <div className="share-box"><label>Link do convite</label><div><input readOnly value={inviteLink}/><button onClick={handleLinkCopy}>{linkCopied?'Copiado ✓':'Copiar'}</button></div><div className="share-buttons"><button onClick={()=>shareInvite('whatsapp')}>WhatsApp</button><button onClick={()=>shareInvite()}>Compartilhar</button></div></div>
         <div className="nav-actions"><button onClick={()=>go(1)}>← Editar convite</button><button className="next" onClick={()=>setInviteOpen(true)}>Ver convite →</button></div>

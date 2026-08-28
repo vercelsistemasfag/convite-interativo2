@@ -75,3 +75,24 @@
 .floating-text.selected .object-content[contenteditable="true"]{outline:none;cursor:text;user-select:text;-webkit-user-select:text;min-width:1ch}
 .field-apply-row{display:flex;gap:6px;align-items:stretch}.field-apply-row input{flex:1;min-width:0}.field-apply-row>button{flex:0 0 auto;max-width:92px;padding:0 7px;border:1px solid #8b3459;border-radius:8px;background:#fff8f5;color:#68133d;font-size:9px;font-weight:800;line-height:1.05}
 .form-row .field-apply-row{flex-direction:column}.form-row .field-apply-row>button{max-width:none;min-height:28px}
+
+/* V11.2 — modos exclusivos de interação */
+.object-modebar{position:absolute!important;z-index:45!important;left:50%!important;bottom:-25px!important;transform:translateX(-50%)!important;display:flex!important;gap:3px!important;padding:3px!important;border-radius:10px!important;background:rgba(34,20,28,.78)!important;box-shadow:0 2px 8px #0005!important;backdrop-filter:blur(4px)}
+.object-modebar button{width:19px!important;height:19px!important;min-width:19px!important;padding:0!important;border:1px solid rgba(255,255,255,.4)!important;border-radius:6px!important;background:rgba(255,255,255,.13)!important;color:rgba(255,255,255,.52)!important;display:grid!important;place-items:center!important;font:700 10px/1 Arial,sans-serif!important;box-shadow:none!important;touch-action:manipulation!important}
+.object-modebar button.active{background:#f3c66b!important;color:#4a1630!important;border-color:#fff0c9!important;box-shadow:0 0 0 1px #6a0735,0 0 8px #f3c66b99!important}
+.object-delete{width:15px!important;height:15px!important;min-width:15px!important;right:-8px!important;top:-8px!important;background:rgba(106,7,53,.78)!important;color:rgba(255,255,255,.8)!important;font-size:9px!important}
+.floating-object.mode-move{cursor:grab}.floating-object.mode-move:active{cursor:grabbing}.floating-object.mode-rotate{cursor:crosshair}.floating-object.mode-resize{cursor:nwse-resize}.floating-object.mode-edit{cursor:text}
+.floating-object.mode-edit .object-content[contenteditable="true"]{pointer-events:auto!important;user-select:text!important;-webkit-user-select:text!important;cursor:text!important;outline:none!important}
+.floating-object.selected:not(.mode-edit) .object-content{pointer-events:none!important}
+
+
+/* V11.3 — interação simplificada: mover + redimensionar + excluir */
+.object-modebar{display:none!important}
+.floating-object{cursor:grab!important}
+.floating-object:active{cursor:grabbing!important}
+.floating-object .object-content{pointer-events:none!important;user-select:none!important;-webkit-user-select:none!important}
+.object-control{width:14px!important;height:14px!important;min-width:14px!important;padding:0!important;border:1px solid rgba(255,255,255,.9)!important;border-radius:50%!important;display:grid!important;place-items:center!important;box-shadow:0 1px 3px #0004!important;font:400 8px/1 Arial,sans-serif!important}
+.object-delete{right:-7px!important;top:-7px!important;background:rgba(91,20,55,.82)!important;color:#fff!important}
+.object-resize{left:-7px!important;bottom:-7px!important;background:rgba(255,255,255,.9)!important;color:#5b1437!important;border-color:rgba(91,20,55,.7)!important;font-size:8px!important;cursor:nwse-resize!important;touch-action:none!important}
+.field-apply-row>button{display:flex!important;align-items:center!important;justify-content:center!important;max-width:88px!important;min-width:74px!important;padding:0 6px!important;font-size:8.5px!important;font-weight:700!important;line-height:1.05!important}
+.form-row .field-apply-row>button{max-width:none!important;min-height:28px!important}
