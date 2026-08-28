@@ -127,6 +127,7 @@ export default function Home() {
   const resizeStart = useRef(null);
   const previewRef = useRef(null);
   const [selectedObject, setSelectedObject] = useState(null);
+  const [interactionMode, setInteractionMode] = useState('move');
 
   useEffect(() => {
     try {
@@ -192,58 +193,63 @@ export default function Home() {
   function applyTextAgain(id, text){ updateFloatingText(id,{visible:true,text}); setSelectedObject(`text:${id}`); }
   function getObject(kind,id){ return kind==='decor' ? floatingElements.find(x=>x.id===id) : floatingTexts.find(x=>x.id===id); }
   function patchObject(kind,id,patch){ kind==='decor' ? updateFloatingElement(id,patch) : updateFloatingText(id,patch); }
-  function pointDistance(a,b){ return Math.hypot(a.x-b.x,a.y-b.y); }
+  function selectObject(kind,id){
+    const key=`${kind}:${id}`;
+    if(selectedObject!==key){ setSelectedObject(key); setInteractionMode('move'); }
+  }
   function startObjectGesture(e,kind,id){
-    if(e.target.closest?.('.object-control')) return;
-    if(kind==='text' && selectedObject===`text:${id}` && e.target.closest?.('.object-content')) { e.stopPropagation(); return; }
+    if(e.target.closest?.('.object-control,.object-modebar')) return;
+    const key=`${kind}:${id}`;
+    if(selectedObject!==key){ e.preventDefault(); e.stopPropagation(); setSelectedObject(key); setInteractionMode('move'); return; }
+    if(interactionMode==='edit' && kind==='text') return;
     e.preventDefault(); e.stopPropagation();
-    setSelectedObject(`${kind}:${id}`);
     e.currentTarget.setPointerCapture?.(e.pointerId);
-    activePointers.current.set(e.pointerId,{x:e.clientX,y:e.clientY});
-    const obj=getObject(kind,id); if(!obj) return;
-    if(activePointers.current.size===1) pointerStart.current={kind,id,pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,x:obj.x,y:obj.y};
-    if(kind==='decor' && activePointers.current.size===2){ const pts=[...activePointers.current.values()]; gestureStart.current={kind,id,distance:pointDistance(pts[0],pts[1]),size:obj.size}; pointerStart.current=null; }
+    const obj=getObject(kind,id), r=previewRef.current?.getBoundingClientRect(); if(!obj||!r)return;
+    if(interactionMode==='move') pointerStart.current={kind,id,pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,x:obj.x,y:obj.y};
+    if(interactionMode==='rotate'){
+      const cx=r.left+r.width*obj.x/100, cy=r.top+r.height*obj.y/100;
+      rotateStart.current={kind,id,pointerId:e.pointerId,cx,cy,startAngle:Math.atan2(e.clientY-cy,e.clientX-cx)*180/Math.PI,rotate:obj.rotate||0};
+    }
+    if(interactionMode==='resize'){
+      const cx=r.left+r.width*obj.x/100, cy=r.top+r.height*obj.y/100;
+      resizeStart.current={kind,id,pointerId:e.pointerId,cx,cy,distance:Math.max(1,Math.hypot(e.clientX-cx,e.clientY-cy)),size:obj.size};
+    }
   }
   function moveObjectGesture(e,kind,id){
-    if(!activePointers.current.has(e.pointerId)||!previewRef.current) return;
-    activePointers.current.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(!previewRef.current) return;
     const r=previewRef.current.getBoundingClientRect();
-    if(kind==='decor' && activePointers.current.size>=2 && gestureStart.current?.id===id){
-      const pts=[...activePointers.current.values()].slice(0,2), dist=pointDistance(pts[0],pts[1]);
-      patchObject(kind,id,{size:Math.max(22,Math.min(110,gestureStart.current.size*(dist/Math.max(1,gestureStart.current.distance))))}); return;
-    }
-    const d=pointerStart.current;
-    if(d?.id===id&&d.pointerId===e.pointerId){
+    if(interactionMode==='move'){
+      const d=pointerStart.current; if(!d||d.id!==id||d.pointerId!==e.pointerId)return;
       const x=Math.max(3,Math.min(97,d.x+((e.clientX-d.startX)/r.width)*100));
       const y=Math.max(3,Math.min(97,d.y+((e.clientY-d.startY)/r.height)*100));
-      patchObject(kind,id,{x,y});
+      patchObject(kind,id,{x,y}); return;
+    }
+    if(interactionMode==='rotate'){
+      const d=rotateStart.current; if(!d||d.id!==id||d.pointerId!==e.pointerId)return;
+      const a=Math.atan2(e.clientY-d.cy,e.clientX-d.cx)*180/Math.PI; patchObject(kind,id,{rotate:d.rotate+a-d.startAngle}); return;
+    }
+    if(interactionMode==='resize'){
+      const d=resizeStart.current; if(!d||d.id!==id||d.pointerId!==e.pointerId)return;
+      const dist=Math.max(1,Math.hypot(e.clientX-d.cx,e.clientY-d.cy)); const min=kind==='text'?10:22,max=kind==='text'?72:110;
+      patchObject(kind,id,{size:Math.max(min,Math.min(max,d.size*(dist/d.distance)))});
     }
   }
-  function endObjectGesture(e){ activePointers.current.delete(e.pointerId); if(activePointers.current.size<2) gestureStart.current=null; if(activePointers.current.size===0) pointerStart.current=null; }
-  function startRotate(e,kind,id){
-    e.preventDefault(); e.stopPropagation(); setSelectedObject(`${kind}:${id}`);
-    const obj=getObject(kind,id), r=previewRef.current?.getBoundingClientRect(); if(!obj||!r)return;
-    const cx=r.left+r.width*obj.x/100, cy=r.top+r.height*obj.y/100;
-    rotateStart.current={kind,id,pointerId:e.pointerId,cx,cy,startAngle:Math.atan2(e.clientY-cy,e.clientX-cx)*180/Math.PI,rotate:obj.rotate||0};
-    e.currentTarget.setPointerCapture?.(e.pointerId);
-  }
-  function moveRotate(e){ const d=rotateStart.current;if(!d||d.pointerId!==e.pointerId)return; const a=Math.atan2(e.clientY-d.cy,e.clientX-d.cx)*180/Math.PI;patchObject(d.kind,d.id,{rotate:d.rotate+a-d.startAngle}); }
-  function endRotate(){ rotateStart.current=null; }
-  function startResize(e,kind,id){
-    e.preventDefault(); e.stopPropagation(); setSelectedObject(`${kind}:${id}`);
-    const obj=getObject(kind,id), r=previewRef.current?.getBoundingClientRect(); if(!obj||!r)return;
-    const cx=r.left+r.width*obj.x/100, cy=r.top+r.height*obj.y/100;
-    resizeStart.current={kind,id,pointerId:e.pointerId,cx,cy,distance:Math.max(1,Math.hypot(e.clientX-cx,e.clientY-cy)),size:obj.size};
-    e.currentTarget.setPointerCapture?.(e.pointerId);
-  }
-  function moveResize(e){ const d=resizeStart.current;if(!d||d.pointerId!==e.pointerId)return; const dist=Math.max(1,Math.hypot(e.clientX-d.cx,e.clientY-d.cy)); const min=d.kind==='text'?10:22,max=d.kind==='text'?72:110; patchObject(d.kind,d.id,{size:Math.max(min,Math.min(max,d.size*(dist/d.distance)))}); }
-  function endResize(){ resizeStart.current=null; }
+  function endObjectGesture(){ pointerStart.current=null; rotateStart.current=null; resizeStart.current=null; }
   function textValue(item){ if(Object.prototype.hasOwnProperty.call(item,'text')) return item.text; return ({message:previewMessage,title:previewTitle,date:`▣ ${previewDate}`,time:`◷ ${previewTime}`,place:`⌖ ${previewPlace}`,closing:'Conto com você!'})[item.type]||''; }
   function FloatingObject({kind,item,children}){
     if(item.visible===false)return null; const selected=selectedObject===`${kind}:${item.id}`;
-    return <div className={`floating-object ${kind==='text'?'floating-text':'floating-decor'} ${selected?'selected':''}`} style={{left:`${item.x}%`,top:`${item.y}%`,fontSize:`${item.size}px`,transform:`translate(-50%,-50%) rotate(${item.rotate||0}deg)`}} onPointerDown={e=>startObjectGesture(e,kind,item.id)} onPointerMove={e=>moveObjectGesture(e,kind,item.id)} onPointerUp={endObjectGesture} onPointerCancel={endObjectGesture}>
-      <div className="object-content" contentEditable={kind==='text'&&selected} suppressContentEditableWarning onBlur={kind==='text'?e=>updateFloatingText(item.id,{text:e.currentTarget.textContent||''}):undefined}>{children}</div>
-      {selected&&<><button type="button" className="object-control object-delete" aria-label="Excluir" onPointerDown={e=>{e.stopPropagation();e.preventDefault();removeObject(kind,item.id)}}>×</button>{kind==='text'&&<button type="button" className="object-control object-resize" aria-label="Ajustar tamanho" onPointerDown={e=>startResize(e,kind,item.id)} onPointerMove={moveResize} onPointerUp={endResize} onPointerCancel={endResize}>↘</button>}<button type="button" className="object-control object-rotate" aria-label="Girar" onPointerDown={e=>startRotate(e,kind,item.id)} onPointerMove={moveRotate} onPointerUp={endRotate} onPointerCancel={endRotate}>↻</button></>}
+    const editable=kind==='text'&&selected&&interactionMode==='edit';
+    return <div className={`floating-object ${kind==='text'?'floating-text':'floating-decor'} ${selected?'selected':''} mode-${selected?interactionMode:'idle'}`} style={{left:`${item.x}%`,top:`${item.y}%`,fontSize:`${item.size}px`,transform:`translate(-50%,-50%) rotate(${item.rotate||0}deg)`}} onPointerDown={e=>startObjectGesture(e,kind,item.id)} onPointerMove={e=>moveObjectGesture(e,kind,item.id)} onPointerUp={endObjectGesture} onPointerCancel={endObjectGesture}>
+      <div className="object-content" contentEditable={editable} suppressContentEditableWarning onBlur={kind==='text'?e=>updateFloatingText(item.id,{text:e.currentTarget.textContent||''}):undefined}>{children}</div>
+      {selected&&<>
+        <button type="button" className="object-control object-delete" aria-label="Excluir" onPointerDown={e=>{e.stopPropagation();e.preventDefault();removeObject(kind,item.id)}}>×</button>
+        <div className="object-modebar" onPointerDown={e=>e.stopPropagation()}>
+          <button type="button" className={interactionMode==='move'?'active':''} aria-label="Mover" onClick={()=>setInteractionMode('move')}>✥</button>
+          {kind==='text'&&<button type="button" className={interactionMode==='edit'?'active':''} aria-label="Editar texto" onClick={()=>setInteractionMode('edit')}>✎</button>}
+          <button type="button" className={interactionMode==='resize'?'active':''} aria-label="Redimensionar" onClick={()=>setInteractionMode('resize')}>↘</button>
+          <button type="button" className={interactionMode==='rotate'?'active':''} aria-label="Girar" onClick={()=>setInteractionMode('rotate')}>↻</button>
+        </div>
+      </>}
     </div>;
   }
 
