@@ -77,7 +77,8 @@ function MiniDialog({text,close}) { return <div className="mini-dialog" onClick=
 
 const defaultInvite = {
   category: 'aniversario',
-  details: { title: '', sub: '', date: '', time: '', place: '', host: '' },
+  details: { title: '', message: 'Vamos celebrar!', date: '', time: '', place: '' },
+  floatingElements: [],
   cover: 0,
   background: 0,
   color: 0,
@@ -104,7 +105,7 @@ export default function Home() {
   const [step, setStep] = useState(0);
   const [invite, setInvite] = useState(defaultInvite);
   const [hydrated, setHydrated] = useState(false);
-  const { category, details, cover, background = 0, color, fontColor = '#f4e7d7', font, decor, enabled } = invite;
+  const { category, details, cover, background = 0, color, fontColor = '#f4e7d7', font, floatingElements = [], enabled } = invite;
   const [aiCopied, setAiCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
@@ -112,6 +113,7 @@ export default function Home() {
   const [customBg, setCustomBg] = useState('');
   const [activeEditorPanel, setActiveEditorPanel] = useState(null);
   const pointerStart = useRef(null);
+  const previewRef = useRef(null);
 
   useEffect(() => {
     try {
@@ -135,24 +137,48 @@ export default function Home() {
   }, [invite, hydrated]);
 
   const selectedCategory = useMemo(() => categories.find((c) => c.id === category) || categories[0], [category]);
-  const previewTitle = details.title || `${selectedCategory.label}${details.host ? ` de ${details.host.split(' ')[0]}` : ''}`;
-  const previewSub = details.sub || selectedCategory.subs[0];
+  const previewTitle = details.title || selectedCategory.label;
+  const previewMessage = details.message || 'Vamos celebrar!';
+  const previewSub = selectedCategory.label;
   const previewDate = formatDateBR(details.date);
   const previewDateLong = formatDateLongBR(details.date);
   const previewTime = details.time || '19:00';
   const previewPlace = details.place || 'Salão de Festas';
-  const previewHost = details.host || 'Seu anfitrião';
   const previewColors = ['#6a0735','#ff654e','#c78c2a','#17345f','#638b7b','#9c739b'];
-  const previewDecor = ['✦','❧','♡','⋰','🎈','⌁'];
   const previewStyle = { '--preview-accent': previewColors[color], '--preview-accent-soft': `${previewColors[color]}33`, '--invite-text': fontColor };
   const inviteLink = typeof window !== 'undefined' ? `${window.location.origin}/c/convite-demo` : 'https://celebra.app/c/convite-demo';
-  const aiPrompt = `Crie uma imagem de fundo para convite digital da Celebra no formato vertical 9:16 (1080x1920 px). Categoria: ${selectedCategory.label}. Subcategoria: ${details.sub || selectedCategory.subs[0]}. Estilo escolhido: ${covers[cover]}. Preserve uma área central livre e limpa para textos e botões do aplicativo. Não inclua palavras, logotipos, datas, molduras com texto ou marcas d'água. Evite elementos importantes no centro; concentre a composição nas bordas e cantos. Use acabamento sofisticado, alta definição e composição adequada para tela de celular.`;
+  const aiPrompt = `Crie uma imagem de fundo para convite digital da Celebra no formato vertical 9:16 (1080x1920 px). Categoria: ${selectedCategory.label}. Estilo escolhido: ${covers[cover]}. Preserve uma área central livre e limpa para textos e botões do aplicativo. Não inclua palavras, logotipos, datas, molduras com texto ou marcas d'água. Evite elementos importantes no centro; concentre a composição nas bordas e cantos. Use acabamento sofisticado, alta definição e composição adequada para tela de celular.`;
 
   function go(n) { setStep(Math.max(0, Math.min(3, n))); setInviteOpen(false); setDialog(null); setActiveEditorPanel(null); window?.scrollTo?.({ top: 0, behavior: 'smooth' }); }
   function patchInvite(patch) { setInvite((current) => ({ ...current, ...patch })); }
   function patchDetails(patch) { setInvite((current) => ({ ...current, details: { ...current.details, ...patch } })); }
   function toggleFeature(id) { setInvite((current) => ({ ...current, enabled: current.enabled.includes(id) ? current.enabled.filter((x) => x !== id) : [...current.enabled, id] })); }
   function clearDraft() { setInvite(defaultInvite); setStep(0); try { window.localStorage.removeItem('celebra:invite-draft:v1'); } catch {} }
+
+  const elementCatalog = [
+    ['balloons','🎈','Balões'],['heart','💛','Coração'],['sparkles','✨','Brilhos'],['gift','🎁','Presente'],
+    ['cake','🎂','Bolo'],['confetti','🎉','Confete'],['star','⭐','Estrela'],['flowers','🌸','Flores']
+  ];
+  function addFloatingElement(type, glyph) {
+    const item = { id: `${Date.now()}-${Math.random()}`, type, glyph, x: 50, y: 24, size: 44, rotate: 0 };
+    patchInvite({ floatingElements: [...floatingElements, item] });
+  }
+  function updateFloatingElement(id, patch) {
+    patchInvite({ floatingElements: floatingElements.map(el => el.id === id ? { ...el, ...patch } : el) });
+  }
+  function removeFloatingElement(id) { patchInvite({ floatingElements: floatingElements.filter(el => el.id !== id) }); }
+  function startElementDrag(e, id) {
+    e.preventDefault(); e.currentTarget.setPointerCapture?.(e.pointerId);
+    pointerStart.current = { id };
+  }
+  function moveElementDrag(e, id) {
+    if (!pointerStart.current || pointerStart.current.id !== id || !previewRef.current) return;
+    const r = previewRef.current.getBoundingClientRect();
+    const x = Math.max(4, Math.min(96, ((e.clientX-r.left)/r.width)*100));
+    const y = Math.max(4, Math.min(96, ((e.clientY-r.top)/r.height)*100));
+    updateFloatingElement(id,{x,y});
+  }
+  function endElementDrag(){ pointerStart.current=null; }
 
   async function handleAiCopy() {
     const ok = await copyText(aiPrompt);
@@ -189,8 +215,9 @@ export default function Home() {
         <h1>Personalize seu convite</h1><div className="gold-divider"><span></span><b>◆</b><span></span></div><p className="page-subtitle">Edite os dados e o visual. A prévia muda na hora.</p>
 
         <div className="editor-preview-top">
-          <div className={`preview-card editor-live font-preview-${font}`} style={{...previewStyle, backgroundImage:`linear-gradient(rgba(20,8,16,.12),rgba(20,8,16,.12)), url(${customBg || backgrounds[background]})`}}>
-            <small>{previewDecor[decor]}　{previewSub}　{previewDecor[decor]}</small><h2>Vamos<br/><i>Celebrar!</i></h2><p className="preview-title">{previewTitle}</p><p>▣ {previewDate}　◷ {previewTime}</p><p>⌖ {previewPlace}</p><p className="preview-host">Por {previewHost}</p><b>Conto com você!</b>
+          <div ref={previewRef} className={`preview-card editor-live font-preview-${font}`} style={{...previewStyle, backgroundImage:`linear-gradient(rgba(20,8,16,.12),rgba(20,8,16,.12)), url(${customBg || backgrounds[background]})`}}>
+            <small>{previewSub}</small><h2>{previewMessage}</h2><p className="preview-title">{previewTitle}</p><p>▣ {previewDate}　◷ {previewTime}</p><p>⌖ {previewPlace}</p><b>Conto com você!</b>
+            {floatingElements.map(el=><button type="button" key={el.id} className="floating-decor" aria-label={`Mover ${el.type}`} style={{left:`${el.x}%`,top:`${el.y}%`,fontSize:`${el.size}px`,transform:`translate(-50%,-50%) rotate(${el.rotate}deg)`}} onPointerDown={(e)=>startElementDrag(e,el.id)} onPointerMove={(e)=>moveElementDrag(e,el.id)} onPointerUp={endElementDrag} onPointerCancel={endElementDrag}>{el.glyph}</button>)}
           </div>
         </div>
 
@@ -211,23 +238,22 @@ export default function Home() {
         <div className={`editor-panel-slot ${activeEditorPanel?'open':''}`}>
           {activeEditorPanel === 'texto' && <div className="editor-section editor-section-active"><ControlTitle icon="✎" text="Textos e informações"/>
             <label className="field-block"><span><b>Título do evento</b></span><input placeholder="Ex.: Aniversário da Mariana" value={details.title} onChange={(e)=>patchDetails({title:e.target.value})}/></label>
-            <label className="field-block"><span><b>Tipo da celebração</b></span><select value={details.sub} onChange={(e)=>patchDetails({sub:e.target.value})}><option value="">Selecione</option>{selectedCategory.subs.map(s=><option key={s}>{s}</option>)}</select></label>
+            <label className="field-block"><span><b>Frase do convite</b></span><input placeholder="Ex.: Vamos celebrar!" value={details.message || ''} onChange={(e)=>patchDetails({message:e.target.value})}/></label>
             <div className="form-row"><label className="field-block"><span><b>Data</b></span><input type="date" value={details.date} onChange={(e)=>patchDetails({date:e.target.value})}/></label><label className="field-block"><span><b>Horário</b></span><input type="time" value={details.time} onChange={(e)=>patchDetails({time:e.target.value})}/></label></div>
             <label className="field-block"><span><b>Local</b></span><input placeholder="Ex.: Salão de Festas" value={details.place} onChange={(e)=>patchDetails({place:e.target.value})}/></label>
-            <label className="field-block"><span><b>Anfitrião</b></span><input placeholder="Ex.: Mariana e família" value={details.host} onChange={(e)=>patchDetails({host:e.target.value})}/></label>
           </div>}
 
           {activeEditorPanel === 'fundos' && <div className="editor-section editor-section-active"><ControlTitle icon="▧" text="Fundos do convite"/><div className="background-grid">{backgrounds.map((src,i)=><button key={src} className={background===i&&!customBg?'selected':''} onClick={()=>{patchInvite({background:i,cover:i});setCustomBg('')}}><img src={src} alt={covers[i]}/><span>{covers[i]}</span></button>)}</div>
             <label className="upload-wide">＋ Enviar minha imagem<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e)=>{const f=e.target.files?.[0];if(f){setCustomBg(URL.createObjectURL(f))}}}/></label>
           </div>}
 
-          {activeEditorPanel === 'fontes' && <div className="editor-section editor-section-active"><ControlTitle icon="Aa" text="Tipografia"/><div className="font-row font-row-v9">{['Playfair','Montserrat','Cormorant','Trebuchet'].map((x,i)=><button key={x} className={font===i?'selected':''} onClick={()=>patchInvite({font:i})}><b className={`font-${i}`}>Aa</b><span>{x}</span></button>)}</div></div>}
+          {activeEditorPanel === 'fontes' && <div className="editor-section editor-section-active"><ControlTitle icon="Aa" text="Fontes marcantes"/><p className="section-hint">Seis estilos bem diferentes para escolher rápido.</p><div className="font-choice-list">{[['Clássica','Celebre momentos incríveis!'],['Moderna','Celebre momentos incríveis!'],['Editorial','Celebre momentos incríveis!'],['Manuscrita','Celebre momentos incríveis!'],['Impacto','CELEBRE MOMENTOS INCRÍVEIS!'],['Decorada','Celebre momentos incríveis!']].map(([x,sample],i)=><button key={x} className={`font-sample font-preview-${i} ${font===i?'selected':''}`} onClick={()=>patchInvite({font:i})}><span>{sample}</span><small>{x}</small>{font===i&&<b>✓</b>}</button>)}</div></div>}
           {activeEditorPanel === 'cores' && <div className="editor-section editor-section-active">
             <ControlTitle icon="◉" text="Cores do convite"/>
             <div className="color-control-group"><strong>Cor da fonte</strong><p>Altera a cor de todos os textos do convite.</p><div className="color-row font-color-row">{['#ffffff','#f4e7d7','#e7bd6a','#6a0735','#17345f','#231f20','#ff654e'].map((c,i)=><button aria-label={`Cor da fonte ${i+1}`} key={c} style={{background:c}} className={fontColor.toLowerCase()===c?'selected':''} onClick={()=>patchInvite({fontColor:c})}/>)}</div><label className="custom-color-picker"><span>Escolher outra cor</span><input type="color" value={fontColor} onChange={(e)=>patchInvite({fontColor:e.target.value})}/><b style={{background:fontColor}}></b></label></div>
             <div className="color-control-group accent-group"><strong>Cor de destaque</strong><p>Usada em bordas e detalhes decorativos.</p><div className="color-row">{['#6a0735','#ff654e','#c78c2a','#17345f','#638b7b','#9c739b'].map((c,i)=><button aria-label={`Cor de destaque ${i+1}`} key={c} style={{background:c}} className={color===i?'selected':''} onClick={()=>patchInvite({color:i})}/>)}</div></div>
           </div>}
-          {activeEditorPanel === 'elementos' && <div className="editor-section editor-section-active"><ControlTitle icon="✦" text="Elementos decorativos"/><div className="decor-row decor-v9">{['✦','❧','♡','⋰','●','⌁'].map((x,i)=><button key={i} className={decor===i?'selected':''} onClick={()=>patchInvite({decor:i})}>{x}</button>)}</div></div>}
+          {activeEditorPanel === 'elementos' && <div className="editor-section editor-section-active"><ControlTitle icon="✦" text="Elementos flutuantes"/><p className="section-hint">Toque para adicionar. Depois arraste o elemento diretamente no convite.</p><div className="element-catalog">{elementCatalog.map(([type,glyph,label])=><button key={type} onClick={()=>addFloatingElement(type,glyph)}><b>{glyph}</b><span>{label}</span></button>)}</div>{floatingElements.length>0&&<div className="element-manager"><strong>Elementos adicionados</strong>{floatingElements.map(el=><div key={el.id}><span>{el.glyph}</span><label>Tamanho<input type="range" min="26" max="86" value={el.size} onChange={e=>updateFloatingElement(el.id,{size:Number(e.target.value)})}/></label><button onClick={()=>updateFloatingElement(el.id,{rotate:(el.rotate+15)%360})}>↻ Girar</button><button className="remove" onClick={()=>removeFloatingElement(el.id)}>×</button></div>)}</div>}</div>}
         </div>
 
         <div className="ai-panel ai-panel-v9"><div><strong>✨ Personalização com IA</strong><small>Opcional</small></div><p>Quer criar um fundo exclusivo? Copie o comando pronto e abra o ChatGPT. Depois, cole o comando e descreva o visual que deseja.</p><div className="ai-steps ai-two"><button onClick={handleAiCopy}><b>1</b><strong>{aiCopied?'Comando copiado ✓':'Copiar comando'}</strong><span>Leva o formato correto do Celebra.</span></button><a href="https://chatgpt.com/" target="_blank" rel="noreferrer"><b>2</b><strong>Abrir ChatGPT</strong><span>Cole o comando e peça sua imagem.</span></a></div></div>
@@ -242,7 +268,7 @@ export default function Home() {
 
       {step === 3 && <section className="html-screen native-page publish-page">
         <button className="back-button" onClick={() => go(2)}>‹</button><BrandHeader compact /><h1>Seu convite está pronto!</h1><div className="gold-divider"><span></span><b>◆</b><span></span></div><p className="page-subtitle">Confira e compartilhe seu convite interativo.</p>
-        <div className={`native-flip ${inviteOpen?'open':''}`}><div className={`native-inside font-preview-${font}`} style={previewStyle}><small>{previewSub}</small><h2>{previewTitle}</h2><p>{previewDateLong} • {previewTime}</p><p>{previewPlace}</p><p>Por {previewHost}</p><div>{features.filter(([id])=>enabled.includes(id)).map(([id,l])=><button key={id} onClick={()=>openFeature(l)}>{l}</button>)}</div></div><button className="native-cover" onClick={()=>setInviteOpen(!inviteOpen)}><img src={customBg || backgrounds[background]} alt="Capa do convite"/></button></div>
+        <div className={`native-flip ${inviteOpen?'open':''}`}><div className={`native-inside font-preview-${font}`} style={previewStyle}><small>{previewSub}</small><h2>{previewTitle}</h2><p>{previewMessage}</p><p>{previewDateLong} • {previewTime}</p><p>{previewPlace}</p><div>{features.filter(([id])=>enabled.includes(id)).map(([id,l])=><button key={id} onClick={()=>openFeature(l)}>{l}</button>)}</div></div><button className="native-cover" onClick={()=>setInviteOpen(!inviteOpen)}><img src={customBg || backgrounds[background]} alt="Capa do convite"/></button></div>
         <div className="published-features">{features.filter(([id])=>enabled.includes(id)).map(([id,l])=><button key={id} onClick={()=>openFeature(l)}>{l}</button>)}</div>
         <div className="share-box"><label>Link do convite</label><div><input readOnly value={inviteLink}/><button onClick={handleLinkCopy}>{linkCopied?'Copiado ✓':'Copiar'}</button></div><div className="share-buttons"><button onClick={()=>shareInvite('whatsapp')}>WhatsApp</button><button onClick={()=>shareInvite()}>Compartilhar</button></div></div>
         <div className="nav-actions"><button onClick={()=>go(1)}>← Editar convite</button><button className="next" onClick={()=>setInviteOpen(true)}>Ver convite →</button></div>
