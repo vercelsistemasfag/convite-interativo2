@@ -1,4 +1,5 @@
 'use client';
+import { supabase } from '../lib/supabase';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 
@@ -142,6 +143,13 @@ export default function Home() {
   const resizeStart = useRef(null);
   const previewRef = useRef(null);
   const [selectedObject, setSelectedObject] = useState(null);
+  const [publishedEvent, setPublishedEvent] = useState(null);
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("celebra:published-event:v1");
+      if (raw) setPublishedEvent(JSON.parse(raw));
+    } catch {}
+  }, []);
 
   useEffect(() => {
     try {
@@ -182,7 +190,7 @@ export default function Home() {
   const previewPlace = details.place || 'Salão de Festas';
   const previewColors = ['#6a0735','#ff654e','#c78c2a','#17345f','#638b7b','#9c739b'];
   const previewStyle = { '--preview-accent': previewColors[color], '--preview-accent-soft': `${previewColors[color]}33`, '--invite-text': fontColor };
-  const inviteLink = typeof window !== 'undefined' ? `${window.location.origin}/c/convite-demo` : 'https://celebra.app/c/convite-demo';
+  const inviteLink = publishedEvent?.public_code ? (typeof window !== 'undefined' ? `${window.location.origin}/e/${publishedEvent.public_code}` : `/e/${publishedEvent.public_code}`) : '';
   const aiPrompt = `Crie uma imagem de fundo para convite digital da Celebra no formato vertical 9:16 (1080x1920 px). Categoria: ${selectedCategory.label}. Estilo escolhido: ${covers[cover]}. Preserve uma área central livre e limpa para textos e botões do aplicativo. Não inclua palavras, logotipos, datas, molduras com texto ou marcas d'água. Evite elementos importantes no centro; concentre a composição nas bordas e cantos. Use acabamento sofisticado, alta definição e composição adequada para tela de celular.`;
 
   function go(n) { setStep(Math.max(0, Math.min(3, n))); setInviteOpen(false); setDialog(null); setActiveEditorPanel(null); window?.scrollTo?.({ top: 0, behavior: 'smooth' }); }
@@ -196,11 +204,80 @@ export default function Home() {
     if(id==='location') return Boolean(featureConfig.location?.address?.trim());
     return true;
   }
-  function finishResources(){
-    const missing=enabled.filter(id=>!featureConfigured(id));
-    if(missing.length){ setConfigError('Preencha os campos obrigatórios ou desative o recurso que não deseja usar.'); return; }
-    go(3);
+  async function finishResources(){
+    const missing=enabled.filter((id)=>!featureConfigured(id));
+    if(missing.length){
+      setConfigError('Preencha os campos obrigatórios ou desative o recurso que não deseja usar.');
+      return;
+    }
+
+    setConfigError('');
+
+    try {
+      let { data: sessionData } = await supabase.auth.getSession();
+      let session = sessionData?.session;
+
+      if (!session) {
+        const { data, error } = await supabase.auth.signInAnonymously();
+        if (error) throw error;
+        session = data.session;
+      }
+
+      const publicCode =
+        (crypto?.randomUUID?.() || Math.random().toString(36).slice(2))
+          .replace(/-/g, '')
+          .slice(0, 12);
+
+      const gifts = (invite.featureConfig?.gifts?.items || [])
+        .map(item => String(item || '').trim())
+        .filter(Boolean);
+
+      const payload = {
+        host_id: session.user.id,
+        public_code: publicCode,
+        status: 'published',
+        category: invite.category,
+        title: invite.details?.title || '',
+        message: invite.details?.message || '',
+        event_date: invite.details?.date || null,
+        event_time: invite.details?.time || null,
+        place_name: invite.details?.place || '',
+        full_address: invite.featureConfig?.location?.address || '',
+        cover_index: invite.cover || 0,
+        background_index: invite.background || 0,
+        font_color: invite.fontColor || '#f4e7d7',
+        font_index: invite.font || 0,
+        decor_index: invite.decor || 0,
+        floating_texts: invite.floatingTexts || [],
+        floating_elements: invite.floatingElements || [],
+        enabled_features: invite.enabled || [],
+        pix_key: invite.featureConfig?.collective?.pixKey || null,
+        pix_receiver_name: invite.featureConfig?.collective?.receiver || null,
+        gift_items: gifts,
+        published_at: new Date().toISOString()
+      };
+
+      const { data: event, error } = await supabase
+        .from('events')
+        .insert(payload)
+        .select('id, public_code')
+        .single();
+
+      if (error) throw error;
+
+      localStorage.setItem(
+        'celebra:published-event:v1',
+        JSON.stringify(event)
+      );
+      setPublishedEvent(event);
+
+      setStep(3);
+    } catch (error) {
+      console.error('Erro ao publicar convite:', error);
+      setConfigError('Não foi possível publicar o convite. Tente novamente.');
+    }
   }
+
   function clearDraft() { setInvite(defaultInvite); setStep(0); try { window.localStorage.removeItem('celebra:invite-draft:v1'); } catch {} }
 
   const elementCatalog = [
@@ -301,14 +378,69 @@ export default function Home() {
     setActiveFeature(id); setDialog(null);
   }
   async function copyPix(){ const ok=await copyText(featureConfig.collective?.pixKey||''); if(ok)setDialog('Chave Pix copiada.'); }
-  function saveGuestAction(kind){
-    if(!guestForm.name.trim()){ setDialog('Informe seu nome antes de enviar.'); return; }
-    const songs=kind==='music'?(guestForm.songs||[]).map(song=>song.trim()).filter(Boolean):[];
-    const action={id:`${Date.now()}-${Math.random()}`,event_id:'convite-demo',type:kind,name:guestForm.name.trim(),attendance:kind==='rsvp'?guestForm.attendance:null,companions:kind==='rsvp'?Number(guestForm.companions||0):null,songs,created_at:new Date().toISOString()};
-    if(kind==='music'&&!songs.length){ setDialog('Informe pelo menos uma música que deseja sugerir.'); return; }
-    try{const current=JSON.parse(localStorage.getItem('celebra:guest-actions:v1')||'[]');localStorage.setItem('celebra:guest-actions:v1',JSON.stringify([...current,action]));}catch{}
-    setActiveFeature(null); setDialog(kind==='rsvp'?'Confirmação registrada.':'Sugestão registrada.'); setGuestForm({name:'',attendance:'yes',companions:'0',songs:['', '', '']});
+  async function saveGuestAction(kind){
+    try {
+      const publishedRaw = localStorage.getItem('celebra:published-event:v1');
+      const publishedEvent = publishedRaw ? JSON.parse(publishedRaw) : null;
+
+      if (!publishedEvent?.id) {
+        setDialog('Não foi possível identificar este convite.');
+        return;
+      }
+
+      if (kind === 'rsvp') {
+        const guestName = String(guestForm.name || '').trim();
+        if (!guestName) {
+          setDialog('Informe seu nome para confirmar presença.');
+          return;
+        }
+
+        const { error } = await supabase
+          .from('rsvps')
+          .insert({
+            event_id: publishedEvent.id,
+            guest_name: guestName,
+            response: guestForm.attendance === 'no' ? 'no' : 'yes',
+            companions: Math.max(0, Number.parseInt(guestForm.companions || '0', 10) || 0)
+          });
+
+        if (error) throw error;
+
+        setDialog('Confirmação registrada.');
+        setGuestForm(v => ({ ...v, name: '', attendance: 'yes', companions: '0' }));
+        return;
+      }
+
+      if (kind === 'music') {
+        const guestName = String(guestForm.name || '').trim();
+        const songs = (guestForm.songs || [])
+          .map(song => String(song || '').trim())
+          .filter(Boolean);
+
+        if (!songs.length) {
+          setDialog('Informe pelo menos uma música.');
+          return;
+        }
+
+        const { error } = await supabase
+          .from('music_suggestions')
+          .insert({
+            event_id: publishedEvent.id,
+            guest_name: guestName || null,
+            songs
+          });
+
+        if (error) throw error;
+
+        setDialog('Sugestão registrada.');
+        setGuestForm(v => ({ ...v, songs: ['', '', ''] }));
+      }
+    } catch (error) {
+      console.error('Erro ao registrar ação do convidado:', error);
+      setDialog('Não foi possível registrar agora. Tente novamente.');
+    }
   }
+
   function backendEventPayload(){ return {event:{id:'convite-demo',category,title:previewTitle,message:previewMessage,date:details.date,time:details.time,place:previewPlace,enabled_features:enabled,feature_config:featureConfig,design:{background,font,fontColor,color,floatingTexts,floatingElements}},tables:{rsvps:['event_id','name','attendance','companions','created_at'],music_suggestions:['event_id','name','songs','created_at']}}; }
 
 
