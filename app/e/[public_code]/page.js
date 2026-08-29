@@ -239,31 +239,44 @@ export default function PublicInvitePage() {
     <main className="public-invite-page">
       <div className={`book-shell ${opened ? 'is-open' : ''}`}>
         <section className="inside-page">
-          <div className="inside-top">
-            <span className="inside-star">✦</span>
-            <h2>INTERAJA COM O CONVITE</h2>
-            <p>Escolha uma opção</p>
+          <div className="interaction-page">
+
+            <div className="interaction-header">
+              <img
+                src="/brand/celebra-logo-v2.png"
+                alt="Celebra"
+                className="interaction-logo"
+              />
+
+              <h2 className="interaction-title">
+                <span>Interaja e</span>
+                <em>Participe!</em>
+              </h2>
+
+              <p>Escolha uma opção para continuar</p>
+            </div>
+
+            <div className="interaction-grid">
+              {['rsvp','music','location','calendar','gifts','collective']
+                .filter(id => enabled.includes(id))
+                .map(id => {
+                  const meta = featureMeta[id];
+                  if (!meta) return null;
+
+                  return (
+                    <button
+                      key={id}
+                      className={`interaction-card interaction-card-${id}`}
+                      onClick={() => runFeature(id)}
+                    >
+                      <span className="interaction-icon">{meta.icon}</span>
+                      <strong>{meta.label}</strong>
+                    </button>
+                  );
+                })}
+            </div>
+
           </div>
-
-          <div className="feature-grid">
-            {enabled.map(id => {
-              const meta = featureMeta[id];
-              if (!meta) return null;
-
-              return (
-                <button
-                  key={id}
-                  className="feature-card"
-                  onClick={() => runFeature(id)}
-                >
-                  <span className="feature-icon">{meta.icon}</span>
-                  <strong>{meta.label}</strong>
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="inside-brand">Celebra</div>
 
           <button className="close-book" onClick={() => setOpened(false)}>
             ‹
