@@ -343,9 +343,11 @@ export default function PublicInvitePage() {
 
           </div>
 
-          <button className="close-book" onClick={() => setOpened(false)}>
-            ‹
-          </button>
+          {opened && (
+            <button className="close-book" onClick={() => setOpened(false)}>
+              ‹
+            </button>
+          )}
         </section>
 
         <section
