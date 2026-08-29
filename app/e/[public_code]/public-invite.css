@@ -6,7 +6,7 @@
   overflow:hidden;
   padding:22px;
   background:
-    radial-gradient(circle at top,#7b2349 0,#54112f 38%,#31091f 100%);
+  background:radial-gradient(circle at 50% 38%,#fffdf8 0%,#f5f1ea 55%,#eee7dd 100%);
   color:#54112f;
 }
 
