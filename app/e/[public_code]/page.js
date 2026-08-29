@@ -14,6 +14,71 @@ const backgroundFiles = [
   '/backgrounds/3936.png'
 ];
 
+
+function FeatureIcon({ id }) {
+  const common = {
+    width: 34,
+    height: 34,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 1.8,
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    "aria-hidden": true
+  };
+
+  if (id === "rsvp") return (
+    <svg {...common}>
+      <circle cx="12" cy="12" r="9"/>
+      <path d="m8.2 12.2 2.5 2.5 5.4-6"/>
+    </svg>
+  );
+
+  if (id === "music") return (
+    <svg {...common}>
+      <path d="M9 18V6l10-2v12"/>
+      <circle cx="6.5" cy="18" r="2.5"/>
+      <circle cx="16.5" cy="16" r="2.5"/>
+    </svg>
+  );
+
+  if (id === "location") return (
+    <svg {...common}>
+      <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/>
+      <circle cx="12" cy="10" r="2.5"/>
+    </svg>
+  );
+
+  if (id === "calendar") return (
+    <svg {...common}>
+      <rect x="3" y="5" width="18" height="16" rx="3"/>
+      <path d="M8 3v4M16 3v4M3 10h18"/>
+      <path d="m9 15 2 2 4-4"/>
+    </svg>
+  );
+
+  if (id === "gifts") return (
+    <svg {...common}>
+      <rect x="3" y="9" width="18" height="12" rx="2"/>
+      <path d="M12 9v12M3 13h18M12 9H7.5A2.5 2.5 0 1 1 10 6.5L12 9Zm0 0h4.5A2.5 2.5 0 1 0 14 6.5L12 9Z"/>
+    </svg>
+  );
+
+  if (id === "collective") return (
+    <svg {...common}>
+      <path d="m12 3.4 4.2 4.2a2.2 2.2 0 0 0 3.1 0"/>
+      <path d="m12 20.6-4.2-4.2a2.2 2.2 0 0 0-3.1 0"/>
+      <path d="m3.4 12 4.2-4.2a2.2 2.2 0 0 0 0-3.1"/>
+      <path d="m20.6 12-4.2 4.2a2.2 2.2 0 0 0 0 3.1"/>
+      <path d="m8.7 8.7 2.1-2.1a1.7 1.7 0 0 1 2.4 0l2.1 2.1a1.7 1.7 0 0 1 0 2.4l-2.1 2.1a1.7 1.7 0 0 1-2.4 0l-2.1-2.1a1.7 1.7 0 0 1 0-2.4Z"/>
+      <path d="m8.7 15.3 2.1 2.1a1.7 1.7 0 0 0 2.4 0l2.1-2.1"/>
+    </svg>
+  );
+
+  return null;
+}
+
 const fonts = [
   'Bebas Neue',
   'Oswald',
@@ -269,7 +334,7 @@ export default function PublicInvitePage() {
                       className={`interaction-card interaction-card-${id}`}
                       onClick={() => runFeature(id)}
                     >
-                      <span className="interaction-icon">{meta.icon}</span>
+                      <span className="interaction-icon"><FeatureIcon id={id} /></span>
                       <strong>{meta.label}</strong>
                     </button>
                   );

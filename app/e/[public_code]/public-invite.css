@@ -1189,3 +1189,103 @@
     font-size:13px;
   }
 }
+
+/* === Ajuste final para caber sem rolagem === */
+@media (max-width:700px){
+
+  .book-shell.is-open{
+    width:min(94vw,430px);
+    height:min(78dvh,700px);
+  }
+
+  .interaction-page{
+    padding:16px 14px 14px;
+    overflow:hidden;
+  }
+
+  .interaction-logo{
+    width:min(34%,118px);
+    margin-bottom:6px;
+  }
+
+  .interaction-title span{
+    font-size:25px;
+    line-height:.92;
+  }
+
+  .interaction-title em{
+    margin-top:0;
+    font-size:31px;
+    line-height:.9;
+  }
+
+  .interaction-header p{
+    margin:8px 0 11px;
+    font-size:10px;
+  }
+
+  .interaction-grid{
+    flex:1 1 auto;
+    min-height:0;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    grid-template-rows:repeat(3,minmax(0,1fr));
+    gap:7px;
+    margin-top:0;
+  }
+
+  .interaction-card{
+    min-height:0;
+    height:100%;
+    padding:7px 5px;
+    border-radius:15px;
+    gap:5px;
+  }
+
+  .interaction-icon{
+    width:42px;
+    height:42px;
+    margin:0;
+  }
+
+  .interaction-icon svg{
+    width:25px;
+    height:25px;
+  }
+
+  .interaction-card strong{
+    font-size:11px;
+    line-height:1.1;
+  }
+}
+
+/* === Rodapé seguro para voltar === */
+@media (max-width:700px){
+
+  .interaction-page{
+    padding-bottom:58px;
+  }
+
+  .close-book{
+    position:absolute;
+    left:14px;
+    bottom:12px;
+    z-index:20;
+    width:38px;
+    height:38px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0;
+    border:1px solid rgba(106,7,53,.10);
+    border-radius:50%;
+    background:#fffaf4;
+    color:#6a0735;
+    font-size:25px;
+    line-height:1;
+    box-shadow:0 5px 14px rgba(70,40,30,.12);
+  }
+
+  .interaction-grid{
+    margin-bottom:0;
+  }
+}
