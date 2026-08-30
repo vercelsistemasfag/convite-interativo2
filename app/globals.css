@@ -200,3 +200,63 @@
   .host-interaction-title em{font-size:31px}
   .book-actions button{min-height:78px}
 }
+
+/* === Revisão do anfitrião: mostrar convite completo === */
+@media(max-width:520px){
+
+  .book-page{
+    min-height:740px;
+    height:740px;
+    padding:14px 12px 18px;
+    box-sizing:border-box;
+    overflow:hidden;
+  }
+
+  .book-page-head{
+    margin-bottom:10px;
+  }
+
+  .host-interaction-logo{
+    width:92px;
+    max-height:70px;
+    margin-bottom:3px;
+  }
+
+  .host-interaction-title{
+    margin-bottom:6px;
+  }
+
+  .host-interaction-title span{
+    font-size:22px;
+  }
+
+  .host-interaction-title em{
+    font-size:28px;
+  }
+
+  .book-page-head small{
+    font-size:10px;
+    line-height:1.2;
+  }
+
+  .book-actions{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    grid-template-rows:repeat(3,minmax(0,1fr));
+    gap:8px;
+  }
+
+  .book-actions button{
+    min-height:92px;
+    padding:8px 5px;
+  }
+
+  .book-actions button svg{
+    width:23px;
+    height:23px;
+  }
+
+  .book-actions button span{
+    font-size:11px;
+  }
+}
