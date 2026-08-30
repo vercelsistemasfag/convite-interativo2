@@ -182,3 +182,9 @@
   outline:2px solid #c58b28;
   outline-offset:1px;
 }
+
+.password-toggle svg{
+  width:21px;
+  height:21px;
+  display:block;
+}
