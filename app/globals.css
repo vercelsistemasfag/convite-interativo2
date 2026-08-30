@@ -260,3 +260,32 @@
     font-size:11px;
   }
 }
+
+/* === Proporção final da prévia do anfitrião === */
+@media(max-width:520px){
+
+  .book-stage{
+    width:min(82vw,390px) !important;
+    height:690px !important;
+    position:relative;
+  }
+
+  .book-stage .book-page,
+  .book-stage .book-cover{
+    width:100% !important;
+    height:100% !important;
+    min-height:690px !important;
+    max-height:none !important;
+    inset:0 !important;
+    box-sizing:border-box;
+  }
+
+  .book-stage .book-page{
+    padding:14px 12px 18px !important;
+    overflow:hidden;
+  }
+
+  .book-stage .book-cover{
+    overflow:hidden;
+  }
+}
