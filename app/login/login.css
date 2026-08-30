@@ -151,3 +151,34 @@
     font-size:24px;
   }
 }
+
+.password-field{
+  position:relative;
+}
+
+.password-field input{
+  padding-right:48px;
+}
+
+.password-toggle{
+  position:absolute;
+  top:50%;
+  right:5px;
+  transform:translateY(-50%);
+  width:40px;
+  height:40px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:0;
+  border-radius:10px;
+  background:transparent;
+  color:#6a0735;
+  font-size:21px;
+  cursor:pointer;
+}
+
+.password-toggle:focus-visible{
+  outline:2px solid #c58b28;
+  outline-offset:1px;
+}

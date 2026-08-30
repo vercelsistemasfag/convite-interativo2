@@ -13,6 +13,8 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -51,6 +53,7 @@ export default function LoginPage() {
           email: email.trim(),
           password,
           options: {
+            emailRedirectTo: `${window.location.origin}/login`,
             data: {
               name: name.trim()
             }
@@ -136,7 +139,7 @@ export default function LoginPage() {
           <label>
             Senha
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               value={password}
               onChange={e => setPassword(e.target.value)}
               placeholder="Sua senha"
@@ -149,7 +152,7 @@ export default function LoginPage() {
             <label>
               Confirmar senha
               <input
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
                 value={confirmPassword}
                 onChange={e => setConfirmPassword(e.target.value)}
                 placeholder="Repita sua senha"

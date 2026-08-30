@@ -160,15 +160,6 @@ export default function Home() {
     checkAuth();
   }, [router]);
 
-  if (authChecking) {
-    return (
-      <main className="auth-loading">
-        <img src="/brand/celebra-logo-v2.png" alt="Celebra" />
-        <p>Carregando...</p>
-      </main>
-    );
-  }
-
   const [step, setStep] = useState(0);
   const [invite, setInvite] = useState(defaultInvite);
   const [hydrated, setHydrated] = useState(false);
@@ -487,6 +478,15 @@ export default function Home() {
 
   function backendEventPayload(){ return {event:{id:'convite-demo',category,title:previewTitle,message:previewMessage,date:details.date,time:details.time,place:previewPlace,enabled_features:enabled,feature_config:featureConfig,design:{background,font,fontColor,color,floatingTexts,floatingElements}},tables:{rsvps:['event_id','name','attendance','companions','created_at'],music_suggestions:['event_id','name','songs','created_at']}}; }
 
+
+  if (authChecking) {
+    return (
+      <main className="auth-loading">
+        <img src="/brand/celebra-logo-v2.png" alt="Celebra" />
+        <p>Carregando...</p>
+      </main>
+    );
+  }
 
   return (
     <main className="prototype-shell">
