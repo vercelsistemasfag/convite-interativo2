@@ -2,6 +2,7 @@
 import { supabase } from '../lib/supabase';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 const screens = [
   null,
@@ -137,6 +138,37 @@ function formatDateLongBR(value) {
 }
 
 export default function Home() {
+  const router = useRouter();
+  const [authChecking, setAuthChecking] = useState(true);
+
+  useEffect(() => {
+    async function checkAuth() {
+      const { data } = await supabase.auth.getSession();
+
+      if (!data.session || data.session.user?.is_anonymous) {
+        if (data.session?.user?.is_anonymous) {
+          await supabase.auth.signOut();
+        }
+
+        router.replace('/login');
+        return;
+      }
+
+      setAuthChecking(false);
+    }
+
+    checkAuth();
+  }, [router]);
+
+  if (authChecking) {
+    return (
+      <main className="auth-loading">
+        <img src="/brand/celebra-logo-v2.png" alt="Celebra" />
+        <p>Carregando...</p>
+      </main>
+    );
+  }
+
   const [step, setStep] = useState(0);
   const [invite, setInvite] = useState(defaultInvite);
   const [hydrated, setHydrated] = useState(false);
@@ -281,6 +313,7 @@ export default function Home() {
         JSON.stringify(event)
       );
       setPublishedEvent(event);
+        router.push(`/painel?id=${event.id}`);
 
       setStep(3);
     } catch (error) {

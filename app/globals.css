@@ -307,3 +307,26 @@
     min-height:570px !important;
   }
 }
+
+/* === Verificação de acesso Celebra === */
+.auth-loading{
+  min-height:100dvh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  background:#f7f1e8;
+  color:#806d75;
+}
+
+.auth-loading img{
+  width:145px;
+  height:auto;
+}
+
+.auth-loading p{
+  margin:0;
+  font-size:13px;
+  font-weight:700;
+}
