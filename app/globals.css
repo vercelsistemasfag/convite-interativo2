@@ -289,3 +289,21 @@
     overflow:hidden;
   }
 }
+
+/* === Ajuste final da prévia do anfitrião === */
+@media(max-width:520px){
+
+  .book-signature{
+    display:none !important;
+  }
+
+  .book-stage{
+    height:570px !important;
+  }
+
+  .book-stage .book-page,
+  .book-stage .book-cover{
+    height:570px !important;
+    min-height:570px !important;
+  }
+}
