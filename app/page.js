@@ -86,6 +86,17 @@ function StepDots({n}) { return <div className="native-dots">{[1,2,3,4,5].map(x=
 function ControlTitle({icon,text}) { return <h3 className="control-title"><i>{icon}</i>{text}</h3> }
 function MiniDialog({text,close}) { return <div className="mini-dialog" onClick={close}><div onClick={e=>e.stopPropagation()}><button onClick={close}>×</button><strong>{text}</strong></div></div> }
 
+function GiftMoneyIcon() {
+  return (
+    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  <rect x="3" y="9" width="18" height="12" rx="2"/>
+  <path d="M12 9v12M3 13h18"/>
+  <path d="M12 9H7.5A2.5 2.5 0 1 1 10 6.5L12 9Zm0 0h4.5A2.5 2.5 0 1 0 14 6.5L12 9Z"/>
+  <path d="M13.7 15.5c-.4-.45-1-.7-1.7-.7-.9 0-1.55.4-1.55 1s.65.9 1.55 1 1.55.35 1.55 1.05-.65 1.05-1.55 1.05c-.75 0-1.4-.25-1.85-.75M12 14v5.7"/>
+</svg>
+  );
+}
+
 const defaultInvite = {
   category: 'aniversario',
   details: { title: '', message: 'Vamos celebrar!', date: '', time: '', place: '' },
@@ -515,7 +526,7 @@ export default function Home() {
           const on=enabled.includes(id), needs=['gifts','collective','location'].includes(id), ready=featureConfigured(id);
           const descriptions={rsvp:'Confirmações organizadas no painel do anfitrião.',music:'Sugestões reunidas no painel do anfitrião.',gifts:'Abra a lista de presentes escolhida.',collective:'Compartilhe os dados do Pix Presente com segurança.',location:'Abra a rota com o endereço completo.',calendar:'Salve o evento automaticamente na agenda.'};
           return <div key={id} className={`feature-item ${on?'on':''}`}>
-            <button type="button" className="feature-main" onClick={()=>toggleFeature(id)}><i><FeatureIcon type={id}/></i><span><strong>{label}</strong><small>{descriptions[id]}</small></span><b>{on?'✓':''}</b></button>
+            <button type="button" className="feature-main" onClick={()=>toggleFeature(id)}><i>{id==='collective'?<GiftMoneyIcon/>:<FeatureIcon type={id}/>} </i><span><strong>{label}</strong><small>{descriptions[id]}</small></span><b>{on?'✓':''}</b></button>
             {on&&needs&&<div className="feature-config">
               {id==='gifts'&&<div className="manual-list-config"><span className="manual-list-title">Sugestões de presente <em>obrigatório</em></span><small>Digite pelo menos uma sugestão. Os convidados verão esta lista dentro do convite.</small>{(featureConfig.gifts?.items||['','','']).map((item,index)=><div className="manual-line" key={`gift-${index}`}><input placeholder={`Sugestão ${index+1}`} value={item} onChange={e=>{const items=[...(featureConfig.gifts?.items||['','',''])];items[index]=e.target.value;patchFeatureConfig('gifts',{items})}}/>{index===(featureConfig.gifts?.items||['','','']).length-1&&<button type="button" aria-label="Adicionar outra sugestão" onClick={()=>patchFeatureConfig('gifts',{items:[...(featureConfig.gifts?.items||['','','']),'']})}>＋</button>}</div>)}</div>}
               {id==='collective'&&<><label><span>Chave Pix <em>obrigatório</em></span><input placeholder="CPF, e-mail, telefone ou chave aleatória" value={featureConfig.collective?.pixKey||''} onChange={e=>patchFeatureConfig('collective',{pixKey:e.target.value})}/></label><label><span>Nome do recebedor <em>obrigatório</em></span><input placeholder="Nome que aparecerá para o convidado" value={featureConfig.collective?.receiver||''} onChange={e=>patchFeatureConfig('collective',{receiver:e.target.value})}/></label></>}
@@ -534,8 +545,8 @@ export default function Home() {
         <div className={`book-stage ${inviteOpen?'open':''}`}>
           <div className="book-page">
             <button type="button" className="book-close" aria-label="Fechar convite" onClick={()=>setInviteOpen(false)}>‹</button>
-            <div className="book-page-head"><span>✦</span><strong>INTERAJA COM O CONVITE</strong><small>Escolha uma opção</small></div>
-            <div className="book-actions">{features.filter(([id])=>enabled.includes(id)).map(([id,label])=><button type="button" key={id} onClick={()=>openFeature(id)}><i><FeatureIcon type={id}/></i><span>{label}</span><b>›</b></button>)}</div>
+            <div className="book-page-head"><span>✦</span><img src="/brand/celebra-logo-v2.png" alt="Celebra" className="host-interaction-logo"/><strong className="host-interaction-title"><span>Interaja e</span><em>Participe!</em></strong><small>Escolha uma opção para continuar</small></div>
+            <div className="book-actions">{features.filter(([id])=>enabled.includes(id)).map(([id,label])=><button type="button" key={id} onClick={()=>openFeature(id)}><i>{id==='collective'?<GiftMoneyIcon/>:<FeatureIcon type={id}/>} </i><span>{label}</span><b>›</b></button>)}</div>
             <div className="book-signature">Celebra <span>• convite interativo •</span></div>
           </div>
           <button type="button" className="book-cover" aria-label={inviteOpen?'Fechar convite':'Abrir convite'} onClick={()=>setInviteOpen(v=>!v)} style={{...previewStyle,backgroundImage:`linear-gradient(rgba(20,8,16,.12),rgba(20,8,16,.12)), url(${customBg || backgrounds[background]})`}}>

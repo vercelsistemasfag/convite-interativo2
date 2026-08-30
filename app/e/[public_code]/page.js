@@ -15,6 +15,17 @@ const backgroundFiles = [
 ];
 
 
+function GiftMoneyIcon() {
+  return (
+    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  <rect x="3" y="9" width="18" height="12" rx="2"/>
+  <path d="M12 9v12M3 13h18"/>
+  <path d="M12 9H7.5A2.5 2.5 0 1 1 10 6.5L12 9Zm0 0h4.5A2.5 2.5 0 1 0 14 6.5L12 9Z"/>
+  <path d="M13.7 15.5c-.4-.45-1-.7-1.7-.7-.9 0-1.55.4-1.55 1s.65.9 1.55 1 1.55.35 1.55 1.05-.65 1.05-1.55 1.05c-.75 0-1.4-.25-1.85-.75M12 14v5.7"/>
+</svg>
+  );
+}
+
 function FeatureIcon({ id }) {
   const common = {
     width: 34,
@@ -331,7 +342,7 @@ export default function PublicInvitePage() {
                       className={`interaction-card interaction-card-${id}`}
                       onClick={() => runFeature(id)}
                     >
-                      <span className="interaction-icon"><FeatureIcon id={id} /></span>
+                      <span className="interaction-icon">{id === 'collective' ? <GiftMoneyIcon /> : <FeatureIcon id={id} />}</span>
                       <strong>{meta.label}</strong>
                     </button>
                   );
