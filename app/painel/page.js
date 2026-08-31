@@ -265,8 +265,15 @@ export default function PainelPage() {
           </span>
         </button>
 
-        <a href="/" className="panel-edit">
-          Editar convite
+        <a
+          href="/"
+          className="panel-primary panel-action-main panel-edit-card"
+        >
+          <span className="panel-action-icon">✎</span>
+          <span>
+            <strong>Editar convite</strong>
+            <small>Altere informações e recursos</small>
+          </span>
         </a>
       </section>
     </main>

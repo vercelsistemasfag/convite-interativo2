@@ -316,3 +316,22 @@
   font-weight:800;
   color:#7a2148;
 }
+
+.panel-share-actions{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+
+.panel-share-actions .panel-action-main{
+  height:100%;
+}
+
+.panel-edit-card{
+  background:#6a0735;
+  color:#fff;
+}
+
+@media(max-width:420px){
+  .panel-share-actions{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
