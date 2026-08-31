@@ -8,6 +8,19 @@ export const size = {
 
 export const contentType = 'image/png';
 
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  'https://convite-interativo2.vercelsistemas.workers.dev';
+
+const backgrounds = [
+  '/backgrounds/3931.png',
+  '/backgrounds/3932.png',
+  '/backgrounds/3933.png',
+  '/backgrounds/3934.png',
+  '/backgrounds/3935.png',
+  '/backgrounds/3936.png',
+];
+
 export default async function Image({ params }) {
   const { public_code } = await params;
 
@@ -18,18 +31,26 @@ export default async function Image({ params }) {
 
   const { data: event } = await supabase
     .from('events')
-    .select('title,message,event_date,event_time,place_name')
+    .select('title,message,event_date,event_time,place_name,background_index')
     .eq('public_code', public_code)
     .eq('status', 'published')
     .maybeSingle();
 
   const title = event?.title || 'Você está convidado!';
-  const message = event?.message || 'Abra seu convite interativo e participe.';
+  const message = event?.message || '';
+
+  const backgroundIndex = Math.max(
+    0,
+    Math.min(backgrounds.length - 1, Number(event?.background_index) || 0)
+  );
+
+  const backgroundUrl = `${SITE_URL}${backgrounds[backgroundIndex]}`;
+
   const details = [
     event?.event_date,
     event?.event_time,
     event?.place_name,
-  ].filter(Boolean).join(' • ');
+  ].filter(Boolean);
 
   return new ImageResponse(
     (
@@ -38,86 +59,119 @@ export default async function Image({ params }) {
           width: '100%',
           height: '100%',
           display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
+          position: 'relative',
+          overflow: 'hidden',
           background: '#f7f1e8',
-          padding: '54px',
           fontFamily: 'Arial',
         }}
       >
+        <img
+          src={backgroundUrl}
+          width="1200"
+          height="630"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+          }}
+        />
+
         <div
           style={{
-            width: '100%',
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            background:
+              'linear-gradient(90deg, rgba(255,250,245,.98) 0%, rgba(255,250,245,.94) 43%, rgba(255,250,245,.30) 72%, rgba(255,250,245,0) 100%)',
+          }}
+        />
+
+        <div
+          style={{
+            position: 'relative',
+            zIndex: 2,
+            width: '62%',
             height: '100%',
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'space-between',
-            borderRadius: '34px',
-            background: '#fffaf5',
-            border: '2px solid #ead9cf',
-            padding: '54px 62px',
+            justifyContent: 'center',
+            padding: '62px 72px',
           }}
         >
           <div
             style={{
               display: 'flex',
-              fontSize: '28px',
+              fontSize: '23px',
               fontWeight: 800,
+              letterSpacing: '1.8px',
               color: '#c58b28',
-              letterSpacing: '2px',
+              marginBottom: '22px',
             }}
           >
             CELEBRA • CONVITE INTERATIVO
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-            <div
-              style={{
-                display: 'flex',
-                fontSize: '66px',
-                lineHeight: 1.05,
-                fontWeight: 900,
-                color: '#6a0735',
-              }}
-            >
-              {title}
-            </div>
+          <div
+            style={{
+              display: 'flex',
+              fontSize: '64px',
+              lineHeight: 1.02,
+              fontWeight: 900,
+              color: '#6a0735',
+              marginBottom: '14px',
+            }}
+          >
+            {title}
+          </div>
 
+          {message && (
             <div
               style={{
                 display: 'flex',
-                fontSize: '30px',
-                lineHeight: 1.25,
-                color: '#6b5961',
+                fontSize: '27px',
+                lineHeight: 1.2,
+                fontWeight: 700,
+                color: '#b07b23',
+                marginBottom: '22px',
               }}
             >
               {message}
             </div>
+          )}
 
-            {details && (
-              <div
-                style={{
-                  display: 'flex',
-                  marginTop: '10px',
-                  fontSize: '25px',
-                  fontWeight: 700,
-                  color: '#54112f',
-                }}
-              >
-                {details}
-              </div>
-            )}
-          </div>
+          {details.length > 0 && (
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '10px',
+                fontSize: '23px',
+                lineHeight: 1.25,
+                fontWeight: 700,
+                color: '#54112f',
+                marginBottom: '28px',
+              }}
+            >
+              {details.map((item, index) => (
+                <div key={index} style={{ display: 'flex' }}>
+                  {index > 0 ? ' • ' : ''}
+                  {item}
+                </div>
+              ))}
+            </div>
+          )}
 
           <div
             style={{
               display: 'flex',
-              fontSize: '25px',
+              fontSize: '22px',
               fontWeight: 800,
-              color: '#6a0735',
+              color: '#54112f',
             }}
           >
-            Toque no convite para abrir ✨
+            ✨ Toque no convite para abrir
           </div>
         </div>
       </div>
