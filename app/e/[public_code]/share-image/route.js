@@ -67,14 +67,15 @@ export async function GET(request, { params }) {
       >
         <img
           src={backgroundUrl}
-          width="1200"
+          width="354"
           height="630"
           style={{
             position: 'absolute',
-            inset: 0,
-            width: '100%',
+            right: 0,
+            top: 0,
             height: '100%',
-            objectFit: 'cover',
+            width: 'auto',
+            objectFit: 'contain',
           }}
         />
 
@@ -84,7 +85,7 @@ export async function GET(request, { params }) {
             inset: 0,
             display: 'flex',
             background:
-              'linear-gradient(90deg, rgba(255,250,245,.98) 0%, rgba(255,250,245,.94) 43%, rgba(255,250,245,.30) 72%, rgba(255,250,245,0) 100%)',
+              'linear-gradient(90deg, #fffaf5 0%, #fffaf5 56%, rgba(255,250,245,.92) 67%, rgba(255,250,245,.18) 82%, rgba(255,250,245,0) 100%)',
           }}
         />
 
