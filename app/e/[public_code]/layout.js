@@ -27,7 +27,7 @@ export async function generateMetadata({ params }) {
     event?.message ||
     'Abra seu convite interativo e participe dessa celebração.';
 
-  const imageUrl = `${SITE_URL}/whatsapp-preview.png`;
+  const imageUrl = `${SITE_URL}/e/${public_code}/share-image?v=1`;
 
   return {
     metadataBase: new URL(SITE_URL),
