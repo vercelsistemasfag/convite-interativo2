@@ -247,3 +247,72 @@
     margin:auto;
   }
 }
+
+.panel-share-actions{
+  display:grid;
+  gap:12px;
+}
+
+.panel-action-main{
+  width:100%;
+  min-height:72px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:14px 16px;
+  border-radius:16px;
+  text-decoration:none;
+  text-align:left;
+  border:0;
+  cursor:pointer;
+}
+
+.panel-action-main span:last-child{
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+}
+
+.panel-action-main strong{
+  font-size:15px;
+  line-height:1.2;
+}
+
+.panel-action-main small{
+  font-size:12px;
+  font-weight:600;
+  opacity:.82;
+}
+
+.panel-action-icon{
+  flex:0 0 42px;
+  width:42px;
+  height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:13px;
+  background:rgba(255,255,255,.18);
+  font-size:22px;
+  font-weight:800;
+}
+
+.panel-whatsapp{
+  background:#54112f;
+  color:#fff;
+}
+
+.panel-copy{
+  background:#f3e7df;
+  color:#6a0735;
+  border:1px solid rgba(106,7,53,.14);
+}
+
+.panel-edit{
+  display:block;
+  margin-top:2px;
+  text-align:center;
+  font-size:13px;
+  font-weight:800;
+  color:#7a2148;
+}

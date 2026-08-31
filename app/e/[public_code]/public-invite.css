@@ -1289,3 +1289,53 @@
     margin-bottom:0;
   }
 }
+
+/* === Legibilidade dos recursos interativos === */
+.feature-modal{
+  background:rgba(45,25,34,.48) !important;
+  backdrop-filter:blur(5px);
+}
+
+.feature-modal .modal-card{
+  background:#fffaf5 !important;
+  color:#54112f !important;
+  border:1px solid rgba(106,7,53,.12);
+  box-shadow:0 18px 50px rgba(45,20,30,.22);
+}
+
+.feature-modal .modal-card input,
+.feature-modal .modal-card textarea,
+.feature-modal .modal-card select{
+  background:#ffffff !important;
+  color:#3f2631 !important;
+  border:1px solid #dbcbd1 !important;
+  opacity:1 !important;
+}
+
+.feature-modal .modal-card input::placeholder,
+.feature-modal .modal-card textarea::placeholder{
+  color:#927d86 !important;
+  opacity:1;
+}
+
+.feature-modal .modal-help{
+  color:#76636b !important;
+}
+
+.feature-modal .primary-modal{
+  background:#6a0735 !important;
+  color:#ffffff !important;
+  border:0 !important;
+  opacity:1 !important;
+  box-shadow:0 7px 18px rgba(106,7,53,.18);
+}
+
+.feature-modal .primary-modal:disabled{
+  opacity:.55 !important;
+}
+
+.feature-modal .modal-close{
+  background:#f3e7df !important;
+  color:#6a0735 !important;
+  border:1px solid rgba(106,7,53,.10);
+}

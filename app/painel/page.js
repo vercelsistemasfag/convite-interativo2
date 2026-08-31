@@ -2,18 +2,23 @@
 
 import './painel.css';
 import { useEffect, useMemo, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabase';
 
 export default function PainelPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const eventId = searchParams.get('id');
+  const [eventId, setEventId] = useState(null);
   const [event, setEvent] = useState(null);
   const [rsvps, setRsvps] = useState([]);
   const [music, setMusic] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const id = new URLSearchParams(window.location.search).get('id');
+    setEventId(id);
+  }, []);
 
   useEffect(() => {
     async function loadPanel() {
@@ -218,24 +223,46 @@ export default function PainelPage() {
         </div>
       </section>
 
-      <section className="panel-actions">
+      <section className="panel-actions panel-share-actions">
         <a
-          className="panel-primary"
+          className="panel-primary panel-action-main"
           href={inviteUrl}
           target="_blank"
           rel="noreferrer"
         >
-          Ver convite
+          <span className="panel-action-icon">↗</span>
+          <span>
+            <strong>Visualizar convite</strong>
+            <small>Veja como o convidado receberá</small>
+          </span>
+        </a>
+
+        <a
+          className="panel-primary panel-action-main panel-whatsapp"
+          href={`https://wa.me/?text=${encodeURIComponent(`Você está convidado! Abra seu convite Celebra: ${inviteUrl}`)}`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          <span className="panel-action-icon">✆</span>
+          <span>
+            <strong>Compartilhar no WhatsApp</strong>
+            <small>Envie o convite diretamente</small>
+          </span>
         </a>
 
         <button
           type="button"
+          className="panel-primary panel-action-main panel-copy"
           onClick={async () => {
             if (!inviteUrl) return;
             await navigator.clipboard.writeText(inviteUrl);
           }}
         >
-          Copiar link
+          <span className="panel-action-icon">⧉</span>
+          <span>
+            <strong>Copiar link</strong>
+            <small>Copie para compartilhar onde quiser</small>
+          </span>
         </button>
 
         <a href="/" className="panel-edit">
