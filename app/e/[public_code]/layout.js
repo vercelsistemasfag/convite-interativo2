@@ -30,6 +30,7 @@ export async function generateMetadata({ params }) {
   const imageUrl = `${SITE_URL}/whatsapp-preview.png`;
 
   return {
+    metadataBase: new URL(SITE_URL),
     title,
     description,
     openGraph: {
