@@ -27,7 +27,7 @@ export async function generateMetadata({ params }) {
     event?.message ||
     'Abra seu convite interativo e participe dessa celebração.';
 
-  const imageUrl = `${SITE_URL}/e/${public_code}/opengraph-image`;
+  const imageUrl = `${SITE_URL}/whatsapp-preview.png`;
 
   return {
     title,
