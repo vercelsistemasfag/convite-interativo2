@@ -569,7 +569,6 @@ export default function Home() {
           </div>;
         })}</div>
         {configError&&<div className="resource-warning">{configError}</div>}
-        <div className="backend-note"><FeatureIcon type="rsvp"/><span><strong>Painel do anfitrião preparado</strong><small>Confirmações e músicas serão salvas por evento quando conectarmos o banco de dados.</small></span></div>
         <div className="nav-actions"><button onClick={()=>go(1)}>← Voltar</button><button className="next" onClick={finishResources}>Finalizar →</button></div><StepDots n={3}/>
       </section>}
 
