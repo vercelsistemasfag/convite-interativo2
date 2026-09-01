@@ -507,7 +507,7 @@ export default function Home() {
         <h1>Personalize seu convite</h1><div className="gold-divider"><span></span><b>◆</b><span></span></div><p className="page-subtitle">Edite os dados e o visual. A prévia muda na hora.</p>
 
         <div className="editor-preview-top">
-          <div ref={previewRef} className={`preview-card editor-live font-preview-${font}`} onPointerDown={(e)=>{if(e.target===e.currentTarget)setSelectedObject(null)}} style={{...previewStyle, backgroundImage:`linear-gradient(rgba(20,8,16,.12),rgba(20,8,16,.12)), url(${customBg || backgrounds[background]})`}}>
+          <div ref={previewRef} className={`preview-card editor-live font-preview-${font}`} onPointerDown={(e)=>{if(e.target===e.currentTarget)setSelectedObject(null)}} style={{...previewStyle, backgroundImage:`linear-gradient(rgba(20,8,16,.12),rgba(20,8,16,.12)), url(${invite.customBackground || customBg || backgrounds[background]})`}}>
             {floatingTexts.map(el=><FloatingObject key={el.id} kind="text" item={el}>{textValue(el)}</FloatingObject>)}
             {floatingElements.map(el=><FloatingObject key={el.id} kind="decor" item={el}>{el.glyph}</FloatingObject>)}
           </div>
@@ -581,7 +581,7 @@ export default function Home() {
             <div className="book-actions">{features.filter(([id])=>enabled.includes(id)).map(([id,label])=><button type="button" key={id} onClick={()=>openFeature(id)}><i>{id==='collective'?<GiftMoneyIcon/>:<FeatureIcon type={id}/>} </i><span>{label}</span><b>›</b></button>)}</div>
             <div className="book-signature">Celebra <span>• convite interativo •</span></div>
           </div>
-          <button type="button" className="book-cover" aria-label={inviteOpen?'Fechar convite':'Abrir convite'} onClick={()=>setInviteOpen(v=>!v)} style={{...previewStyle,backgroundImage:`linear-gradient(rgba(20,8,16,.12),rgba(20,8,16,.12)), url(${customBg || backgrounds[background]})`}}>
+          <button type="button" className="book-cover" aria-label={inviteOpen?'Fechar convite':'Abrir convite'} onClick={()=>setInviteOpen(v=>!v)} style={{...previewStyle,backgroundImage:`linear-gradient(rgba(20,8,16,.12),rgba(20,8,16,.12)), url(${invite.customBackground || customBg || backgrounds[background]})`}}>
             {floatingTexts.filter(el=>el.visible!==false).map(el=><div key={el.id} className={`published-object published-text font-preview-${font}`} style={{left:`${el.x}%`,top:`${el.y}%`,fontSize:`${el.size}px`,transform:`translate(-50%,-50%)`}}>{textValue(el)}</div>)}
             {floatingElements.map(el=><div key={el.id} className="published-object published-decor" style={{left:`${el.x}%`,top:`${el.y}%`,fontSize:`${el.size}px`,transform:`translate(-50%,-50%)`}}>{el.glyph}</div>)}
             <span className="book-open-hint">Toque para abrir <b>›</b></span>
