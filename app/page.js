@@ -313,6 +313,39 @@ export default function Home() {
     }
   }
 
+  async function uploadCustomBackground(file) {
+    if (!file) return;
+
+    try {
+      const ext = file.name?.split('.').pop()?.toLowerCase() || 'jpg';
+      const fileName = `${crypto.randomUUID()}.${ext}`;
+
+      const { error } = await supabase.storage
+        .from('invite-backgrounds')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (error) throw error;
+
+      const { data } = supabase.storage
+        .from('invite-backgrounds')
+        .getPublicUrl(fileName);
+
+      const url = data.publicUrl;
+
+      setCustomBg(url);
+      setInvite(current => ({
+        ...current,
+        customBackground: url
+      }));
+    } catch (error) {
+      console.error('Erro ao enviar fundo:', error);
+      setConfigError('Não foi possível enviar a imagem. Tente novamente.');
+    }
+  }
+
   function clearDraft() { setInvite(defaultInvite); setStep(0); try { window.localStorage.removeItem('celebra:invite-draft:v1'); } catch {} }
 
   const elementCatalog = [
@@ -537,7 +570,7 @@ export default function Home() {
           </div>}
 
           {activeEditorPanel === 'fundos' && <div className="editor-section editor-section-active"><ControlTitle icon="▧" text="Fundos do convite"/><div className="background-grid">{backgrounds.map((src,i)=><button key={src} className={background===i&&!customBg?'selected':''} onClick={()=>{patchInvite({background:i,cover:i});setCustomBg('')}}><img src={src} alt={covers[i]}/><span>{covers[i]}</span></button>)}</div>
-            <label className="upload-wide">＋ Enviar minha imagem<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e)=>{const f=e.target.files?.[0];if(f){setCustomBg(URL.createObjectURL(f))}}}/></label>
+            <label className="upload-wide">＋ Enviar minha imagem<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e)=>{const f=e.target.files?.[0];if(f){uploadCustomBackground(f)}}}/></label>
           </div>}
 
           {activeEditorPanel === 'fontes' && <div className="editor-section editor-section-active"><ControlTitle icon="Aa" text="Fontes compactas"/><p className="section-hint">Doze estilos realmente diferentes, carregados como web fonts para manter o mesmo visual em qualquer aparelho.</p><div className="font-choice-list">{[['Bebas Neue','VAMOS CELEBRAR!'],['Oswald','Vamos celebrar!'],['Roboto Condensed','Vamos celebrar!'],['Barlow Condensed','Vamos celebrar!'],['Archivo Narrow','Vamos celebrar!'],['Anton','VAMOS CELEBRAR!'],['Fjalla One','Vamos celebrar!'],['Amatic SC','VAMOS CELEBRAR!'],['Pacifico','Vamos celebrar!'],['Lobster','Vamos celebrar!'],['Caveat','Vamos celebrar!'],['Satisfy','Vamos celebrar!']].map(([x,sample],i)=><button key={x} className={`font-sample font-preview-${i} ${font===i?'selected':''}`} onClick={()=>patchInvite({font:i})}><span>{sample}</span><small>{x}</small>{font===i&&<b>✓</b>}</button>)}</div></div>}
