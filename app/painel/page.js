@@ -239,7 +239,7 @@ export default function PainelPage() {
 
         <a
           className="panel-primary panel-action-main panel-whatsapp"
-          href={`https://wa.me/?text=${encodeURIComponent(`Você está convidado! Abra seu convite Celebra: ${inviteUrl}`)}`}
+          href={`https://wa.me/?text=${encodeURIComponent(inviteUrl)}`}
           target="_blank"
           rel="noreferrer"
         >
