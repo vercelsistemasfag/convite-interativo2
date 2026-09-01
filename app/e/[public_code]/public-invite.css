@@ -286,7 +286,7 @@
 
 .choice-row button.selected{
   background:radial-gradient(circle at 50% 38%,#fffdf8 0%,#f5f1ea 55%,#eee7dd 100%);
-  color:white;
+  color:#6a0735;
   border-color:#6a0735;
 }
 
