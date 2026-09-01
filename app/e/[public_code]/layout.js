@@ -19,9 +19,7 @@ export async function generateMetadata({ params }) {
     .eq('status', 'published')
     .maybeSingle();
 
-  const title = event?.title
-    ? `${event.title} • Você está convidado!`
-    : 'Você recebeu um convite • Celebra';
+  const title = 'Clique e participe da festa!';
 
   const description =
     event?.message ||
