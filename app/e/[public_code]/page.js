@@ -171,7 +171,7 @@ export default function PublicInvitePage() {
 
   const coverBackground = useMemo(() => {
     if (!event) return backgroundFiles[0];
-    return backgroundFiles[event.background_index] || backgroundFiles[0];
+    return event.custom_background_url || backgroundFiles[event.background_index] || backgroundFiles[0];
   }, [event]);
 
   function textValue(item) {
