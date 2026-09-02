@@ -41,8 +41,14 @@ export default function InstallPWA({ className = '' }) {
       return;
     }
 
+    const regs = await navigator.serviceWorker.getRegistrations();
+    const controller = navigator.serviceWorker.controller;
     alert(
-      'Para instalar o Celebra no celular, abra o menu ⋮ do Chrome e escolha "Adicionar à tela inicial".'
+      'DIAGNÓSTICO PWA\n\n' +
+      'Controlador: ' + (controller?.scriptURL || 'NENHUM') + '\n' +
+      'Registros: ' + (regs.length || 0) + '\n' +
+      'Escopos: ' + (regs.map(r => r.scope).join(' | ') || 'NENHUM') + '\n' +
+      'Prompt instalação: NÃO'
     );
   };
 
