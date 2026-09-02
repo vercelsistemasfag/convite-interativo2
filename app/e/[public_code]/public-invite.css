@@ -1339,3 +1339,17 @@
   color:#6a0735 !important;
   border:1px solid rgba(106,7,53,.10);
 }
+
+.guest-install-button{
+  position:fixed;
+  top:14px;
+  right:14px;
+  z-index:50;
+  border:0;
+  border-radius:999px;
+  padding:10px 14px;
+  background:#6a0735;
+  color:#fff;
+  font:600 13px/1.1 inherit;
+  box-shadow:0 8px 20px rgba(84,17,47,.22);
+}

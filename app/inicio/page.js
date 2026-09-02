@@ -4,6 +4,7 @@ import './inicio.css';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabase';
+import InstallPWA from '../install-pwa';
 
 export default function InicioPage() {
   const router = useRouter();
@@ -81,6 +82,7 @@ export default function InicioPage() {
         <a href="/" className="new-invite-button">
           + Criar novo convite
         </a>
+        <InstallPWA className="new-invite-button" />
       </section>
 
       <section className="home-section">
