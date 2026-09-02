@@ -1,13 +1,13 @@
 {
-  "name": "Celebra — Convite Interativo",
+  "name": "Celebra Anfitrião",
   "short_name": "Celebra",
-  "id": "/",
-  "start_url": "/",
+  "id": "/inicio",
+  "start_url": "/inicio",
   "scope": "/",
   "display": "standalone",
   "background_color": "#f8f4f2",
   "theme_color": "#5b143c",
   "lang": "pt-BR",
-  "description": "Crie e compartilhe convites interativos para momentos especiais.",
+  "description": "Crie, publique e acompanhe seus convites interativos.",
   "categories": ["lifestyle", "social"]
 }

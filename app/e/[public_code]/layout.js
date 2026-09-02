@@ -29,6 +29,7 @@ export async function generateMetadata({ params }) {
 
   return {
     metadataBase: new URL(SITE_URL),
+    manifest: `/e/${public_code}/manifest.webmanifest`,
     title,
     description: 'Confirme presença, faça sugestões de músicas, veja a lista de presentes e muito mais!',
     openGraph: {
