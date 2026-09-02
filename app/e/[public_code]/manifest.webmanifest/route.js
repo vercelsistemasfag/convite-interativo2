@@ -12,7 +12,11 @@ export async function GET(request, { params }) {
     theme_color: '#5b143c',
     lang: 'pt-BR',
     description: 'Seu convite interativo Celebra.',
-    categories: ['lifestyle', 'social']
+    categories: ['lifestyle', 'social'],
+    icons: [
+      { src: '/brand/celebra-icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+      { src: '/brand/celebra-icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+    ]
   };
 
   return Response.json(manifest, {
