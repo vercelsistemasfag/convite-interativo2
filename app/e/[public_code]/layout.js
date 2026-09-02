@@ -30,8 +30,10 @@ export async function generateMetadata({ params }) {
   return {
     metadataBase: new URL(SITE_URL),
     title,
+    description: 'Confirme presença, faça sugestões de músicas, veja a lista de presentes e muito mais!',
     openGraph: {
       title,
+      description: 'Confirme presença, faça sugestões de músicas, veja a lista de presentes e muito mais!',
       type: 'website',
       url: `${SITE_URL}/e/${public_code}`,
       siteName: 'Celebra • Convite Interativo',
@@ -47,6 +49,7 @@ export async function generateMetadata({ params }) {
     twitter: {
       card: 'summary_large_image',
       title,
+      description: 'Confirme presença, faça sugestões de músicas, veja a lista de presentes e muito mais!',
       images: [imageUrl],
     },
   };
