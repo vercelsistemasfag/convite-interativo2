@@ -16,6 +16,9 @@
     "cf-typegen": "wrangler types"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.1",
+    "@capacitor/cli": "^8.5.1",
+    "@capacitor/core": "^8.5.1",
     "@supabase/supabase-js": "^2.112.4",
     "next": "16.3.3",
     "react": "19.2.8",
