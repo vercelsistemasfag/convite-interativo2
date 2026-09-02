@@ -30,10 +30,8 @@ export async function generateMetadata({ params }) {
   return {
     metadataBase: new URL(SITE_URL),
     title,
-    description,
     openGraph: {
       title,
-      description,
       type: 'website',
       url: `${SITE_URL}/e/${public_code}`,
       siteName: 'Celebra • Convite Interativo',
@@ -49,7 +47,6 @@ export async function generateMetadata({ params }) {
     twitter: {
       card: 'summary_large_image',
       title,
-      description,
       images: [imageUrl],
     },
   };
