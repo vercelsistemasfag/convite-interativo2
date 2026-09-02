@@ -4,9 +4,9 @@ export async function GET(request, { params }) {
   const manifest = {
     name: 'Celebra Convite',
     short_name: 'Celebra',
-    id: `/e/${public_code}/`,
+    id: `/e/${public_code}`,
     start_url: `/e/${public_code}`,
-    scope: `/e/${public_code}/`,
+    scope: `/e/${public_code}`,
     display: 'standalone',
     background_color: '#f8f4f2',
     theme_color: '#5b143c',
