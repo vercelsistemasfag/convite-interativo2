@@ -35,7 +35,7 @@ export default function LoginPage() {
       const { data } = await supabase.auth.getSession();
 
       if (data.session && !data.session.user?.is_anonymous) {
-        router.replace('/inicio');
+        router.replace('/anfitriao/inicio');
       }
     }
 
@@ -71,7 +71,7 @@ export default function LoginPage() {
       setConfirmPassword('');
 
       setTimeout(() => {
-        router.replace('/inicio');
+        router.replace('/anfitriao/inicio');
       }, 900);
     } catch (err) {
       setError(err?.message || 'Não foi possível atualizar a senha.');
@@ -140,7 +140,7 @@ export default function LoginPage() {
         if (signUpError) throw signUpError;
 
         if (signUpData.session) {
-          router.push('/inicio');
+          router.push('/anfitriao/inicio');
           return;
         }
 
@@ -156,7 +156,7 @@ export default function LoginPage() {
 
       if (signInError) throw signInError;
 
-      router.push('/inicio');
+      router.push('/anfitriao/inicio');
     } catch (err) {
       setError(err?.message || 'Não foi possível continuar.');
     } finally {

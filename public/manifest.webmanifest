@@ -1,9 +1,9 @@
 {
   "name": "Celebra Anfitrião",
   "short_name": "Celebra",
-  "id": "/",
-  "start_url": "/login",
-  "scope": "/",
+  "id": "/anfitriao/",
+  "start_url": "/anfitriao/login",
+  "scope": "/anfitriao/",
   "display": "standalone",
   "background_color": "#f8f4f2",
   "theme_color": "#5b143c",

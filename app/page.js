@@ -150,7 +150,7 @@ export default function Home() {
           await supabase.auth.signOut();
         }
 
-        router.replace('/login');
+        router.replace('/anfitriao/login');
         return;
       }
 

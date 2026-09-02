@@ -20,7 +20,7 @@ export default function InicioPage() {
         const session = data.session;
 
         if (!session || session.user?.is_anonymous) {
-          router.replace('/login');
+          router.replace('/anfitriao/login');
           return;
         }
 
@@ -79,7 +79,7 @@ export default function InicioPage() {
       </header>
 
       <section className="home-top-actions">
-        <a href="/" className="new-invite-button">
+        <a href="/anfitriao" className="new-invite-button">
           + Criar novo convite
         </a>
         <InstallPWA className="new-invite-button" />
@@ -100,7 +100,7 @@ export default function InicioPage() {
             <h3>Seu primeiro convite começa aqui</h3>
             <p>Crie um convite interativo e acompanhe tudo pelo painel.</p>
 
-            <a href="/">Criar convite</a>
+            <a href="/anfitriao">Criar convite</a>
           </div>
         ) : (
           <div className="event-list">

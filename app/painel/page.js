@@ -30,7 +30,7 @@ export default function PainelPage() {
         const session = sessionData.session;
 
         if (!session || session.user?.is_anonymous) {
-          router.replace('/login');
+          router.replace('/anfitriao/login');
           return;
         }
 
@@ -266,7 +266,7 @@ export default function PainelPage() {
         </button>
 
         <a
-          href="/"
+          href="/anfitriao"
           className="panel-primary panel-action-main panel-edit-card"
         >
           <span className="panel-action-icon">✎</span>
