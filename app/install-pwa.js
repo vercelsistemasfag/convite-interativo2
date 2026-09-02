@@ -31,12 +31,19 @@ export default function InstallPWA({ className = '' }) {
     };
   }, []);
 
-  if (!prompt || installed) return null;
+  if (installed) return null;
 
   const install = async () => {
-    await prompt.prompt();
-    await prompt.userChoice;
-    setPrompt(null);
+    if (prompt) {
+      await prompt.prompt();
+      await prompt.userChoice;
+      setPrompt(null);
+      return;
+    }
+
+    alert(
+      'Para instalar o Celebra no celular, abra o menu ⋮ do Chrome e escolha "Adicionar à tela inicial".'
+    );
   };
 
   return (
