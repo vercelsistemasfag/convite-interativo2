@@ -526,6 +526,7 @@ export default function Home() {
     <main className="prototype-shell">
       {step === 0 && <section className="html-screen home-html" aria-label="Tela inicial do Celebra">
         <BrandHeader />
+        <a href="/anfitriao/inicio" className="back-invites-button">← Voltar para meus convites</a>
         <div className="home-question">O que vamos<br/>comemorar <span>hoje?</span></div>
         <div className="category-grid">
           {categories.map((cat) => <button key={cat.id} className="category-card" style={{'--cat': cat.color}} onClick={() => { setInvite((current) => ({ ...current, category: cat.id, details: { ...current.details, sub: '' } })); go(1); }}>
