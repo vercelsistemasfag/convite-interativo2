@@ -279,6 +279,7 @@ export default function Home() {
         full_address: invite.featureConfig?.location?.address || '',
         cover_index: invite.cover || 0,
         background_index: invite.background || 0,
+      custom_background_url: invite.customBackground || customBg || null,
         font_color: invite.fontColor || '#f4e7d7',
         font_index: invite.font || 0,
         decor_index: invite.decor || 0,
