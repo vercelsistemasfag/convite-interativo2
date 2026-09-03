@@ -27,18 +27,18 @@ export default function ServiceWorkerRegister() {
           return;
         }
 
-        // PWA individual do convidado
-        if (pathname.startsWith('/e/')) {
-          const parts = pathname.split('/').filter(Boolean);
-          const publicCode = parts[1];
+        // Convites publicos usam web + APK, sem PWA proprio
+      if (pathname.startsWith('/e/')) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(
+          regs
+            .filter(r => new URL(r.scope).pathname.startsWith('/e/'))
+            .map(r => r.unregister())
+        );
+        return;
+      }
 
-          if (publicCode) {
-            await navigator.serviceWorker.register('/sw.js', {
-              scope: `/e/${publicCode}`
-            });
-          }
-        }
-      } catch (error) {
+    } catch (error) {
         console.error('Erro ao configurar Service Worker:', error);
       }
     };
