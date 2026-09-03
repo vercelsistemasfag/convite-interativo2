@@ -1353,3 +1353,102 @@
   font:600 13px/1.1 inherit;
   box-shadow:0 8px 20px rgba(84,17,47,.22);
 }
+
+/* Ações do aplicativo convidado */
+.guest-app-actions{
+  width:min(92vw,520px);
+  margin:22px auto 34px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  text-align:center;
+}
+
+.guest-app-actions button{
+  min-height:52px;
+  padding:10px 14px;
+  border:1px solid rgba(106,7,53,.16);
+  border-radius:26px;
+  background:#fff;
+  color:#6a0735;
+  font:600 15px/1.2 inherit;
+  box-shadow:0 7px 18px rgba(84,17,47,.10);
+}
+
+.guest-app-actions p{
+  grid-column:1 / -1;
+  margin:4px 12px 0;
+  color:#7f7076;
+  font-size:13px;
+  line-height:1.4;
+}
+
+.guest-app-dialog{
+  position:fixed;
+  inset:0;
+  z-index:200;
+  display:grid;
+  place-items:center;
+  padding:22px;
+  background:rgba(35,12,24,.48);
+  backdrop-filter:blur(4px);
+}
+
+.guest-app-dialog-card{
+  position:relative;
+  width:min(92vw,390px);
+  padding:28px 22px 22px;
+  border-radius:24px;
+  background:#fffaf4;
+  color:#54112f;
+  box-shadow:0 20px 60px rgba(35,12,24,.28);
+}
+
+.guest-app-dialog-card h3{
+  margin:0 34px 14px 0;
+  font-size:21px;
+}
+
+.guest-app-dialog-card p{
+  margin:0 0 12px;
+  color:#725e67;
+  font-size:14px;
+  line-height:1.5;
+}
+
+.guest-app-dialog-close{
+  position:absolute;
+  top:12px;
+  right:14px;
+  width:34px;
+  height:34px;
+  border:0;
+  border-radius:50%;
+  background:#f3e8e2;
+  color:#6a0735;
+  font-size:22px;
+}
+
+.guest-app-dialog-primary{
+  width:100%;
+  min-height:48px;
+  margin-top:8px;
+  border:0;
+  border-radius:24px;
+  background:#6a0735;
+  color:#fff;
+  font-weight:700;
+}
+
+@media (max-width:420px){
+  .guest-app-actions{
+    width:min(94vw,390px);
+    gap:9px;
+  }
+
+  .guest-app-actions button{
+    min-height:48px;
+    padding:9px 10px;
+    font-size:13px;
+  }
+}

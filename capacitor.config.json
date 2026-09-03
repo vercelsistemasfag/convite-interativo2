@@ -1,6 +1,6 @@
 {
   "appId": "br.com.celebra.convite",
-  "appName": "Celebra Convite",
+  "appName": "Celebra Convidado",
   "webDir": "public",
   "server": {
     "url": "https://celebra-convite.vercelsistemas.workers.dev/convite",

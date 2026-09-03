@@ -4,6 +4,7 @@ import './public-invite.css';
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { supabase } from '../../../lib/supabase';
+import GuestAppActions from './guest-app-actions';
 
 const backgroundFiles = [
   '/backgrounds/3931.png',
@@ -310,8 +311,6 @@ export default function PublicInvitePage() {
 
   return (
     <main className="public-invite-page">
-      <a className="guest-install-button" href={`celebra://convite/${publicCode}`}>Abrir no aplicativo</a>
-      <a className="guest-apk-download" href="/downloads/celebra-convite.apk" download>Instalar aplicativo</a>
       <div className={`book-shell ${opened ? 'is-open' : ''}`}>
         <section className="inside-page">
           <div className="interaction-page">
@@ -414,6 +413,9 @@ export default function PublicInvitePage() {
           )}
         </section>
       </div>
+
+      <GuestAppActions publicCode={publicCode} />
+
       {activeFeature === 'rsvp' && (
         <div className="feature-modal">
           <div className="modal-card">
