@@ -11,6 +11,7 @@ export default function DeepLinkHandler() {
       const codigo = url.replace('celebra://convite/', '').split(/[?#]/)[0];
 
       if (codigo) {
+        localStorage.setItem("celebra:last-invite", codigo);
         window.location.href = `/e/${encodeURIComponent(codigo)}`;
       }
     };

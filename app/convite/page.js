@@ -1,17 +1,34 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import './convite.css';
+
 export default function ConviteApp() {
+  const [codigo, setCodigo] = useState('');
+
+  useEffect(() => {
+    setCodigo(localStorage.getItem('celebra:last-invite') || '');
+  }, []);
+
+  const abrir = () => {
+    if (codigo) window.location.href = `/e/${encodeURIComponent(codigo)}`;
+  };
+
   return (
-    <main style={{
-      minHeight: '100vh',
-      display: 'grid',
-      placeItems: 'center',
-      padding: '32px',
-      textAlign: 'center',
-      background: '#f8f4f2',
-      color: '#54112f'
-    }}>
-      <div>
-        <h1 style={{ marginBottom: '12px' }}>Celebra Convite</h1>
-        <p>Abra seu convite pelo link que você recebeu.</p><a href="celebra://convite/1a35e27998c5" style={{display:"inline-block",marginTop:"24px",padding:"14px 22px",background:"#6a0735",color:"white",borderRadius:"12px",textDecoration:"none"}}>Testar abertura no aplicativo</a>
+    <main className="convite-home">
+      <div className="convite-brand">
+        <img src="/brand/celebra-logo-v2.png" alt="Celebra Convite Interativo" />
+      </div>
+
+      <div className="convite-actions">
+        {!codigo && (
+          <p>Abra o link do convite que você recebeu para vinculá-lo ao aplicativo.</p>
+        )}
+
+        <button onClick={abrir} disabled={!codigo}>
+          <span>✉</span>
+          Abrir meu convite
+        </button>
       </div>
     </main>
   );

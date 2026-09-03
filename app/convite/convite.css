@@ -1,0 +1,99 @@
+.convite-home{
+  min-height:100vh;
+  padding:32px 24px 54px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:space-between;
+  overflow:hidden;
+  position:relative;
+  background:
+    radial-gradient(circle at 8% 8%, rgba(255,110,90,.28) 0 8%, transparent 9%),
+    radial-gradient(circle at 92% 88%, rgba(88,10,52,.65) 0 9%, transparent 10%),
+    linear-gradient(180deg,#fff8f2 0%,#f5d6ce 48%,#8f3654 73%,#4b0d2d 100%);
+  color:#54112f;
+}
+
+.convite-home::before,
+.convite-home::after{
+  content:"";
+  position:absolute;
+  width:180px;
+  height:180px;
+  border-radius:50%;
+  filter:blur(2px);
+  opacity:.42;
+  pointer-events:none;
+}
+
+.convite-home::before{
+  left:-90px;
+  top:-45px;
+  background:#ff7866;
+}
+
+.convite-home::after{
+  right:-95px;
+  bottom:-55px;
+  background:#4f0c31;
+}
+
+.convite-brand{
+  width:100%;
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  z-index:1;
+}
+
+.convite-brand img{
+  width:min(88vw,430px);
+  height:auto;
+  object-fit:contain;
+  filter:drop-shadow(0 8px 18px rgba(84,17,47,.10));
+}
+
+.convite-actions{
+  width:100%;
+  max-width:430px;
+  position:relative;
+  z-index:1;
+  padding-bottom:8vh;
+  text-align:center;
+}
+
+.convite-actions p{
+  margin:0 14px 22px;
+  font-size:16px;
+  line-height:1.45;
+  color:#fff4ee;
+}
+
+.convite-actions button{
+  width:100%;
+  min-height:72px;
+  border-radius:38px;
+  border:2px solid #d8a44c;
+  background:linear-gradient(135deg,#ff735e,#df665f);
+  color:#fff;
+  font-size:21px;
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  box-shadow:
+    0 12px 26px rgba(53,8,30,.30),
+    inset 0 1px 0 rgba(255,255,255,.25);
+}
+
+.convite-actions button span{
+  font-size:29px;
+  line-height:1;
+}
+
+.convite-actions button:disabled{
+  opacity:.58;
+}
