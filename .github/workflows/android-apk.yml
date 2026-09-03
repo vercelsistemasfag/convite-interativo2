@@ -12,6 +12,10 @@ jobs:
         with:
           distribution: temurin
           java-version: "21"
+      - name: Instalar dependencias
+        run: npm ci
+      - name: Sincronizar Capacitor
+        run: npx cap sync android
       - name: Gerar APK
         working-directory: android
         run: ./gradlew assembleDebug
