@@ -1,5 +1,4 @@
 'use client';
-import InstallPWA from '../../install-pwa';
 
 import './public-invite.css';
 import { useEffect, useMemo, useState } from 'react';
@@ -311,7 +310,8 @@ export default function PublicInvitePage() {
 
   return (
     <main className="public-invite-page">
-      <InstallPWA className="guest-install-button" />
+      <a className="guest-install-button" href={\`celebra://convite/\${publicCode}\`}>Abrir no aplicativo</a>
+      <a className="guest-apk-download" href="/downloads/celebra-convite.apk" download>Instalar aplicativo</a>
       <div className={`book-shell ${opened ? 'is-open' : ''}`}>
         <section className="inside-page">
           <div className="interaction-page">
