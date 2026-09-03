@@ -1,5 +1,6 @@
 import './globals.css';
 import ServiceWorkerRegister from './sw-register';
+import DeepLinkHandler from './deep-link-handler';
 
 export const metadata = {
   title: 'Celebra — Convite Interativo',
@@ -12,5 +13,5 @@ export const metadata = {
 export const viewport = { themeColor: '#5b143c', width: 'device-width', initialScale: 1 };
 
 export default function RootLayout({ children }) {
-  return <html lang="pt-BR"><body><ServiceWorkerRegister />{children}</body></html>;
+  return <html lang="pt-BR"><body><ServiceWorkerRegister /><DeepLinkHandler />{children}</body></html>;
 }

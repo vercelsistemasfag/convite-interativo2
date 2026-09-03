@@ -3,7 +3,7 @@
   "appName": "Celebra Convite",
   "webDir": "public",
   "server": {
-    "url": "https://celebra-convite.vercelsistemas.workers.dev/e/1a35e27998c5",
+    "url": "https://celebra-convite.vercelsistemas.workers.dev",
     "cleartext": false
   }
 }
