@@ -12,7 +12,9 @@ export default function DeepLinkHandler() {
 
       if (codigo) {
         localStorage.setItem("celebra:last-invite", codigo);
-        window.location.href = `/e/${encodeURIComponent(codigo)}`;
+        window.location.replace(
+          `https://celebra-convite.vercelsistemas.workers.dev/e/${encodeURIComponent(codigo)}`
+        );
       }
     };
 

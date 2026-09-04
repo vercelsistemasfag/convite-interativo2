@@ -1,9 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Capacitor } from '@capacitor/core';
 
 export default function GuestAppActions({ publicCode }) {
   const [dialog, setDialog] = useState(null);
+  const [environmentReady, setEnvironmentReady] = useState(false);
+  const [isNative, setIsNative] = useState(false);
+
+  useEffect(() => {
+    setIsNative(Capacitor.isNativePlatform());
+    setEnvironmentReady(true);
+  }, []);
 
   const isIOS = () =>
     /iPad|iPhone|iPod/.test(navigator.userAgent) ||
@@ -41,6 +49,10 @@ export default function GuestAppActions({ publicCode }) {
 
     setDialog(null);
   };
+
+  if (!environmentReady || isNative) {
+    return null;
+  }
 
   return (
     <>

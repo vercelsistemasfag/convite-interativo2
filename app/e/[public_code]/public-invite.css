@@ -1452,3 +1452,20 @@
     font-size:13px;
   }
 }
+
+/* Layout público: convite grande e ações abaixo */
+.public-invite-page{
+  flex-direction:column;
+  justify-content:flex-start;
+  overflow-x:hidden;
+  overflow-y:auto;
+  padding:28px 18px 42px;
+}
+
+.book-shell{
+  flex:0 0 auto;
+}
+
+.guest-app-actions{
+  flex:0 0 auto;
+}
