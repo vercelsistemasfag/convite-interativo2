@@ -121,7 +121,20 @@ function formatDateBR(value) {
 
 export default function PublicInvitePage() {
   const params = useParams();
-  const publicCode = params?.public_code;
+  const routePublicCode = params?.public_code;
+  const [publicCode, setPublicCode] = useState(routePublicCode || '');
+
+  useEffect(() => {
+    if (routePublicCode) {
+      setPublicCode(routePublicCode);
+      return;
+    }
+
+    const match = window.location.pathname.match(/^\/e\/([^/?#]+)/);
+    if (match?.[1]) {
+      setPublicCode(decodeURIComponent(match[1]));
+    }
+  }, [routePublicCode]);
 
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
