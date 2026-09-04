@@ -7,11 +7,49 @@ export default function ConviteApp() {
   const [codigo, setCodigo] = useState('');
 
   useEffect(() => {
-    setCodigo(localStorage.getItem('celebra:last-invite') || '');
+    let timer;
+
+    const abrirCodigo = (novoCodigo) => {
+      if (!novoCodigo) return;
+
+      setCodigo(novoCodigo);
+
+      timer = setTimeout(() => {
+        window.location.replace(
+          `https://celebra-convite.vercelsistemas.workers.dev/e/${encodeURIComponent(novoCodigo)}`
+        );
+      }, 900);
+    };
+
+    const pendente = localStorage.getItem('celebra:pending-invite');
+    const salvo = localStorage.getItem('celebra:last-invite');
+
+    if (pendente) {
+      localStorage.removeItem('celebra:pending-invite');
+      abrirCodigo(pendente);
+    } else if (salvo) {
+      setCodigo(salvo);
+    }
+
+    const receberConvite = (event) => {
+      localStorage.removeItem('celebra:pending-invite');
+      abrirCodigo(event.detail);
+    };
+
+    window.addEventListener('celebra:open-invite', receberConvite);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('celebra:open-invite', receberConvite);
+    };
   }, []);
 
   const abrir = () => {
-    if (codigo) window.location.href = `/e/${encodeURIComponent(codigo)}`;
+    if (codigo) {
+      window.location.replace(
+        `https://celebra-convite.vercelsistemas.workers.dev/e/${encodeURIComponent(codigo)}`
+      );
+    }
   };
 
   return (
