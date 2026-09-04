@@ -6,25 +6,43 @@ import './convite.css';
 export default function ConviteApp() {
   const [codigo, setCodigo] = useState('');
 
+  const abrirConvite = (valor) => {
+    if (!valor) return;
+
+    window.location.assign(
+      `/e/${encodeURIComponent(valor)}`
+    );
+  };
+
   useEffect(() => {
-    const salvo = localStorage.getItem('celebra:last-invite') || '';
+    const salvo =
+      localStorage.getItem('celebra:last-invite') || '';
+
     setCodigo(salvo);
 
-    const autoAbrir = localStorage.getItem('celebra:auto-open');
+    const recebido = (event) => {
+      const novoCodigo = event.detail?.codigo;
 
-    if (salvo && autoAbrir === '1') {
-      localStorage.removeItem('celebra:auto-open');
+      if (novoCodigo) {
+        setCodigo(novoCodigo);
+      }
+    };
 
-      window.location.href =
-        `/e/${encodeURIComponent(salvo)}`;
-    }
+    window.addEventListener(
+      'celebra-convite-recebido',
+      recebido
+    );
+
+    return () => {
+      window.removeEventListener(
+        'celebra-convite-recebido',
+        recebido
+      );
+    };
   }, []);
 
   const abrir = () => {
-    if (codigo) {
-      window.location.href =
-        `/e/${encodeURIComponent(codigo)}`;
-    }
+    abrirConvite(codigo);
   };
 
   return (
@@ -44,7 +62,11 @@ export default function ConviteApp() {
           </p>
         )}
 
-        <button onClick={abrir} disabled={!codigo}>
+        <button
+          type="button"
+          onClick={abrir}
+          disabled={!codigo}
+        >
           <span>↗</span>
           Abrir meu convite
         </button>
