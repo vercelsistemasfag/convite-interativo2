@@ -647,8 +647,8 @@ Aguarde eu explicar exatamente como quero o convite antes de criar a imagem.`;
       </section>}
     
       {showEditorGuide && (
-        <div className="feature-modal">
-          <div className="modal-card editor-guide-card">
+        <div className="editor-guide-overlay">
+          <div className="editor-guide-card">
             <h3>Antes de começar, olha só 👀</h3>
 
             <p>
