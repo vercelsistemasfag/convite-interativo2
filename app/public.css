@@ -44,3 +44,30 @@
   font-weight:700;
   font-size:15px;
 }
+
+/* Força o guia a abrir como modal flutuante */
+.feature-modal:has(.editor-guide-card){
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(35,20,28,.48);
+  backdrop-filter:blur(4px);
+  overflow-y:auto;
+}
+
+.editor-guide-card{
+  position:relative;
+  max-width:420px;
+  width:min(92vw,420px);
+  max-height:88vh;
+  overflow-y:auto;
+  margin:auto;
+  padding:24px 20px;
+  border-radius:24px;
+  background:#fffaf7;
+  box-shadow:0 22px 60px rgba(25,8,18,.28);
+}
