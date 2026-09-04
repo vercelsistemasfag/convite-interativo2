@@ -5,52 +5,40 @@ import { App } from '@capacitor/app';
 
 export default function DeepLinkHandler() {
   useEffect(() => {
-    const abrirConvite = (url) => {
-      if (!url?.startsWith('celebra://convite/')) return false;
+    const receberConvite = (url) => {
+      if (!url || !url.startsWith('celebra://convite/')) return false;
 
-      const codigo = url.replace('celebra://convite/', '').split(/[?#]/)[0];
+      const codigo = url
+        .replace('celebra://convite/', '')
+        .split(/[?#]/)[0];
 
-      if (codigo) {
-        localStorage.setItem("celebra:last-invite", codigo);
-        window.location.replace(
-          `https://celebra-convite.vercelsistemas.workers.dev/e/${encodeURIComponent(codigo)}`
-        );
-        return true;
-      }
+      if (!codigo) return false;
 
-      return false;
+      localStorage.setItem('celebra:last-invite', codigo);
+      localStorage.setItem('celebra:auto-open', '1');
+
+      window.location.replace('/convite');
+      return true;
     };
 
-    let cancelled = false;
+    let ativo = true;
+
+    const iniciar = async () => {
+      const launch = await App.getLaunchUrl();
+
+      if (ativo && launch?.url) {
+        receberConvite(launch.url);
+      }
+    };
+
+    iniciar();
 
     const listener = App.addListener('appUrlOpen', ({ url }) => {
-      abrirConvite(url);
+      if (ativo) receberConvite(url);
     });
 
-    const checkInitialUrl = async () => {
-      const delays = [0, 250, 500, 1000, 1500];
-
-      for (const delay of delays) {
-        if (cancelled) return;
-
-        if (delay) {
-          await new Promise((resolve) => setTimeout(resolve, delay));
-        }
-
-        if (cancelled) return;
-
-        const result = await App.getLaunchUrl();
-
-        if (abrirConvite(result?.url)) {
-          return;
-        }
-      }
-    };
-
-    checkInitialUrl();
-
     return () => {
-      cancelled = true;
+      ativo = false;
       listener.then((handle) => handle.remove());
     };
   }, []);
