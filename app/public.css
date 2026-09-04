@@ -1,0 +1,46 @@
+
+/* Guia rápido antes do editor */
+.editor-guide-card{
+  max-width:420px;
+  width:min(92vw,420px);
+  padding:24px 20px;
+  border-radius:24px;
+  text-align:left;
+}
+
+.editor-guide-card h3{
+  margin:0 0 16px;
+  font-size:22px;
+  line-height:1.2;
+  color:#6a0735;
+}
+
+.editor-guide-card p{
+  margin:0 0 16px;
+  font-size:14px;
+  line-height:1.55;
+  color:#6f6670;
+}
+
+.editor-guide-pointer{
+  margin:4px 0 18px;
+  padding:11px 14px;
+  border-radius:14px;
+  background:#fff4f7;
+  color:#6a0735;
+  font-size:13px;
+  font-weight:700;
+  text-align:center;
+}
+
+.editor-guide-card .primary-modal{
+  width:100%;
+  min-height:48px;
+  margin-top:4px;
+  border:0;
+  border-radius:24px;
+  background:#6a0735;
+  color:#fff;
+  font-weight:700;
+  font-size:15px;
+}

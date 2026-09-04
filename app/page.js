@@ -102,14 +102,7 @@ const defaultInvite = {
   category: 'aniversario',
   details: { title: '', message: 'Vamos celebrar!', date: '', time: '', place: '' },
   floatingElements: [],
-  floatingTexts: [
-    { id:'message', type:'message', x:50, y:29, size:34, rotate:0, visible:true },
-    { id:'title', type:'title', x:50, y:42, size:22, rotate:0, visible:true },
-    { id:'date', type:'date', x:37, y:56, size:14, rotate:0, visible:true },
-    { id:'time', type:'time', x:67, y:56, size:14, rotate:0, visible:true },
-    { id:'place', type:'place', x:50, y:66, size:14, rotate:0, visible:true },
-    { id:'closing', type:'closing', x:50, y:79, size:15, rotate:0, visible:true },
-  ],
+  floatingTexts: [],
   cover: 0,
   background: 0,
   color: 0,
@@ -161,6 +154,7 @@ export default function Home() {
   }, [router]);
 
   const [step, setStep] = useState(0);
+  const [showEditorGuide, setShowEditorGuide] = useState(false);
   const [invite, setInvite] = useState(defaultInvite);
   const [hydrated, setHydrated] = useState(false);
   const { category, details, cover, background = 0, color, fontColor = '#f4e7d7', font, floatingElements = [], floatingTexts = defaultInvite.floatingTexts, enabled, featureConfig = defaultInvite.featureConfig } = invite;
@@ -225,7 +219,27 @@ export default function Home() {
   const previewColors = ['#6a0735','#ff654e','#c78c2a','#17345f','#638b7b','#9c739b'];
   const previewStyle = { '--preview-accent': previewColors[color], '--preview-accent-soft': `${previewColors[color]}33`, '--invite-text': fontColor };
   const inviteLink = publishedEvent?.public_code ? (typeof window !== 'undefined' ? `${window.location.origin}/e/${publishedEvent.public_code}` : `/e/${publishedEvent.public_code}`) : '';
-  const aiPrompt = `Crie uma imagem de fundo para convite digital da Celebra no formato vertical 9:16 (1080x1920 px). Categoria: ${selectedCategory.label}. Estilo escolhido: ${covers[cover]}. Preserve uma área central livre e limpa para textos e botões do aplicativo. Não inclua palavras, logotipos, datas, molduras com texto ou marcas d'água. Evite elementos importantes no centro; concentre a composição nas bordas e cantos. Use acabamento sofisticado, alta definição e composição adequada para tela de celular.`;
+  const aiPrompt = `Quero criar uma arte para um convite digital.
+
+A imagem deverá ter:
+• formato vertical 9:16;
+• tamanho exato de 1080 × 1920 px;
+• alta resolução;
+• composição adequada para tela de celular.
+
+Não crie nenhuma imagem ainda.
+
+Primeiro, converse comigo e aguarde minhas instruções sobre o tipo de comemoração, tema, cores, estilo, elementos e composição.
+
+Depois eu vou escolher entre duas possibilidades:
+
+1. Criar somente o fundo do convite, deixando espaço adequado para eu inserir textos posteriormente no Celebra.
+
+2. Criar a arte completa, já incluindo os textos e informações que eu fornecer, como nome, data, horário, local e outras informações.
+
+Não presuma qual opção eu quero e não gere uma arte aleatória.
+
+Aguarde eu explicar exatamente como quero o convite antes de criar a imagem.`;
 
   function go(n) { setStep(Math.max(0, Math.min(3, n))); setInviteOpen(false); setDialog(null); setActiveEditorPanel(null); window?.scrollTo?.({ top: 0, behavior: 'smooth' }); }
   function patchInvite(patch) { setInvite((current) => ({ ...current, ...patch })); }
@@ -529,7 +543,7 @@ export default function Home() {
         <a href="/anfitriao/inicio" className="back-invites-button">← Voltar para meus convites</a>
         <div className="home-question">O que vamos<br/>comemorar <span>hoje?</span></div>
         <div className="category-grid">
-          {categories.map((cat) => <button key={cat.id} className="category-card" style={{'--cat': cat.color}} onClick={() => { setInvite((current) => ({ ...current, category: cat.id, details: { ...current.details, sub: '' } })); go(1); }}>
+          {categories.map((cat) => <button key={cat.id} className="category-card" style={{'--cat': cat.color}} onClick={() => { setInvite((current) => ({ ...current, category: cat.id, details: { ...current.details, sub: '' } })); setShowEditorGuide(true); }}>
             <CategoryIcon type={cat.icon}/>
             <strong>{cat.label}</strong>
             <i><span></span><b>◆</b><span></span></i>
@@ -565,10 +579,10 @@ export default function Home() {
         <div className={`editor-panel-slot ${activeEditorPanel?'open':''}`}>
           {activeEditorPanel === 'texto' && <div className="editor-section editor-section-active"><ControlTitle icon="✎" text="Textos e informações"/>
             <p className="section-hint">Edite o conteúdo somente nos campos abaixo. Na arte, toque para selecionar, arraste para mover e use a seta para redimensionar.</p>
-            <label className="field-block"><span><b>Título do evento</b></span><div className="field-apply-row"><input placeholder="Ex.: Aniversário da Mariana" value={details.title} onChange={(e)=>patchDetails({title:e.target.value})}/><button type="button" onClick={()=>applyTextAgain('title',details.title||selectedCategory.label)}>Aplicar novamente</button></div></label>
-            <label className="field-block"><span><b>Frase do convite</b></span><div className="field-apply-row"><input placeholder="Ex.: Vamos celebrar!" value={details.message || ''} onChange={(e)=>patchDetails({message:e.target.value})}/><button type="button" onClick={()=>applyTextAgain('message',details.message||'Vamos celebrar!')}>Aplicar novamente</button></div></label>
-            <div className="form-row"><label className="field-block"><span><b>Data</b></span><div className="field-apply-row"><input type="date" value={details.date} onChange={(e)=>patchDetails({date:e.target.value})}/><button type="button" onClick={()=>applyTextAgain('date',`▣ ${formatDateBR(details.date)}`)}>Aplicar novamente</button></div></label><label className="field-block"><span><b>Horário</b></span><div className="field-apply-row"><input type="time" value={details.time} onChange={(e)=>patchDetails({time:e.target.value})}/><button type="button" onClick={()=>applyTextAgain('time',`◷ ${details.time||'19:00'}`)}>Aplicar novamente</button></div></label></div>
-            <label className="field-block"><span><b>Local</b></span><div className="field-apply-row"><input placeholder="Ex.: Salão de Festas" value={details.place} onChange={(e)=>patchDetails({place:e.target.value})}/><button type="button" onClick={()=>applyTextAgain('place',`⌖ ${details.place||'Salão de Festas'}`)}>Aplicar novamente</button></div></label>
+            <label className="field-block"><span><b>Título do evento</b></span><div className="field-apply-row"><input placeholder="Ex.: Aniversário da Mariana" value={details.title} onChange={(e)=>patchDetails({title:e.target.value})}/><button type="button" onClick={()=>applyTextAgain('title',details.title||selectedCategory.label)}>Aplicar texto</button></div></label>
+            <label className="field-block"><span><b>Frase do convite</b></span><div className="field-apply-row"><input placeholder="Ex.: Vamos celebrar!" value={details.message || ''} onChange={(e)=>patchDetails({message:e.target.value})}/><button type="button" onClick={()=>applyTextAgain('message',details.message||'Vamos celebrar!')}>Aplicar texto</button></div></label>
+            <div className="form-row"><label className="field-block"><span><b>Data</b></span><div className="field-apply-row"><input type="date" value={details.date} onChange={(e)=>patchDetails({date:e.target.value})}/><button type="button" onClick={()=>applyTextAgain('date',`▣ ${formatDateBR(details.date)}`)}>Aplicar texto</button></div></label><label className="field-block"><span><b>Horário</b></span><div className="field-apply-row"><input type="time" value={details.time} onChange={(e)=>patchDetails({time:e.target.value})}/><button type="button" onClick={()=>applyTextAgain('time',`◷ ${details.time||'19:00'}`)}>Aplicar texto</button></div></label></div>
+            <label className="field-block"><span><b>Local</b></span><div className="field-apply-row"><input placeholder="Ex.: Salão de Festas" value={details.place} onChange={(e)=>patchDetails({place:e.target.value})}/><button type="button" onClick={()=>applyTextAgain('place',`⌖ ${details.place||'Salão de Festas'}`)}>Aplicar texto</button></div></label>
           </div>}
 
           {activeEditorPanel === 'fundos' && <div className="editor-section editor-section-active"><ControlTitle icon="▧" text="Fundos do convite"/><div className="background-grid">{backgrounds.map((src,i)=><button key={src} className={background===i&&!customBg?'selected':''} onClick={()=>{patchInvite({background:i,cover:i});setCustomBg('')}}><img src={src} alt={covers[i]}/><span>{covers[i]}</span></button>)}</div>
@@ -584,7 +598,7 @@ export default function Home() {
           {activeEditorPanel === 'elementos' && <div className="editor-section editor-section-active"><ControlTitle icon="✦" text="Elementos flutuantes"/><p className="section-hint">Toque para adicionar. Na arte, toque no ícone para selecionar, arraste a caixa para mover e use a seta no canto para redimensionar.</p><div className="element-catalog">{elementCatalog.map(([type,glyph,label])=><button key={type} onClick={()=>addFloatingElement(type,glyph)}><b>{glyph}</b><span>{label}</span></button>)}</div></div>}
         </div>
 
-        <div className="ai-panel ai-panel-v9"><div><strong>✨ Personalização com IA</strong><small>Opcional</small></div><p>Quer criar um fundo exclusivo? Copie o comando pronto e abra o ChatGPT. Depois, cole o comando e descreva o visual que deseja.</p><div className="ai-steps ai-two"><button onClick={handleAiCopy}><b>1</b><strong>{aiCopied?'Comando copiado ✓':'Copiar comando'}</strong><span>Leva o formato correto do Celebra.</span></button><a href="https://chatgpt.com/" target="_blank" rel="noreferrer"><b>2</b><strong>Abrir ChatGPT</strong><span>Cole o comando e peça sua imagem.</span></a></div></div>
+        <div className="ai-panel ai-panel-v9"><div><strong>✨ Personalização com IA</strong><small>Opcional</small></div><p>Quer criar sua arte com o ChatGPT? Copie o briefing e continue a conversa por lá. Você pode pedir somente o fundo ou o convite completo, já com os textos.</p><div className="ai-steps ai-two"><button onClick={handleAiCopy}><b>1</b><strong>{aiCopied?'Comando copiado ✓':'Copiar comando'}</strong><span>Leva o formato correto do Celebra.</span></button><a href="https://chatgpt.com/" target="_blank" rel="noreferrer"><b>2</b><strong>Abrir ChatGPT</strong><span>Cole o comando e peça sua imagem.</span></a></div></div>
         <div className="nav-actions"><button onClick={()=>go(0)}>← Voltar</button><button className="next" onClick={()=>go(2)}>Continuar →</button></div><StepDots n={2}/>
       </section>}
 
@@ -631,6 +645,52 @@ export default function Home() {
         {dialog&&<MiniDialog text={dialog} close={()=>setDialog(null)}/>} 
         <script type="application/json" id="celebra-backend-contract" dangerouslySetInnerHTML={{__html:JSON.stringify(backendEventPayload())}} />
       </section>}
-    </main>
+    
+      {showEditorGuide && (
+        <div className="feature-modal">
+          <div className="modal-card editor-guide-card">
+            <h3>Antes de começar, olha só 👀</h3>
+
+            <p>
+              <strong>Quer montar tudo pelo Celebra?</strong><br />
+              O convite começa mais livre para você decidir o que realmente quer usar.
+              As ferramentas ficam <strong>logo abaixo do convite</strong> e aparecem
+              recolhidas para deixar a tela mais limpa. É só tocar no botão da função
+              que você quer editar para abrir as opções.
+            </p>
+
+            <div className="editor-guide-pointer">
+              ↓ Toque nos botões abaixo da prévia para personalizar
+            </div>
+
+            <p>
+              <strong>Prefere criar a arte com o ChatGPT? ✨</strong><br />
+              Também dá! Copie o briefing que deixamos pronto. O ChatGPT vai receber
+              o tamanho e o formato corretos e vai esperar você explicar como quer a arte.
+              Você pode pedir apenas o fundo ou o convite completo, já com nome, data,
+              horário, local e outros textos.
+            </p>
+
+            <p>
+              Se a sua arte já vier completa, você não precisa repetir as informações
+              usando os textos do Celebra. Use somente as ferramentas que fizerem sentido
+              para o seu convite.
+            </p>
+
+            <button
+              type="button"
+              className="primary-modal"
+              onClick={() => {
+                setShowEditorGuide(false);
+                go(1);
+              }}
+            >
+              Entendi, vamos lá!
+            </button>
+          </div>
+        </div>
+      )}
+
+</main>
   );
 }
