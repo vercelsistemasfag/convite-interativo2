@@ -177,7 +177,7 @@ export default function PublicInvitePage() {
 
   useEffect(() => {
     if (!event) return;
-    const timer = setTimeout(() => setOpened(true), 5000);
+    const timer = setTimeout(() => setOpened(true), 10000);
     return () => clearTimeout(timer);
   }, [event]);
 
