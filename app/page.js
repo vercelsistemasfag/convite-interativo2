@@ -437,7 +437,7 @@ Aguarde eu explicar exatamente como quero o convite antes de criar a imagem.`;
   function FloatingObject({kind,item,children,style={}}){
     if(item.visible===false)return null;
     const selected=selectedObject===`${kind}:${item.id}`;
-    return <div className={`floating-object ${kind==='text'?'floating-text':'floating-decor'} ${selected?'selected':''}`} style={{...style,left:`${item.x}%`,top:`${item.y}%`,fontSize:`${item.size}px`,transform:`translate(-50%,-50%)`}} onPointerDown={e=>startObjectGesture(e,kind,item.id)} onPointerMove={e=>moveObjectGesture(e,kind,item.id)} onPointerUp={endObjectGesture} onPointerCancel={endObjectGesture}>
+    return <div className={`floating-object ${kind==='text'?'floating-text':'floating-decor'} ${selected?'selected':''}`} style={{...style,left:`${item.x}%`,top:`${item.y}%`,fontSize:`${item.size}px`,color:kind==='text'?(item.color||fontColor):undefined,transform:`translate(-50%,-50%)`}} onPointerDown={e=>startObjectGesture(e,kind,item.id)} onPointerMove={e=>moveObjectGesture(e,kind,item.id)} onPointerUp={endObjectGesture} onPointerCancel={endObjectGesture}>
       <div className="object-content">{children}</div>
       {selected&&<>
         <button type="button" className="object-control object-delete" aria-label="Excluir" onPointerDown={e=>{e.stopPropagation();e.preventDefault();removeObject(kind,item.id)}}>×</button>
