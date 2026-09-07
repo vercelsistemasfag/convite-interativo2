@@ -32,6 +32,14 @@ const backgroundCategories = {
   },
   times: {
     label: 'Times de Futebol',
+    names: [
+      'São Paulo',
+      'Palmeiras',
+      'Juventude',
+      'Internacional',
+      'Grêmio',
+      'Flamengo',
+    ],
     images: [
       '/backgrounds/times-futebol/1.png',
       '/backgrounds/times-futebol/2.png',
@@ -43,6 +51,14 @@ const backgroundCategories = {
   },
   quinzeAnos: {
     label: 'Aniversário 15 Anos',
+    names: [
+      'Elegante',
+      'Despojado',
+      'Moderno',
+      'Romântico',
+      'Glamour',
+      'Delicado',
+    ],
     images: [
       '/backgrounds/aniversario-15-anos/1.png',
       '/backgrounds/aniversario-15-anos/2.png',
@@ -679,7 +695,11 @@ Aguarde eu explicar exatamente como quero o convite antes de criar a imagem.`;
           src={src}
           alt={`${backgroundCategories[activeBackgroundCategory].label} ${i + 1}`}
         />
-        <span>{isClassic ? covers[i] : `Fundo ${i + 1}`}</span>
+        <span>
+          {isClassic
+            ? covers[i]
+            : backgroundCategories[activeBackgroundCategory].names[i]}
+        </span>
       </button>
     );
   })}
