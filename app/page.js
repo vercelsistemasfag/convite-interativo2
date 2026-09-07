@@ -177,10 +177,16 @@ export default function Home() {
       : '';
   const selectedText = floatingTexts.find((item) => item.id === selectedTextId);
   const selectedTextColor = selectedText?.color || fontColor;
+  const selectedTextFont = selectedText?.font ?? font;
 
   function applySelectedTextColor(nextColor) {
     if (!selectedTextId) return;
     updateFloatingText(selectedTextId, { color: nextColor });
+  }
+
+  function applySelectedTextFont(nextFont) {
+    if (!selectedTextId) return;
+    updateFloatingText(selectedTextId, { font: nextFont });
   }
   const [publishedEvent, setPublishedEvent] = useState(null);
   useEffect(() => {
@@ -568,7 +574,7 @@ Aguarde eu explicar exatamente como quero o convite antes de criar a imagem.`;
 
         <div className="editor-preview-top">
           <div ref={previewRef} className={`preview-card editor-live font-preview-${font}`} onPointerDown={(e)=>{if(e.target===e.currentTarget)setSelectedObject(null)}} style={{...previewStyle, backgroundImage:`linear-gradient(rgba(20,8,16,.12),rgba(20,8,16,.12)), url(${invite.customBackground || customBg || backgrounds[background]})`}}>
-            {floatingTexts.map(el=><FloatingObject key={el.id} kind="text" item={el}>{textValue(el)}</FloatingObject>)}
+            {floatingTexts.map(el=><FloatingObject key={el.id} kind="text" item={el} className={`font-preview-${el.font ?? font}`}>{textValue(el)}</FloatingObject>)}
             {floatingElements.map(el=><FloatingObject key={el.id} kind="decor" item={el}>{el.glyph}</FloatingObject>)}
           </div>
         </div>
@@ -600,7 +606,9 @@ Aguarde eu explicar exatamente como quero o convite antes de criar a imagem.`;
             <label className="upload-wide">＋ Enviar minha imagem<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e)=>{const f=e.target.files?.[0];if(f){uploadCustomBackground(f)}}}/></label>
           </div>}
 
-          {activeEditorPanel === 'fontes' && <div className="editor-section editor-section-active"><ControlTitle icon="Aa" text="Fontes compactas"/><p className="section-hint">Doze estilos realmente diferentes, carregados como web fonts para manter o mesmo visual em qualquer aparelho.</p><div className="font-choice-list">{[['Bebas Neue','VAMOS CELEBRAR!'],['Oswald','Vamos celebrar!'],['Roboto Condensed','Vamos celebrar!'],['Barlow Condensed','Vamos celebrar!'],['Archivo Narrow','Vamos celebrar!'],['Anton','VAMOS CELEBRAR!'],['Fjalla One','Vamos celebrar!'],['Amatic SC','VAMOS CELEBRAR!'],['Pacifico','Vamos celebrar!'],['Lobster','Vamos celebrar!'],['Caveat','Vamos celebrar!'],['Satisfy','Vamos celebrar!']].map(([x,sample],i)=><button key={x} className={`font-sample font-preview-${i} ${font===i?'selected':''}`} onClick={()=>patchInvite({font:i})}><span>{sample}</span><small>{x}</small>{font===i&&<b>✓</b>}</button>)}</div></div>}
+          {activeEditorPanel === 'fontes' && <div className="editor-section editor-section-active"><ControlTitle icon="Aa" text="Fontes compactas"/><p className="section-hint">{selectedTextId
+    ? 'Escolha a fonte somente para o texto selecionado.'
+    : 'Toque primeiro no texto que deseja alterar na prévia.'}</p><div className="font-choice-list">{[['Bebas Neue','VAMOS CELEBRAR!'],['Oswald','Vamos celebrar!'],['Roboto Condensed','Vamos celebrar!'],['Barlow Condensed','Vamos celebrar!'],['Archivo Narrow','Vamos celebrar!'],['Anton','VAMOS CELEBRAR!'],['Fjalla One','Vamos celebrar!'],['Amatic SC','VAMOS CELEBRAR!'],['Pacifico','Vamos celebrar!'],['Lobster','Vamos celebrar!'],['Caveat','Vamos celebrar!'],['Satisfy','Vamos celebrar!']].map(([x,sample],i)=><button key={x} className={`font-sample font-preview-${i} ${Number(selectedTextFont)===i?'selected':''}`} disabled={!selectedTextId} onClick={()=>applySelectedTextFont(i)}><span>{sample}</span><small>{x}</small>{font===i&&<b>✓</b>}</button>)}</div></div>}
           {activeEditorPanel === 'cores' && <div className="editor-section editor-section-active">
             <ControlTitle icon="◉" text="Cores do texto"/>
             <div className="color-control-group"><strong>Cor do texto selecionado</strong><p>{selectedTextId ? 'Escolha uma cor diferente para este texto.' : 'Toque primeiro no texto que deseja alterar na prévia.'}</p><div className="color-row font-color-row">{['#ffffff','#f4e7d7','#e7bd6a','#6a0735','#17345f','#231f20','#ff654e'].map((c,i)=><button aria-label={`Cor da fonte ${i+1}`} key={c} style={{background:c}} className={selectedTextColor.toLowerCase()===c?'selected':''} disabled={!selectedTextId} onClick={()=>applySelectedTextColor(c)}/>)}</div><label className="custom-color-picker"><span>Escolher outra cor</span><input type="color" value={selectedTextColor} disabled={!selectedTextId} onChange={(e)=>applySelectedTextColor(e.target.value)}/><b style={{background:selectedTextColor}}></b></label></div>
@@ -642,7 +650,7 @@ Aguarde eu explicar exatamente como quero o convite antes de criar a imagem.`;
             <div className="book-signature">Celebra <span>• convite interativo •</span></div>
           </div>
           <button type="button" className="book-cover" aria-label={inviteOpen?'Fechar convite':'Abrir convite'} onClick={()=>setInviteOpen(v=>!v)} style={{...previewStyle,backgroundImage:`linear-gradient(rgba(20,8,16,.12),rgba(20,8,16,.12)), url(${invite.customBackground || customBg || backgrounds[background]})`}}>
-            {floatingTexts.filter(el=>el.visible!==false).map(el=><div key={el.id} className={`published-object published-text font-preview-${font}`} style={{left:`${el.x}%`,top:`${el.y}%`,fontSize:`${el.size}px`,color:el.color||fontColor,transform:`translate(-50%,-50%)`}}>{textValue(el)}</div>)}
+            {floatingTexts.filter(el=>el.visible!==false).map(el=><div key={el.id} className={`published-object published-text font-preview-${el.font ?? font}`} style={{left:`${el.x}%`,top:`${el.y}%`,fontSize:`${el.size}px`,color:el.color||fontColor,transform:`translate(-50%,-50%)`}}>{textValue(el)}</div>)}
             {floatingElements.map(el=><div key={el.id} className="published-object published-decor" style={{left:`${el.x}%`,top:`${el.y}%`,fontSize:`${el.size}px`,color:el.color||fontColor,transform:`translate(-50%,-50%)`}}>{el.glyph}</div>)}
             <span className="book-open-hint">Toque para abrir <b>›</b></span>
           </button>
