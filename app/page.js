@@ -26,37 +26,33 @@ const covers = ['Bordô Dourado', 'Floral Rosé', 'Abstrato', 'Festa Noturna', '
 const backgrounds = ['/backgrounds/3931.png','/backgrounds/3932.png','/backgrounds/3933.png','/backgrounds/3934.png','/backgrounds/3935.png','/backgrounds/3936.png'];
 
 const backgroundCategories = {
-  classicos: {
-    label: 'Clássicos',
-    images: backgrounds,
-  },
-  times: {
-    label: 'Times de Futebol',
+  infantil: {
+    label: 'Infantil',
     names: [
-      'São Paulo',
-      'Palmeiras',
-      'Juventude',
-      'Internacional',
-      'Grêmio',
-      'Flamengo',
+      'Diversão',
+      'Aventura',
+      'Festa Colorida',
+      'Mundo Encantado',
+      'Brincadeira',
+      'Alegria',
     ],
     images: [
-      '/backgrounds/times-futebol/1.png',
-      '/backgrounds/times-futebol/2.png',
-      '/backgrounds/times-futebol/3.png',
-      '/backgrounds/times-futebol/4.png',
-      '/backgrounds/times-futebol/5.png',
-      '/backgrounds/times-futebol/6.png',
+      '/backgrounds/infantil/1.png',
+      '/backgrounds/infantil/2.png',
+      '/backgrounds/infantil/3.png',
+      '/backgrounds/infantil/4.png',
+      '/backgrounds/infantil/5.png',
+      '/backgrounds/infantil/6.png',
     ],
   },
   quinzeAnos: {
     label: 'Aniversário 15 Anos',
     names: [
-      'Elegante',
-      'Despojado',
-      'Moderno',
+      'Clássico',
       'Romântico',
-      'Glamour',
+      'Moderno',
+      'Elegante',
+      'Dourado',
       'Delicado',
     ],
     images: [
@@ -67,6 +63,29 @@ const backgroundCategories = {
       '/backgrounds/aniversario-15-anos/5.png',
       '/backgrounds/aniversario-15-anos/6.png',
     ],
+  },
+  times: {
+    label: 'Times de Futebol',
+    names: [
+      'São Paulo',
+      'Internacional',
+      'Grêmio',
+      'Palmeiras',
+      'Flamengo',
+      'Corinthians',
+    ],
+    images: [
+      '/backgrounds/times-futebol/1.png',
+      '/backgrounds/times-futebol/2.png',
+      '/backgrounds/times-futebol/3.png',
+      '/backgrounds/times-futebol/4.png',
+      '/backgrounds/times-futebol/5.png',
+      '/backgrounds/times-futebol/6.png',
+    ],
+  },
+  classicos: {
+    label: 'Clássicos',
+    images: backgrounds,
   },
 };
 
@@ -213,7 +232,7 @@ export default function Home() {
   const [guestForm, setGuestForm] = useState({ name:'', attendance:'yes', companions:'0', songs:['', '', ''] });
   const [customBg, setCustomBg] = useState('');
   const [activeEditorPanel, setActiveEditorPanel] = useState(null);
-  const [activeBackgroundCategory, setActiveBackgroundCategory] = useState('classicos');
+  const [activeBackgroundCategory, setActiveBackgroundCategory] = useState('infantil');
   const activeBackgrounds = backgroundCategories[activeBackgroundCategory].images;
   const pointerStart = useRef(null);
   const resizeStart = useRef(null);
