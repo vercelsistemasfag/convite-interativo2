@@ -413,3 +413,36 @@
   font-weight:700;
   cursor:pointer;
 }
+
+
+/* Navegação entre categorias de fundos */
+.background-category-tabs{
+  display:flex;
+  gap:6px;
+  margin:2px 0 12px;
+  overflow-x:auto;
+  scrollbar-width:none;
+}
+
+.background-category-tabs::-webkit-scrollbar{
+  display:none;
+}
+
+.background-category-tabs button{
+  flex:0 0 auto;
+  min-height:32px;
+  padding:6px 11px;
+  border:1px solid #eadde2;
+  border-radius:16px;
+  background:#fff;
+  color:#6a0735;
+  font-size:12px;
+  font-weight:700;
+  white-space:nowrap;
+}
+
+.background-category-tabs button.active{
+  border-color:#6a0735;
+  background:#6a0735;
+  color:#fff;
+}

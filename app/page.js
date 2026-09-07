@@ -24,6 +24,36 @@ const categories = [
 
 const covers = ['Bordô Dourado', 'Floral Rosé', 'Abstrato', 'Festa Noturna', 'Tropical', 'Arquitetônico'];
 const backgrounds = ['/backgrounds/3931.png','/backgrounds/3932.png','/backgrounds/3933.png','/backgrounds/3934.png','/backgrounds/3935.png','/backgrounds/3936.png'];
+
+const backgroundCategories = {
+  classicos: {
+    label: 'Clássicos',
+    images: backgrounds,
+  },
+  times: {
+    label: 'Times de Futebol',
+    images: [
+      '/backgrounds/times-futebol/1.png',
+      '/backgrounds/times-futebol/2.png',
+      '/backgrounds/times-futebol/3.png',
+      '/backgrounds/times-futebol/4.png',
+      '/backgrounds/times-futebol/5.png',
+      '/backgrounds/times-futebol/6.png',
+    ],
+  },
+  quinzeAnos: {
+    label: 'Aniversário 15 Anos',
+    images: [
+      '/backgrounds/aniversario-15-anos/1.png',
+      '/backgrounds/aniversario-15-anos/2.png',
+      '/backgrounds/aniversario-15-anos/3.png',
+      '/backgrounds/aniversario-15-anos/4.png',
+      '/backgrounds/aniversario-15-anos/5.png',
+      '/backgrounds/aniversario-15-anos/6.png',
+    ],
+  },
+};
+
 const features = [
   ['rsvp', 'Confirmar presença'],
   ['music', 'Sugestão de músicas'],
@@ -167,6 +197,8 @@ export default function Home() {
   const [guestForm, setGuestForm] = useState({ name:'', attendance:'yes', companions:'0', songs:['', '', ''] });
   const [customBg, setCustomBg] = useState('');
   const [activeEditorPanel, setActiveEditorPanel] = useState(null);
+  const [activeBackgroundCategory, setActiveBackgroundCategory] = useState('classicos');
+  const activeBackgrounds = backgroundCategories[activeBackgroundCategory].images;
   const pointerStart = useRef(null);
   const resizeStart = useRef(null);
   const previewRef = useRef(null);
@@ -602,7 +634,56 @@ Aguarde eu explicar exatamente como quero o convite antes de criar a imagem.`;
             <label className="field-block"><span><b>Local</b></span><div className="field-apply-row"><input placeholder="Ex.: Salão de Festas" value={details.place} onChange={(e)=>patchDetails({place:e.target.value})}/><button type="button" onClick={()=>applyTextAgain('place',`⌖ ${details.place||'Salão de Festas'}`)}>Aplicar texto</button></div></label>
           </div>}
 
-          {activeEditorPanel === 'fundos' && <div className="editor-section editor-section-active"><ControlTitle icon="▧" text="Fundos do convite"/><div className="background-grid">{backgrounds.map((src,i)=><button key={src} className={background===i&&!customBg?'selected':''} onClick={()=>{patchInvite({background:i,cover:i,customBackground:''});setCustomBg('')}}><img src={src} alt={covers[i]}/><span>{covers[i]}</span></button>)}</div>
+          {activeEditorPanel === 'fundos' && <div className="editor-section editor-section-active"><ControlTitle icon="▧" text="Fundos do convite"/><div className="background-category-tabs">
+  {Object.entries(backgroundCategories).map(([id, category]) => (
+    <button
+      type="button"
+      key={id}
+      className={activeBackgroundCategory === id ? 'active' : ''}
+      onClick={() => setActiveBackgroundCategory(id)}
+    >
+      {category.label}
+    </button>
+  ))}
+</div>
+<div className="background-grid">
+  {activeBackgrounds.map((src, i) => {
+    const isClassic = activeBackgroundCategory === 'classicos';
+    const isSelected = isClassic
+      ? background === i && !invite.customBackground && !customBg
+      : invite.customBackground === src || customBg === src;
+
+    return (
+      <button
+        type="button"
+        key={src}
+        className={isSelected ? 'selected' : ''}
+        onClick={() => {
+          setCustomBg('');
+          if (isClassic) {
+            patchInvite({
+              background: i,
+              cover: i,
+              customBackground: '',
+            });
+          } else {
+            patchInvite({
+              background: i,
+              cover: i,
+              customBackground: src,
+            });
+          }
+        }}
+      >
+        <img
+          src={src}
+          alt={`${backgroundCategories[activeBackgroundCategory].label} ${i + 1}`}
+        />
+        <span>{isClassic ? covers[i] : `Fundo ${i + 1}`}</span>
+      </button>
+    );
+  })}
+</div>
             <label className="upload-wide">＋ Enviar minha imagem<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e)=>{const f=e.target.files?.[0];if(f){uploadCustomBackground(f)}}}/></label>
           </div>}
 
