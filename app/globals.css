@@ -23,10 +23,10 @@
 .preview-card.preview-5{background:linear-gradient(155deg,#ff725c,#842d57)}
 .preview-card .preview-title{font:600 15px/1.25 Georgia,serif;color:inherit;margin:9px 0 5px}
 .preview-card .preview-host{opacity:.82;font-size:10px}
-.preview-card.font-preview-0,.native-inside.font-preview-0{font-family:Georgia,'Times New Roman',serif}
-.preview-card.font-preview-1,.native-inside.font-preview-1{font-family:Arial,Helvetica,sans-serif}
-.preview-card.font-preview-2,.native-inside.font-preview-2{font-family:'Times New Roman',Georgia,serif;font-style:italic}
-.preview-card.font-preview-3,.native-inside.font-preview-3{font-family:'Trebuchet MS',Arial,sans-serif}
+.preview-card.font-preview-0,.native-inside.font-preview-0,.floating-text.font-preview-0,.published-text.font-preview-0{font-family:Georgia,'Times New Roman',serif}
+.preview-card.font-preview-1,.native-inside.font-preview-1,.floating-text.font-preview-1,.published-text.font-preview-1{font-family:Arial,Helvetica,sans-serif}
+.preview-card.font-preview-2,.native-inside.font-preview-2,.floating-text.font-preview-2,.published-text.font-preview-2{font-family:'Times New Roman',Georgia,serif;font-style:italic}
+.preview-card.font-preview-3,.native-inside.font-preview-3,.floating-text.font-preview-3,.published-text.font-preview-3{font-family:'Trebuchet MS',Arial,sans-serif}
 .native-inside{border-color:var(--preview-accent,#c69242);box-shadow:inset 0 0 0 2px var(--preview-accent-soft,#6a073533)}
 .native-inside>small{color:var(--preview-accent,#6a0735);font-weight:700;text-transform:uppercase;letter-spacing:.09em}
 .native-inside h2{color:var(--preview-accent,#4b1731)}
