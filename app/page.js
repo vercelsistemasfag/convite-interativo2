@@ -171,6 +171,17 @@ export default function Home() {
   const resizeStart = useRef(null);
   const previewRef = useRef(null);
   const [selectedObject, setSelectedObject] = useState(null);
+  const selectedTextId =
+    typeof selectedObject === 'string' && selectedObject.startsWith('text:')
+      ? selectedObject.slice(5)
+      : '';
+  const selectedText = floatingTexts.find((item) => item.id === selectedTextId);
+  const selectedTextColor = selectedText?.color || fontColor;
+
+  function applySelectedTextColor(nextColor) {
+    if (!selectedTextId) return;
+    updateFloatingText(selectedTextId, { color: nextColor });
+  }
   const [publishedEvent, setPublishedEvent] = useState(null);
   useEffect(() => {
     try {
@@ -592,7 +603,7 @@ Aguarde eu explicar exatamente como quero o convite antes de criar a imagem.`;
           {activeEditorPanel === 'fontes' && <div className="editor-section editor-section-active"><ControlTitle icon="Aa" text="Fontes compactas"/><p className="section-hint">Doze estilos realmente diferentes, carregados como web fonts para manter o mesmo visual em qualquer aparelho.</p><div className="font-choice-list">{[['Bebas Neue','VAMOS CELEBRAR!'],['Oswald','Vamos celebrar!'],['Roboto Condensed','Vamos celebrar!'],['Barlow Condensed','Vamos celebrar!'],['Archivo Narrow','Vamos celebrar!'],['Anton','VAMOS CELEBRAR!'],['Fjalla One','Vamos celebrar!'],['Amatic SC','VAMOS CELEBRAR!'],['Pacifico','Vamos celebrar!'],['Lobster','Vamos celebrar!'],['Caveat','Vamos celebrar!'],['Satisfy','Vamos celebrar!']].map(([x,sample],i)=><button key={x} className={`font-sample font-preview-${i} ${font===i?'selected':''}`} onClick={()=>patchInvite({font:i})}><span>{sample}</span><small>{x}</small>{font===i&&<b>✓</b>}</button>)}</div></div>}
           {activeEditorPanel === 'cores' && <div className="editor-section editor-section-active">
             <ControlTitle icon="◉" text="Cores do convite"/>
-            <div className="color-control-group"><strong>Cor da fonte</strong><p>Altera a cor de todos os textos do convite.</p><div className="color-row font-color-row">{['#ffffff','#f4e7d7','#e7bd6a','#6a0735','#17345f','#231f20','#ff654e'].map((c,i)=><button aria-label={`Cor da fonte ${i+1}`} key={c} style={{background:c}} className={fontColor.toLowerCase()===c?'selected':''} onClick={()=>patchInvite({fontColor:c})}/>)}</div><label className="custom-color-picker"><span>Escolher outra cor</span><input type="color" value={fontColor} onChange={(e)=>patchInvite({fontColor:e.target.value})}/><b style={{background:fontColor}}></b></label></div>
+            <div className="color-control-group"><strong>Cor da caixa selecionada</strong><p>{selectedTextId ? 'Escolha a cor somente desta caixa de texto.' : 'Toque primeiro em uma caixa de texto na prévia.'}</p><div className="color-row font-color-row">{['#ffffff','#f4e7d7','#e7bd6a','#6a0735','#17345f','#231f20','#ff654e'].map((c,i)=><button aria-label={`Cor da fonte ${i+1}`} key={c} style={{background:c}} className={selectedTextColor.toLowerCase()===c?'selected':''} disabled={!selectedTextId} onClick={()=>applySelectedTextColor(c)}/>)}</div><label className="custom-color-picker"><span>Escolher outra cor</span><input type="color" value={selectedTextColor} disabled={!selectedTextId} onChange={(e)=>applySelectedTextColor(e.target.value)}/><b style={{background:selectedTextColor}}></b></label></div>
             <div className="color-control-group accent-group"><strong>Cor de destaque</strong><p>Usada em bordas e detalhes decorativos.</p><div className="color-row">{['#6a0735','#ff654e','#c78c2a','#17345f','#638b7b','#9c739b'].map((c,i)=><button aria-label={`Cor de destaque ${i+1}`} key={c} style={{background:c}} className={color===i?'selected':''} onClick={()=>patchInvite({color:i})}/>)}</div></div>
           </div>}
           {activeEditorPanel === 'elementos' && <div className="editor-section editor-section-active"><ControlTitle icon="✦" text="Elementos flutuantes"/><p className="section-hint">Toque para adicionar. Na arte, toque no ícone para selecionar, arraste a caixa para mover e use a seta no canto para redimensionar.</p><div className="element-catalog">{elementCatalog.map(([type,glyph,label])=><button key={type} onClick={()=>addFloatingElement(type,glyph)}><b>{glyph}</b><span>{label}</span></button>)}</div></div>}
@@ -631,8 +642,8 @@ Aguarde eu explicar exatamente como quero o convite antes de criar a imagem.`;
             <div className="book-signature">Celebra <span>• convite interativo •</span></div>
           </div>
           <button type="button" className="book-cover" aria-label={inviteOpen?'Fechar convite':'Abrir convite'} onClick={()=>setInviteOpen(v=>!v)} style={{...previewStyle,backgroundImage:`linear-gradient(rgba(20,8,16,.12),rgba(20,8,16,.12)), url(${invite.customBackground || customBg || backgrounds[background]})`}}>
-            {floatingTexts.filter(el=>el.visible!==false).map(el=><div key={el.id} className={`published-object published-text font-preview-${font}`} style={{left:`${el.x}%`,top:`${el.y}%`,fontSize:`${el.size}px`,transform:`translate(-50%,-50%)`}}>{textValue(el)}</div>)}
-            {floatingElements.map(el=><div key={el.id} className="published-object published-decor" style={{left:`${el.x}%`,top:`${el.y}%`,fontSize:`${el.size}px`,transform:`translate(-50%,-50%)`}}>{el.glyph}</div>)}
+            {floatingTexts.filter(el=>el.visible!==false).map(el=><div key={el.id} className={`published-object published-text font-preview-${font}`} style={{left:`${el.x}%`,top:`${el.y}%`,fontSize:`${el.size}px`,color:el.color||fontColor,transform:`translate(-50%,-50%)`}}>{textValue(el)}</div>)}
+            {floatingElements.map(el=><div key={el.id} className="published-object published-decor" style={{left:`${el.x}%`,top:`${el.y}%`,fontSize:`${el.size}px`,color:el.color||fontColor,transform:`translate(-50%,-50%)`}}>{el.glyph}</div>)}
             <span className="book-open-hint">Toque para abrir <b>›</b></span>
           </button>
         </div>
