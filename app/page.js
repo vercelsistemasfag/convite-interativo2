@@ -256,6 +256,10 @@ export default function Home() {
     updateFloatingText(selectedTextId, { font: nextFont });
   }
   const [publishedEvent, setPublishedEvent] = useState(null);
+  const finalFloatingTexts =
+    Array.isArray(publishedEvent?.design?.floatingTexts)
+      ? publishedEvent.design.floatingTexts
+      : floatingTexts;
   useEffect(() => {
     try {
       const raw = localStorage.getItem("celebra:published-event:v1");
@@ -393,7 +397,7 @@ Aguarde eu explicar exatamente como quero o convite antes de criar a imagem.`;
       const { data: event, error } = await supabase
         .from('events')
         .insert(payload)
-        .select('id, public_code')
+        .select('id, public_code, design')
         .single();
 
       if (error) throw error;
@@ -770,7 +774,7 @@ Aguarde eu explicar exatamente como quero o convite antes de criar a imagem.`;
             <div className="book-signature">Celebra <span>• convite interativo •</span></div>
           </div>
           <button type="button" className="book-cover" aria-label={inviteOpen?'Fechar convite':'Abrir convite'} onClick={()=>setInviteOpen(v=>!v)} style={{...previewStyle,backgroundImage:`linear-gradient(rgba(20,8,16,.12),rgba(20,8,16,.12)), url(${invite.customBackground || customBg || backgrounds[background]})`}}>
-            {floatingTexts.filter(el=>el.visible!==false).map(el=><div key={el.id} className={`published-object published-text font-preview-${el.font ?? font}`} style={{left:`${el.x}%`,top:`${el.y}%`,fontSize:`${el.size}px`,color:el.color||fontColor,transform:`translate(-50%,-50%)`}}>{textValue(el)}</div>)}
+            {finalFloatingTexts.filter(el=>el.visible!==false).map(el=><div key={el.id} className={`published-object published-text font-preview-${el.font ?? font}`} style={{left:`${el.x}%`,top:`${el.y}%`,fontSize:`${el.size}px`,color:el.color||fontColor,transform:`translate(-50%,-50%)`}}>{textValue(el)}</div>)}
             {floatingElements.map(el=><div key={el.id} className="published-object published-decor" style={{left:`${el.x}%`,top:`${el.y}%`,fontSize:`${el.size}px`,color:el.color||fontColor,transform:`translate(-50%,-50%)`}}>{el.glyph}</div>)}
             <span className="book-open-hint">Toque para abrir <b>›</b></span>
           </button>
