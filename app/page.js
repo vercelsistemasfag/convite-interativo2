@@ -408,7 +408,11 @@ Aguarde eu explicar exatamente como quero o convite antes de criar a imagem.`;
       setStep(3);
     } catch (error) {
       console.error('Erro ao publicar convite:', error);
-      setConfigError('Não foi possível publicar o convite. Tente novamente.');
+      setConfigError(
+        `Não foi possível publicar: ${
+          error?.message || error?.details || error?.code || 'erro desconhecido'
+        }`
+      );
     }
   }
 
