@@ -394,8 +394,11 @@ export default function PublicInvitePage() {
                   style={{
                     left: `${item.x ?? 50}%`,
                     top: `${item.y ?? 50}%`,
-                    fontSize: `${item.size ?? 18}px`
-                  }}
+                    fontSize: `${item.size ?? 18}px`,
+                  color: item.color || event.font_color || '#f4e7d7',
+                  fontFamily:
+                    fonts[Number(item.font ?? event.font_index ?? 0)] ||
+                    fonts[0],}}
                 >
                   {value}
                 </div>
