@@ -460,7 +460,42 @@ Aguarde eu explicar exatamente como quero o convite antes de criar a imagem.`;
     setInvite(current => ({...current, floatingElements:(current.floatingElements||[]).map(el=>el.id===id?{...el,...patch}:el)}));
   }
   function updateFloatingText(id, patch) {
-    setInvite(current => ({...current, floatingTexts:(current.floatingTexts||defaultInvite.floatingTexts).map(el=>el.id===id?{...el,...patch}:el)}));
+    setInvite((current) => {
+      const defaults = defaultInvite.floatingTexts || [];
+      const currentTexts = Array.isArray(current.floatingTexts)
+        ? current.floatingTexts
+        : defaults;
+
+      const textExists = currentTexts.some((item) => item.id === id);
+
+      if (textExists) {
+        return {
+          ...current,
+          floatingTexts: currentTexts.map((item) =>
+            item.id === id ? { ...item, ...patch } : item
+          ),
+        };
+      }
+
+      const defaultText = defaults.find((item) => item.id === id);
+
+      return {
+        ...current,
+        floatingTexts: [
+          ...currentTexts,
+          {
+            ...(defaultText || {
+              id,
+              x: 50,
+              y: 50,
+              size: 24,
+              visible: true,
+            }),
+            ...patch,
+          },
+        ],
+      };
+    });
   }
   function removeObject(kind,id) {
     if(kind==='decor') setInvite(current=>({...current,floatingElements:(current.floatingElements||[]).filter(el=>el.id!==id)}));
