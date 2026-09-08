@@ -243,7 +243,22 @@ export default function PainelPage() {
           target="_blank"
           rel="noreferrer"
         >
-          <span className="panel-action-icon">✆</span>
+          <span className="panel-action-icon">
+            <svg
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M20 11.6a8 8 0 0 1-11.8 7L4 19.7l1.1-4.1A8 8 0 1 1 20 11.6Z" />
+              <path d="M8.1 7.7c.3-.3.7-.2.9.1l1.1 1.6c.2.3.2.6 0 .9l-.8.9c.7 1.5 1.8 2.6 3.4 3.4l.9-.8c.3-.2.6-.2.9 0l1.6 1.1c.3.2.4.6.1.9-.6.8-1.6 1.2-2.6 1-3.8-.8-6.8-3.8-7.6-7.6-.2-1 .3-2 1.1-2.6Z" />
+            </svg>
+          </span>
           <span>
             <strong>Compartilhar no WhatsApp</strong>
             <small>Envie o convite diretamente</small>
