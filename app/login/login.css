@@ -269,3 +269,28 @@
   outline-offset:5px;
   border-radius:6px;
 }
+
+
+/* Organiza login e crédito verticalmente em uma única tela */
+.auth-page{
+  flex-direction:column;
+  gap:10px;
+  min-height:100svh;
+  padding-top:16px;
+  padding-bottom:10px;
+}
+
+.login-developer-footer{
+  flex:none;
+  margin-top:0;
+  padding:0 12px;
+}
+
+.login-developer-footer a{
+  gap:4px;
+  font-size:10px;
+}
+
+.login-developer-footer img{
+  width:62px;
+}
