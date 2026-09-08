@@ -351,6 +351,21 @@ export default function LoginPage() {
             : 'Já tenho uma conta'}
         </button>
       </section>
+
+      <footer className="login-developer-footer">
+        <a
+          href="https://vercelsistemas.vercel.app"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Acessar o site da Vercel Tecnologia da Informação"
+        >
+          <span>Desenvolvido por Vercel Tecnologia da Informação</span>
+          <img
+            src="/brand/vercel-logotipo-transparente.png"
+            alt="Vercel Tecnologia da Informação"
+          />
+        </a>
+      </footer>
     </main>
   );
 }

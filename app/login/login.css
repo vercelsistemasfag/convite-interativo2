@@ -233,3 +233,39 @@
   opacity:.55;
   cursor:default;
 }
+
+
+/* Crédito discreto no rodapé do login */
+.login-developer-footer{
+  width:100%;
+  margin-top:22px;
+  padding:0 16px 18px;
+  display:flex;
+  justify-content:center;
+  text-align:center;
+}
+
+.login-developer-footer a{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:7px;
+  color:#756b72;
+  font-size:11px;
+  line-height:1.3;
+  text-decoration:none;
+  opacity:.78;
+}
+
+.login-developer-footer img{
+  display:block;
+  width:76px;
+  height:auto;
+  object-fit:contain;
+}
+
+.login-developer-footer a:focus-visible{
+  outline:2px solid #6a0735;
+  outline-offset:5px;
+  border-radius:6px;
+}
