@@ -446,3 +446,28 @@
   background:#6a0735;
   color:#fff;
 }
+
+
+/* Quebra automática para textos longos do convite */
+.floating-text{
+  width:max-content;
+  max-width:88%;
+}
+
+.floating-text .object-content{
+  white-space:normal;
+  overflow-wrap:anywhere;
+  word-break:normal;
+  text-align:center;
+  line-height:1.12;
+}
+
+.published-object.published-text{
+  width:max-content;
+  max-width:88%;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  word-break:normal;
+  text-align:center;
+  line-height:1.12;
+}

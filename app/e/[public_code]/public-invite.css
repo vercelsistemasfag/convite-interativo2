@@ -1469,3 +1469,15 @@
 .guest-app-actions{
   flex:0 0 auto;
 }
+
+
+/* Quebra automática dos textos no convite público */
+.cover-text{
+  width:max-content;
+  max-width:88%;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  word-break:normal;
+  text-align:center;
+  line-height:1.12;
+}
