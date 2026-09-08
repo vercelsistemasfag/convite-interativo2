@@ -393,7 +393,7 @@ Aguarde eu explicar exatamente como quero o convite antes de criar a imagem.`;
       const { data: event, error } = await supabase
         .from('events')
         .insert(payload)
-        .select('id, public_code, design')
+        .select('id, public_code')
         .single();
 
       if (error) throw error;
