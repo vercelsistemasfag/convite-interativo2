@@ -41,7 +41,7 @@ public class MainActivity extends BridgeActivity {
 
         final ImageView imagem = new ImageView(this);
         imagem.setImageResource(R.drawable.capa_convidado);
-        imagem.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        imagem.setScaleType(ImageView.ScaleType.CENTER_CROP);
         imagem.setAdjustViewBounds(false);
 
         capa.addView(imagem, new FrameLayout.LayoutParams(
@@ -66,7 +66,7 @@ public class MainActivity extends BridgeActivity {
             float alturaTela = capa.getHeight();
             float larguraOriginal = imagem.getDrawable().getIntrinsicWidth();
             float alturaOriginal = imagem.getDrawable().getIntrinsicHeight();
-            float escala = Math.min(
+            float escala = Math.max(
                 larguraTela / larguraOriginal,
                 alturaTela / alturaOriginal
             );
@@ -85,7 +85,35 @@ public class MainActivity extends BridgeActivity {
             botao.setLayoutParams(posicao);
         });
 
-        botao.setOnClickListener(view -> raiz.removeView(capa));
+        botao.setOnClickListener(view -> {
+            final WebView webView = bridge != null ? bridge.getWebView() : null;
+
+            if (webView == null) {
+                raiz.removeView(capa);
+                return;
+            }
+
+            String abrirConvite =
+                "(function(){" +
+                "var itens=document.querySelectorAll('button,a');" +
+                "for(var i=0;i<itens.length;i++){" +
+                "var texto=(itens[i].textContent||'').toLowerCase();" +
+                "if(texto.indexOf('abrir meu convite')!==-1){" +
+                "itens[i].click();" +
+                "return true;" +
+                "}" +
+                "}" +
+                "return false;" +
+                "})()";
+
+            webView.evaluateJavascript(abrirConvite, resultado ->
+                capa.postDelayed(() -> {
+                    if (capa.getParent() != null) {
+                        raiz.removeView(capa);
+                    }
+                }, 350)
+            );
+        });
     }
 
     private void abrirConviteDoIntent(Intent intent) {
