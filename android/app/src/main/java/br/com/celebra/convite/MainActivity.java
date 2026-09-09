@@ -4,6 +4,11 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.webkit.WebView;
+import android.graphics.Color;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import com.getcapacitor.BridgeActivity;
 
@@ -16,6 +21,7 @@ public class MainActivity extends BridgeActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         abrirConviteDoIntent(getIntent());
+        mostrarCapa();
     }
 
     @Override
@@ -23,6 +29,63 @@ public class MainActivity extends BridgeActivity {
         super.onNewIntent(intent);
         setIntent(intent);
         abrirConviteDoIntent(intent);
+        mostrarCapa();
+    }
+
+    private void mostrarCapa() {
+        final ViewGroup raiz = findViewById(android.R.id.content);
+        if (raiz == null) return;
+
+        final FrameLayout capa = new FrameLayout(this);
+        capa.setBackgroundColor(Color.rgb(242, 211, 200));
+
+        final ImageView imagem = new ImageView(this);
+        imagem.setImageResource(R.drawable.capa_convidado);
+        imagem.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        imagem.setAdjustViewBounds(false);
+
+        capa.addView(imagem, new FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        ));
+
+        final View botao = new View(this);
+        botao.setContentDescription("Abrir meu convite");
+        botao.setClickable(true);
+        capa.addView(botao, new FrameLayout.LayoutParams(1, 1));
+
+        raiz.addView(capa, new ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        ));
+
+        capa.post(() -> {
+            if (imagem.getDrawable() == null) return;
+
+            float larguraTela = capa.getWidth();
+            float alturaTela = capa.getHeight();
+            float larguraOriginal = imagem.getDrawable().getIntrinsicWidth();
+            float alturaOriginal = imagem.getDrawable().getIntrinsicHeight();
+            float escala = Math.min(
+                larguraTela / larguraOriginal,
+                alturaTela / alturaOriginal
+            );
+
+            float larguraImagem = larguraOriginal * escala;
+            float alturaImagem = alturaOriginal * escala;
+            float inicioX = (larguraTela - larguraImagem) / 2f;
+            float inicioY = (alturaTela - alturaImagem) / 2f;
+
+            FrameLayout.LayoutParams posicao = new FrameLayout.LayoutParams(
+                (int) (larguraImagem * 0.60f),
+                (int) (alturaImagem * 0.09f)
+            );
+            posicao.leftMargin = (int) (inicioX + larguraImagem * 0.20f);
+            posicao.topMargin = (int) (inicioY + alturaImagem * 0.76f);
+            botao.setLayoutParams(posicao);
+        });
+
+        botao.setOnClickListener(view -> raiz.removeView(capa));
     }
 
     private void abrirConviteDoIntent(Intent intent) {
