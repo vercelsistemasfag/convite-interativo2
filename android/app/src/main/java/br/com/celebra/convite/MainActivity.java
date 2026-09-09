@@ -85,35 +85,9 @@ public class MainActivity extends BridgeActivity {
             botao.setLayoutParams(posicao);
         });
 
-        botao.setOnClickListener(view -> {
-            final WebView webView = bridge != null ? bridge.getWebView() : null;
-
-            if (webView == null) {
-                raiz.removeView(capa);
-                return;
-            }
-
-            String abrirConvite =
-                "(function(){" +
-                "var itens=document.querySelectorAll('button,a');" +
-                "for(var i=0;i<itens.length;i++){" +
-                "var texto=(itens[i].textContent||'').toLowerCase();" +
-                "if(texto.indexOf('abrir meu convite')!==-1){" +
-                "itens[i].click();" +
-                "return true;" +
-                "}" +
-                "}" +
-                "return false;" +
-                "})()";
-
-            webView.evaluateJavascript(abrirConvite, resultado ->
-                capa.postDelayed(() -> {
-                    if (capa.getParent() != null) {
-                        raiz.removeView(capa);
-                    }
-                }, 350)
-            );
-        });
+        View.OnClickListener abrirConvite = view -> raiz.removeView(capa);
+        botao.setOnClickListener(abrirConvite);
+        capa.setOnClickListener(abrirConvite);
     }
 
     private void abrirConviteDoIntent(Intent intent) {
