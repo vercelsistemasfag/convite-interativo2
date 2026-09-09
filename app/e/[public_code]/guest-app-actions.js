@@ -43,7 +43,7 @@ export default function GuestAppActions({ publicCode }) {
 
   const prosseguir = () => {
     if (dialog === 'android') {
-      window.location.href = '/downloads/celebra-convite.apk';
+      window.location.href = `/downloads/celebra-convite.apk?v=${Date.now()}`;
       return;
     }
 
