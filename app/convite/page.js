@@ -19,12 +19,15 @@ export default function ConviteApp() {
       localStorage.getItem('celebra:last-invite') || '';
 
     setCodigo(salvo);
+    if (salvo) abrirConvite(salvo);
 
     const recebido = (event) => {
       const novoCodigo = event.detail?.codigo;
 
       if (novoCodigo) {
+        localStorage.setItem('celebra:last-invite', novoCodigo);
         setCodigo(novoCodigo);
+        abrirConvite(novoCodigo);
       }
     };
 
