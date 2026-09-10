@@ -25,16 +25,12 @@ jobs:
       - name: Gerar APK
         working-directory: android
         run: ./gradlew assembleDebug
-      - name: Publicar APK no GitHub Releases
+      - name: Publicar APK no Cloudflare R2
         env:
-          GH_TOKEN: ${{ github.token }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          cp android/app/build/outputs/apk/debug/app-debug.apk celebra-convite.apk
-          if gh release view apk-atual >/dev/null 2>&1; then
-            gh release upload apk-atual celebra-convite.apk --clobber
-          else
-            gh release create apk-atual celebra-convite.apk               --title "Celebra Convite - APK atual"               --notes "Versão atual do aplicativo Celebra para convidados."
-          fi
+          npx wrangler r2 object put celebra-downloads/celebra-convite.apk             --file=android/app/build/outputs/apk/debug/app-debug.apk             --remote             --content-type=application/vnd.android.package-archive
 
       - uses: actions/upload-artifact@v4
         with:
