@@ -183,3 +183,24 @@
     margin:auto;
   }
 }
+
+.event-actions .delete-invite-button {
+  grid-column: 1 / -1;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #d65a67;
+  border-radius: 12px;
+  background: #fff7f8;
+  color: #a52a38;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.event-actions .delete-invite-button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}

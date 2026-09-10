@@ -11,6 +11,7 @@ export default function InicioPage() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [deletingId, setDeletingId] = useState(null);
 
   useEffect(() => {
     async function loadHome() {
@@ -43,6 +44,37 @@ export default function InicioPage() {
 
     loadHome();
   }, [router]);
+
+  const excluirConvite = async (event) => {
+    const confirmou = window.confirm(
+      `Excluir "${event.title || 'Convite sem título'}"? Esta ação não poderá ser desfeita.`
+    );
+
+    if (!confirmou || deletingId) return;
+
+    setDeletingId(event.id);
+    setError('');
+
+    try {
+      const { error: deleteError } = await supabase
+        .from('events')
+        .delete()
+        .eq('id', event.id)
+        .eq('host_id', user.id);
+
+      if (deleteError) throw deleteError;
+
+      setEvents((atuais) =>
+        atuais.filter((convite) => convite.id !== event.id)
+      );
+    } catch (err) {
+      setError(
+        err?.message || 'Não foi possível excluir o convite. Tente novamente.'
+      );
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -117,6 +149,14 @@ export default function InicioPage() {
                 <div className="event-actions">
                   <a href={`/e/${event.public_code}`}>Ver convite</a>
                   <a href={`/painel?id=${event.id}`}>Abrir painel</a>
+                  <button
+                    type="button"
+                    className="delete-invite-button"
+                    onClick={() => excluirConvite(event)}
+                    disabled={deletingId === event.id}
+                  >
+                    {deletingId === event.id ? 'Excluindo...' : 'Excluir'}
+                  </button>
                 </div>
               </article>
             ))}
