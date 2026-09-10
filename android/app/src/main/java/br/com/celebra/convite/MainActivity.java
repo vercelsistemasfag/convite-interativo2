@@ -40,7 +40,15 @@ public class MainActivity extends BridgeActivity {
         capa.setBackgroundColor(Color.rgb(242, 211, 200));
 
         final ImageView imagem = new ImageView(this);
-        imagem.setImageResource(R.drawable.capa_convidado);
+        float proporcaoTela =
+                (float) getResources().getDisplayMetrics().heightPixels
+                / getResources().getDisplayMetrics().widthPixels;
+
+        imagem.setImageResource(
+                proporcaoTela >= 1.9f
+                        ? R.drawable.capa_convidado_9x20
+                        : R.drawable.capa_convidado
+        );
         imagem.setScaleType(ImageView.ScaleType.CENTER_CROP);
         imagem.setAdjustViewBounds(false);
 
