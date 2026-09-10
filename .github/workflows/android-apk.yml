@@ -17,6 +17,9 @@ jobs:
           java-version: "21"
       - name: Instalar dependencias
         run: npm ci
+      - name: Evitar incluir o APK dentro dele mesmo
+        run: rm -f public/downloads/celebra-convite.apk
+
       - name: Sincronizar Capacitor
         run: npx cap sync android
       - name: Gerar APK
