@@ -1481,3 +1481,26 @@
   text-align:center;
   line-height:1.12;
 }
+
+
+.guest-app-dialog-card {
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.guest-app-dialog-steps {
+  margin: 4px 0 18px;
+  padding-left: 22px;
+  color: #725c67;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.guest-app-dialog-steps li + li {
+  margin-top: 9px;
+}
+
+.guest-app-dialog-steps strong {
+  color: #5f0735;
+}

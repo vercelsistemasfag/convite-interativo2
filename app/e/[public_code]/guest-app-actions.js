@@ -43,7 +43,13 @@ export default function GuestAppActions({ publicCode }) {
 
   const prosseguir = () => {
     if (dialog === 'android') {
-      window.location.href = 'https://pub-5c31ce22b1b34c859235d0a6696b4a04.r2.dev/celebra-convite.apk';
+      setDialog(null);
+
+      window.setTimeout(() => {
+        window.location.href =
+          'https://pub-5c31ce22b1b34c859235d0a6696b4a04.r2.dev/celebra-convite.apk';
+      }, 150);
+
       return;
     }
 
@@ -81,18 +87,38 @@ export default function GuestAppActions({ publicCode }) {
             </button>
 
             {dialog === 'android' ? (
-              <>
-                <h3>Instalar Celebra Convidado</h3>
-                <p>
-                  O Android poderá pedir autorização para instalar aplicativos
-                  desta fonte.
-                </p>
-                <p>
-                  Se isso acontecer, permita temporariamente a instalação para
-                  este navegador e retorne para concluir.
-                </p>
-              </>
-            ) : (
+            <>
+              <h3>Instalar Celebra Convidado</h3>
+
+              <p>
+                Ao tocar em <strong>Prosseguir</strong>, o download começará
+                automaticamente.
+              </p>
+
+              <ol className="guest-app-dialog-steps">
+                <li>
+                  Quando o download terminar, toque no arquivo e confirme a
+                  instalação.
+                </li>
+                <li>
+                  Se o Android pedir autorização para instalar aplicativos
+                  desta fonte, permita o acesso.
+                </li>
+                <li>
+                  Se o Google Play informar que bloqueou a instalação por
+                  segurança, toque na seta abaixo do aviso e selecione
+                  <strong> Instalar assim mesmo</strong>.
+                </li>
+                <li>
+                  Ao concluir, não toque no botão <strong>Abrir</strong> da
+                  mensagem exibida no topo da tela. Volte para este convite e
+                  toque em <strong>Abrir no aplicativo</strong>. Esse primeiro
+                  acesso vincula e salva o convite no Celebra Convidado para
+                  que você possa acessá-lo diretamente pelo aplicativo nas
+                  próximas vezes.
+                </li>
+              </ol>
+            </>          ) : (
               <>
                 <h3>Adicionar no iPhone ou iPad</h3>
                 <p>
