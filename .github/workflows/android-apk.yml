@@ -25,17 +25,15 @@ jobs:
       - name: Gerar APK
         working-directory: android
         run: ./gradlew assembleDebug
-      - name: Atualizar APK público
+      - name: Publicar APK no GitHub Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          cp android/app/build/outputs/apk/debug/app-debug.apk public/downloads/celebra-convite.apk
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f public/downloads/celebra-convite.apk
-          if git diff --cached --quiet; then
-            echo "APK público já está atualizado"
+          cp android/app/build/outputs/apk/debug/app-debug.apk celebra-convite.apk
+          if gh release view apk-atual >/dev/null 2>&1; then
+            gh release upload apk-atual celebra-convite.apk --clobber
           else
-            git commit -m "Atualiza APK público automaticamente"
-            git push
+            gh release create apk-atual celebra-convite.apk               --title "Celebra Convite - APK atual"               --notes "Versão atual do aplicativo Celebra para convidados."
           fi
 
       - uses: actions/upload-artifact@v4

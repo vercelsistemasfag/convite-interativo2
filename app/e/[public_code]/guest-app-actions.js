@@ -43,7 +43,7 @@ export default function GuestAppActions({ publicCode }) {
 
   const prosseguir = () => {
     if (dialog === 'android') {
-      window.location.href = `/downloads/celebra-convite.apk?v=${Date.now()}`;
+      window.location.href = 'https://github.com/vercelsistemasfag/convite-interativo2/releases/download/apk-atual/celebra-convite.apk';
       return;
     }
 
