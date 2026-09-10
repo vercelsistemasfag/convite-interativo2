@@ -111,8 +111,7 @@ export default function GuestAppActions({ publicCode }) {
                 </li>
                 <li>
                   Quando aparecer a caixa <strong>Aplicativo instalado</strong>,
-                  toque em <strong>Concluído</strong> — não toque em
-                  <strong>Abrir</strong>. Depois, volte para este convite e
+                  toque em <strong>Concluído</strong> — não toque em&nbsp;<strong>Abrir</strong>. Depois, volte para este convite e
                   toque em <strong>Abrir no aplicativo</strong>.
                   <br />
                   Esse primeiro
