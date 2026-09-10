@@ -1,66 +1,20 @@
-# Celebre — Convites Interativos
+# Celebra — Convite Interativo
 
-Frontend MVP do PWA de convites interativos, preparado para Cloudflare Workers com vinext.
+Versão consolidada do frontend aprovada em 27/08/2026.
 
-## Stack
-
-- Next.js 16 / App Router
-- React 19
-- vinext
-- Cloudflare Workers + Vite Plugin
-- PWA com manifest e service worker
-
-## Desenvolvimento local
+## Deploy Cloudflare + vinext
 
 ```bash
 npm install
-npm run check:vinext
-npm run dev:vinext
-```
-
-O fluxo original do Next.js continua disponível com `npm run dev`.
-
-## Build Cloudflare
-
-```bash
 npm run build:vinext
-```
-
-## Primeiro deploy
-
-1. Entre na sua conta Cloudflare pelo terminal:
-
-```bash
-npx wrangler login
-```
-
-2. Confira sua conta:
-
-```bash
-npx wrangler whoami
-```
-
-3. Faça o deploy:
-
-```bash
 npm run deploy
 ```
 
-O Worker será publicado inicialmente em um endereço `*.workers.dev`. Depois, um domínio personalizado pode ser vinculado pelo painel da Cloudflare.
-
-> Se o deploy for feito por CI/GitHub, use `CLOUDFLARE_API_TOKEN` e `CLOUDFLARE_ACCOUNT_ID` como variáveis secretas em vez de colocar credenciais no código.
-
-## Estrutura futura
-
-O projeto está preparado para receber:
-
-- Supabase para eventos, confirmações, músicas, votos, presentes e contribuições;
-- Deezer para pesquisa e preview de músicas;
-- Amazon Creators API para lista de presentes;
-- Pix direto para a conta do organizador;
-- Links públicos individuais em `/e/<slug-codigo>`;
-- painel privado do organizador.
-
-## Observação
-
-O vinext ainda está em beta. Antes de cada atualização importante, rode `npm run check:vinext` e valide o build antes do deploy.
+### Diretrizes aplicadas
+- A página inicial usa exatamente a arte aprovada enviada pelo usuário, sem recriação.
+- As demais etapas usam exatamente os mockups aprovados na conversa como base visual.
+- Fluxo compacto sem rolagem interna nas telas de criação.
+- Categorias: Aniversário, Casamento, Bebê, Formatura, Natal e Réveillon.
+- Personalização com IA: Copiar instruções → Colar no ChatGPT → Abrir ChatGPT; abertura só é liberada após copiar.
+- Recursos: Confirmar presença, Sugestão de músicas, Lista de presentes, Presente coletivo, Como chegar e Adicionar à agenda.
+- Página final usa o modelo aprovado, com efeito de folhear o convite, link e compartilhamento.

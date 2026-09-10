@@ -1,0 +1,34 @@
+
+> celebre-convite-interativo@0.2.0 build:vinext
+> vinext build
+
+
+  vinext build  (Vite 8.2.2)
+
+transforming...
+✓ 23 modules transformed.
+✗ Build failed in 100ms
+Build failed with 1 error:
+
+[31m[UNLOADABLE_DEPENDENCY] [0mCould not load \0virtual:vinext-rsc-entry
+    [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m node_modules/vinext/dist/server/app-router-entry.js:12:92 [38;5;246m][0m
+    [38;5;246m│[0m
+ [38;5;246m12 │[0m [38;5;249mi[0m[38;5;249mm[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249mt[0m[38;5;249m [0m[38;5;249mr[0m[38;5;249ms[0m[38;5;249mc[0m[38;5;249mH[0m[38;5;249ma[0m[38;5;249mn[0m[38;5;249md[0m[38;5;249ml[0m[38;5;249me[0m[38;5;249mr[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249m{[0m[38;5;249m [0m[38;5;249m_[0m[38;5;249m_[0m[38;5;249ma[0m[38;5;249ms[0m[38;5;249ms[0m[38;5;249me[0m[38;5;249mt[0m[38;5;249mP[0m[38;5;249mr[0m[38;5;249me[0m[38;5;249mf[0m[38;5;249mi[0m[38;5;249mx[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249m_[0m[38;5;249m_[0m[38;5;249mb[0m[38;5;249ma[0m[38;5;249ms[0m[38;5;249me[0m[38;5;249mP[0m[38;5;249ma[0m[38;5;249mt[0m[38;5;249mh[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249m_[0m[38;5;249m_[0m[38;5;249mi[0m[38;5;249mm[0m[38;5;249ma[0m[38;5;249mg[0m[38;5;249me[0m[38;5;249mA[0m[38;5;249ml[0m[38;5;249ml[0m[38;5;249mo[0m[38;5;249mw[0m[38;5;249me[0m[38;5;249md[0m[38;5;249mW[0m[38;5;249mi[0m[38;5;249md[0m[38;5;249mt[0m[38;5;249mh[0m[38;5;249ms[0m[38;5;249m,[0m[38;5;249m [0m[38;5;249m_[0m[38;5;249m_[0m[38;5;249mi[0m[38;5;249mm[0m[38;5;249ma[0m[38;5;249mg[0m[38;5;249me[0m[38;5;249mC[0m[38;5;249mo[0m[38;5;249mn[0m[38;5;249mf[0m[38;5;249mi[0m[38;5;249mg[0m[38;5;249m [0m[38;5;249m}[0m[38;5;249m [0m[38;5;249mf[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mm[0m[38;5;249m [0m"virtual:vinext-rsc-entry"[38;5;249m;[0m
+ [38;5;240m   │[0m                                                                                            ─────────────┬────────────  
+ [38;5;240m   │[0m                                                                                                         ╰────────────── file name contained an unexpected NUL byte
+ [38;5;240m   │[0m 
+ [38;5;240m   │[0m [38;5;115mHelp[0m: This module seems to be a virtual module, but no plugin handled it via the load hook.
+[38;5;246m────╯[0m
+
+    at aggregateBindingErrorsIntoJsError (file:///workspaces/convite-interativo2/node_modules/rolldown/dist/shared/error-HDibX49O.mjs:48:18)
+    at unwrapBindingResult (file:///workspaces/convite-interativo2/node_modules/rolldown/dist/shared/error-HDibX49O.mjs:18:128)
+    at #build (file:///workspaces/convite-interativo2/node_modules/rolldown/dist/shared/rolldown-C9Hfg50O.mjs:133:34)
+    at async buildEnvironment (file:///workspaces/convite-interativo2/node_modules/vite/dist/node/chunks/node.js:33821:66)
+    at async Object.build (file:///workspaces/convite-interativo2/node_modules/vite/dist/node/chunks/node.js:34242:19)
+    at async Promise.all (index 0)
+    at async Object.buildApp (file:///workspaces/convite-interativo2/node_modules/@cloudflare/vite-plugin/dist/index.mjs:113824:3)
+    at async Object.buildApp (file:///workspaces/convite-interativo2/node_modules/vite/dist/node/chunks/node.js:34234:6)
+    at async file:///workspaces/convite-interativo2/node_modules/vinext/dist/cli.js:330:4
+    at async buildApp (file:///workspaces/convite-interativo2/node_modules/vinext/dist/cli.js:327:2) {
+  errors: [Getter/Setter]
+}

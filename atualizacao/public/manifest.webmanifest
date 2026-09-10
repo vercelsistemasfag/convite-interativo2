@@ -1,0 +1,13 @@
+{
+  "name": "Celebre — Convites Interativos",
+  "short_name": "Celebre",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f7f6fb",
+  "theme_color": "#6f55d9",
+  "lang": "pt-BR",
+  "description": "Crie convites interativos para momentos especiais.",
+  "categories": ["lifestyle", "social"]
+}
