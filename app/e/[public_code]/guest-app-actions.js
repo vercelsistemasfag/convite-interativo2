@@ -110,8 +110,9 @@ export default function GuestAppActions({ publicCode }) {
                   <strong> Instalar assim mesmo</strong>.
                 </li>
                 <li>
-                  Ao concluir, não toque no botão <strong>Abrir</strong> da
-                  mensagem exibida no topo da tela. Volte para este convite e
+                  Quando aparecer a caixa <strong>Aplicativo instalado</strong>,
+                  toque em <strong>Concluído</strong> — não toque em
+                  <strong>Abrir</strong>. Depois, volte para este convite e
                   toque em <strong>Abrir no aplicativo</strong>. Esse primeiro
                   acesso vincula e salva o convite no Celebra Convidado para
                   que você possa acessá-lo diretamente pelo aplicativo nas
