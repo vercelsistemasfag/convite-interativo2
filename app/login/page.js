@@ -382,7 +382,7 @@ export default function LoginPage() {
               </label>
             )}
 
-        <label className={passwordlessMode ? "otp-hidden" : undefined}>
+        <label style={{ display: passwordlessMode ? 'none' : undefined }}>
           Senha
           <div className="password-field">
             <input
