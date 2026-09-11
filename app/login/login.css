@@ -295,10 +295,6 @@
   width:62px;
 }
 
-.otp-hidden {
-  display: none;
-}
-
 .auth-passwordless {
   width: 100%;
   min-height: 50px;

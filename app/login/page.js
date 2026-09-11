@@ -481,8 +481,7 @@ export default function LoginPage() {
                     : 'Entrar sem senha'}
                 </button>
 
-                {passwordlessMode && (
-                  <div className="auth-register-invite">
+                <div className="auth-register-invite">
                     <span>Ainda não tem cadastro?</span>
                     <button
                       type="button"
@@ -502,7 +501,6 @@ export default function LoginPage() {
                       Criar minha conta
                     </button>
                   </div>
-                )}
               </>
             )}
 
@@ -518,20 +516,6 @@ export default function LoginPage() {
             )}
         </form>
       )}
-
-        <button
-          className="auth-switch"
-          type="button"
-          onClick={() => {
-            setMode(mode === 'login' ? 'register' : 'login');
-            setError('');
-            setMessage('');
-          }}
-        >
-          {mode === 'login'
-            ? 'Ainda não tenho conta'
-            : 'Já tenho uma conta'}
-        </button>
       </section>
 
       <footer className="login-developer-footer">
