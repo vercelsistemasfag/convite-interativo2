@@ -294,3 +294,41 @@
 .login-developer-footer img{
   width:62px;
 }
+
+.otp-hidden {
+  display: none;
+}
+
+.auth-passwordless {
+  width: 100%;
+  min-height: 50px;
+  margin-top: 10px;
+  border: 1px solid #6a0735;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #6a0735;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.auth-passwordless:disabled,
+.auth-resend:disabled {
+  cursor: default;
+  opacity: 0.65;
+}
+
+.auth-resend {
+  display: block;
+  margin: 14px auto 0;
+  padding: 6px;
+  border: 0;
+  background: transparent;
+  color: #6a0735;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: underline;
+  cursor: pointer;
+}

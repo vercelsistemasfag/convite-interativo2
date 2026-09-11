@@ -16,6 +16,8 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isRecovery, setIsRecovery] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -104,6 +106,70 @@ export default function LoginPage() {
       setMessage('Enviamos um link de recuperação para o seu e-mail.');
     } catch (err) {
       setError(err?.message || 'Não foi possível enviar o link de recuperação.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleSendOtp() {
+    setError('');
+    setMessage('');
+
+    if (!email.trim()) {
+      setError('Informe seu e-mail para receber o código de acesso.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { error: otpError } = await supabase.auth.signInWithOtp({
+        email: email.trim(),
+        options: {
+          shouldCreateUser: false
+        }
+      });
+
+      if (otpError) throw otpError;
+
+      setOtpSent(true);
+      setOtpCode('');
+      setMessage('Enviamos um código de 6 dígitos para o seu e-mail.');
+    } catch (err) {
+      setError(
+        err?.message || 'Não foi possível enviar o código de acesso.'
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleVerifyOtp(event) {
+    event.preventDefault();
+    setError('');
+    setMessage('');
+
+    if (!/^\d{6}$/.test(otpCode.trim())) {
+      setError('Digite o código de 6 dígitos enviado ao seu e-mail.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { error: verifyError } = await supabase.auth.verifyOtp({
+        email: email.trim(),
+        token: otpCode.trim(),
+        type: 'email'
+      });
+
+      if (verifyError) throw verifyError;
+
+      router.push('/anfitriao/inicio');
+    } catch (err) {
+      setError(
+        err?.message || 'Código inválido ou expirado. Solicite um novo código.'
+      );
     } finally {
       setLoading(false);
     }
@@ -241,8 +307,8 @@ export default function LoginPage() {
           </button>
         </form>
       ) : (
-      <form className="auth-form" onSubmit={handleSubmit}>
-          {mode === 'register' && (
+      <form className="auth-form" onSubmit={otpSent ? handleVerifyOtp : handleSubmit}>
+          {mode === 'register' && !otpSent && (
             <label>
               Nome
               <input
@@ -267,7 +333,28 @@ export default function LoginPage() {
             />
           </label>
 
-        <label>
+            {otpSent && (
+              <label>
+                Código de acesso
+                <input
+                  type="text"
+                  value={otpCode}
+                  onChange={(e) =>
+                    setOtpCode(
+                      e.target.value.replace(/\D/g, '').slice(0, 6)
+                    )
+                  }
+                  placeholder="Digite os 6 números"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                  pattern="[0-9]{6}"
+                  required
+                />
+              </label>
+            )}
+
+        <label className={otpSent ? "otp-hidden" : undefined}>
           Senha
           <div className="password-field">
             <input
@@ -276,7 +363,7 @@ export default function LoginPage() {
               onChange={e => setPassword(e.target.value)}
               placeholder="Sua senha"
               autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-              required
+              required={!otpSent}
             />
             <button
               type="button"
@@ -289,7 +376,7 @@ export default function LoginPage() {
           </div>
         </label>
 
-        {mode === 'login' && (
+        {mode === 'login' && !otpSent && (
           <button
             type="button"
             className="forgot-password"
@@ -327,13 +414,54 @@ export default function LoginPage() {
           {error && <p className="auth-error">{error}</p>}
           {message && <p className="auth-success">{message}</p>}
 
-          <button className="auth-primary" type="submit" disabled={loading}>
-            {loading
-              ? 'Aguarde...'
-              : mode === 'login'
-                ? 'Entrar'
-                : 'Criar conta'}
-          </button>
+          <button
+              className="auth-primary"
+              type="submit"
+              disabled={loading}
+            >
+              {loading
+                ? otpSent
+                  ? 'Validando...'
+                  : 'Aguarde...'
+                : otpSent
+                  ? 'Confirmar código'
+                  : mode === 'login'
+                    ? 'Entrar'
+                    : 'Criar conta'}
+            </button>
+
+            {mode === 'login' && (
+              <button
+                className="auth-passwordless"
+                type="button"
+                onClick={
+                  otpSent
+                    ? () => {
+                        setOtpSent(false);
+                        setOtpCode('');
+                        setError('');
+                        setMessage('');
+                      }
+                    : handleSendOtp
+                }
+                disabled={loading}
+              >
+                {otpSent
+                  ? 'Voltar para entrar com senha'
+                  : 'Entrar sem senha'}
+              </button>
+            )}
+
+            {otpSent && (
+              <button
+                className="auth-resend"
+                type="button"
+                onClick={handleSendOtp}
+                disabled={loading}
+              >
+                Reenviar código
+              </button>
+            )}
         </form>
       )}
 
