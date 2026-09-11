@@ -332,3 +332,34 @@
   text-decoration: underline;
   cursor: pointer;
 }
+
+.auth-passwordless-help {
+  margin: -4px 0 4px;
+  color: #725c67;
+  font-size: 13px;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.auth-register-invite {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 7px;
+  color: #725c67;
+  font-size: 13px;
+}
+
+.auth-create-account {
+  padding: 4px;
+  border: 0;
+  background: transparent;
+  color: #6a0735;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: underline;
+  cursor: pointer;
+}

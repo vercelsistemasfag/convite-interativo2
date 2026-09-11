@@ -18,6 +18,7 @@ export default function LoginPage() {
   const [isRecovery, setIsRecovery] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState('');
+  const [passwordlessMode, setPasswordlessMode] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -134,7 +135,7 @@ export default function LoginPage() {
 
       setOtpSent(true);
       setOtpCode('');
-      setMessage('Enviamos um código de 6 dígitos para o seu e-mail.');
+      setMessage('Enviamos um código de 8 dígitos para o seu e-mail.');
     } catch (err) {
       setError(
         err?.message || 'Não foi possível enviar o código de acesso.'
@@ -149,8 +150,8 @@ export default function LoginPage() {
     setError('');
     setMessage('');
 
-    if (!/^\d{6}$/.test(otpCode.trim())) {
-      setError('Digite o código de 6 dígitos enviado ao seu e-mail.');
+    if (!/^\d{8}$/.test(otpCode.trim())) {
+      setError('Digite o código de 8 dígitos enviado ao seu e-mail.');
       return;
     }
 
@@ -240,18 +241,24 @@ export default function LoginPage() {
         />
 
         <div className="auth-copy">
-          <span>CONVITE INTERATIVO</span>
-          <h1>
-            {mode === 'login'
-              ? 'Entre para continuar'
-              : 'Crie sua conta'}
-          </h1>
-          <p>
-            {mode === 'login'
-              ? 'Acesse seus convites e acompanhe seus convidados.'
-              : 'Crie seus convites e gerencie tudo em um só lugar.'}
-          </p>
-        </div>
+            <span>CONVITE INTERATIVO</span>
+            <h1>
+              {passwordlessMode
+                ? 'Entrar com código'
+                : mode === 'login'
+                  ? 'Entre para continuar'
+                  : 'Crie sua conta'}
+            </h1>
+            <p>
+              {passwordlessMode
+                ? otpSent
+                  ? 'Digite o código de 8 dígitos enviado para o seu e-mail.'
+                  : 'Receba um código de acesso no e-mail do seu cadastro.'
+                : mode === 'login'
+                  ? 'Acesse seus convites e acompanhe seus convidados.'
+                  : 'Crie seus convites e gerencie tudo em um só lugar.'}
+            </p>
+          </div>
 
         {isRecovery ? (
         <form className="auth-form" onSubmit={handleUpdatePassword}>
@@ -307,8 +314,20 @@ export default function LoginPage() {
           </button>
         </form>
       ) : (
-      <form className="auth-form" onSubmit={otpSent ? handleVerifyOtp : handleSubmit}>
-          {mode === 'register' && !otpSent && (
+      <form
+            className="auth-form"
+            onSubmit={
+              passwordlessMode
+                ? otpSent
+                  ? handleVerifyOtp
+                  : (event) => {
+                      event.preventDefault();
+                      handleSendOtp();
+                    }
+                : handleSubmit
+            }
+          >
+          {mode === 'register' && !passwordlessMode && (
             <label>
               Nome
               <input
@@ -321,7 +340,9 @@ export default function LoginPage() {
             </label>
           )}
 
-          <label>
+          {(!passwordlessMode || !otpSent) && (
+              <>
+                <label>
             E-mail
             <input
               type="email"
@@ -332,8 +353,15 @@ export default function LoginPage() {
               required
             />
           </label>
+                {passwordlessMode && !otpSent && (
+                  <p className="auth-passwordless-help">
+                    Informe o e-mail usado no seu cadastro para receber o código.
+                  </p>
+                )}
+              </>
+            )}
 
-            {otpSent && (
+            {passwordlessMode && otpSent && (
               <label>
                 Código de acesso
                 <input
@@ -341,20 +369,20 @@ export default function LoginPage() {
                   value={otpCode}
                   onChange={(e) =>
                     setOtpCode(
-                      e.target.value.replace(/\D/g, '').slice(0, 6)
+                      e.target.value.replace(/\D/g, '').slice(0, 8)
                     )
                   }
-                  placeholder="Digite os 6 números"
+                  placeholder="Digite os 8 números"
                   inputMode="numeric"
                   autoComplete="one-time-code"
-                  maxLength={6}
-                  pattern="[0-9]{6}"
+                  maxLength={8}
+                  pattern="[0-9]{8}"
                   required
                 />
               </label>
             )}
 
-        <label className={otpSent ? "otp-hidden" : undefined}>
+        <label className={passwordlessMode ? "otp-hidden" : undefined}>
           Senha
           <div className="password-field">
             <input
@@ -363,7 +391,7 @@ export default function LoginPage() {
               onChange={e => setPassword(e.target.value)}
               placeholder="Sua senha"
               autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-              required={!otpSent}
+              required={!passwordlessMode}
             />
             <button
               type="button"
@@ -376,7 +404,7 @@ export default function LoginPage() {
           </div>
         </label>
 
-        {mode === 'login' && !otpSent && (
+        {mode === 'login' && !passwordlessMode && (
           <button
             type="button"
             className="forgot-password"
@@ -419,40 +447,66 @@ export default function LoginPage() {
               type="submit"
               disabled={loading}
             >
-              {loading
-                ? otpSent
-                  ? 'Validando...'
-                  : 'Aguarde...'
-                : otpSent
-                  ? 'Confirmar código'
+              {passwordlessMode
+                ? loading
+                  ? otpSent
+                    ? 'Validando...'
+                    : 'Enviando...'
+                  : otpSent
+                    ? 'Confirmar código'
+                    : 'Enviar código'
+                : loading
+                  ? 'Aguarde...'
                   : mode === 'login'
                     ? 'Entrar'
                     : 'Criar conta'}
             </button>
 
             {mode === 'login' && (
-              <button
-                className="auth-passwordless"
-                type="button"
-                onClick={
-                  otpSent
-                    ? () => {
+              <>
+                <button
+                  className="auth-passwordless"
+                  type="button"
+                  onClick={() => {
+                    setPasswordlessMode((atual) => !atual);
+                    setOtpSent(false);
+                    setOtpCode('');
+                    setError('');
+                    setMessage('');
+                  }}
+                  disabled={loading}
+                >
+                  {passwordlessMode
+                    ? 'Voltar para entrar com e-mail e senha'
+                    : 'Entrar sem senha'}
+                </button>
+
+                {passwordlessMode && (
+                  <div className="auth-register-invite">
+                    <span>Ainda não tem cadastro?</span>
+                    <button
+                      type="button"
+                      className="auth-create-account"
+                      onClick={() => {
+                        setPasswordlessMode(false);
                         setOtpSent(false);
                         setOtpCode('');
                         setError('');
                         setMessage('');
-                      }
-                    : handleSendOtp
-                }
-                disabled={loading}
-              >
-                {otpSent
-                  ? 'Voltar para entrar com senha'
-                  : 'Entrar sem senha'}
-              </button>
+                        setName('');
+                        setPassword('');
+                        setConfirmPassword('');
+                        setMode('register');
+                      }}
+                    >
+                      Criar minha conta
+                    </button>
+                  </div>
+                )}
+              </>
             )}
 
-            {otpSent && (
+            {passwordlessMode && otpSent && (
               <button
                 className="auth-resend"
                 type="button"
