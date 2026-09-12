@@ -56,13 +56,23 @@ export default function InicioPage() {
     setError('');
 
     try {
-      const { error: deleteError } = await supabase
+      const {
+        data: deletedEvents,
+        error: deleteError
+      } = await supabase
         .from('events')
         .delete()
         .eq('id', event.id)
-        .eq('host_id', user.id);
+        .eq('host_id', user.id)
+        .select('id');
 
       if (deleteError) throw deleteError;
+
+      if (!deletedEvents?.length) {
+        throw new Error(
+          'O banco de dados não autorizou a exclusão deste convite.'
+        );
+      }
 
       setEvents((atuais) =>
         atuais.filter((convite) => convite.id !== event.id)
