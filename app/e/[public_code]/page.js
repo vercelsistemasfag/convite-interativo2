@@ -285,9 +285,10 @@ export default function PublicInvitePage() {
   async function shareInvite() {
     const url = window.location.href;
     const shareData = { url };
+    const isNative = Capacitor.isNativePlatform();
 
     try {
-      if (Capacitor.isNativePlatform()) {
+      if (isNative) {
         await Share.share({ url });
         return;
       }
@@ -300,7 +301,7 @@ export default function PublicInvitePage() {
       await navigator.clipboard.writeText(url);
       window.alert('Link do convite copiado.');
     } catch (error) {
-      if (error?.name === 'AbortError') return;
+      if (isNative || error?.name === 'AbortError') return;
 
       try {
         await navigator.clipboard.writeText(url);
