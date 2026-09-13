@@ -3,6 +3,8 @@
 import './public-invite.css';
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
+import { Capacitor } from '@capacitor/core';
+import { Share } from '@capacitor/share';
 import { supabase } from '../../../lib/supabase';
 import GuestAppActions from './guest-app-actions';
 
@@ -285,6 +287,11 @@ export default function PublicInvitePage() {
     const shareData = { url };
 
     try {
+      if (Capacitor.isNativePlatform()) {
+        await Share.share({ url });
+        return;
+      }
+
       if (navigator.share) {
         await navigator.share(shareData);
         return;
