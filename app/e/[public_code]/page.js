@@ -461,8 +461,8 @@ export default function PublicInvitePage() {
               <input
                 type="number"
                 min="0"
-                placeholder="Acompanhantes"
-                value={companions}
+                placeholder="Número de acompanhantes"
+                value={companions === 0 || companions === '0' ? '' : companions}
                 onChange={e => setCompanions(e.target.value)}
               />
             )}
