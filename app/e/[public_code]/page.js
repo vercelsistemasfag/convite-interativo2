@@ -64,9 +64,10 @@ function FeatureIcon({ id }) {
 
   if (id === "calendar") return (
     <svg {...common}>
-      <rect x="3" y="5" width="18" height="16" rx="3"/>
-      <path d="M8 3v4M16 3v4M3 10h18"/>
-      <path d="m9 15 2 2 4-4"/>
+      <circle cx="18" cy="5" r="2.5" />
+      <circle cx="6" cy="12" r="2.5" />
+      <circle cx="18" cy="19" r="2.5" />
+      <path d="M8.2 10.8l7.5-4.4M8.2 13.2l7.5 4.4" />
     </svg>
   );
 
@@ -281,12 +282,7 @@ export default function PublicInvitePage() {
 
   async function shareInvite() {
     const url = window.location.href;
-    const title = event?.title || 'Convite Celebra';
-    const shareData = {
-      title,
-      text: `Você recebeu um convite: ${title}`,
-      url,
-    };
+    const shareData = { url };
 
     try {
       if (navigator.share) {
