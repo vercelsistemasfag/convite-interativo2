@@ -95,7 +95,7 @@ const features = [
   ['gifts', 'Lista de presentes'],
   ['collective', 'Pix Presente'],
   ['location', 'Como chegar'],
-  ['calendar', 'Adicionar à agenda'],
+  ['calendar', 'Compartilhar convite'],
 ];
 
 function pct(x, y, w, h, iw = 1024, ih = 1536) {
@@ -580,7 +580,7 @@ Aguarde eu explicar exatamente como quero o convite antes de criar a imagem.`;
   }
   function openFeature(id) {
     if(id==='location' && featureConfig.location?.address){ window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(featureConfig.location.address)}`,'_blank','noopener,noreferrer'); return; }
-    if(id==='calendar'){ downloadCalendar(); return; }
+    if(id==='calendar'){ window.alert('No convite publicado, este botão abrirá as opções de compartilhamento do celular.'); return; }
     setActiveFeature(id); setDialog(null);
   }
   async function copyPix(){ const ok=await copyText(featureConfig.collective?.pixKey||''); if(ok)setDialog('Chave Pix copiada.'); }
@@ -784,7 +784,7 @@ Aguarde eu explicar exatamente como quero o convite antes de criar a imagem.`;
         <button className="back-button" onClick={() => go(1)}>‹</button><BrandHeader compact /><h1>O que seus convidados<br/>poderão fazer</h1><div className="gold-divider"><span></span><b>◆</b><span></span></div><p className="page-subtitle">Ative somente os recursos que quiser oferecer.</p>
         <div className="feature-list">{features.map(([id,label])=>{
           const on=enabled.includes(id), needs=['gifts','collective','location'].includes(id), ready=featureConfigured(id);
-          const descriptions={rsvp:'Confirmações organizadas no painel do anfitrião.',music:'Sugestões reunidas no painel do anfitrião.',gifts:'Abra a lista de presentes escolhida.',collective:'Compartilhe os dados do Pix Presente com segurança.',location:'Abra a rota com o endereço completo.',calendar:'Salve o evento automaticamente na agenda.'};
+          const descriptions={rsvp:'Confirmações organizadas no painel do anfitrião.',music:'Sugestões reunidas no painel do anfitrião.',gifts:'Abra a lista de presentes escolhida.',collective:'Compartilhe os dados do Pix Presente com segurança.',location:'Abra a rota com o endereço completo.',calendar:'Abra as opções do celular para compartilhar o convite.'};
           return <div key={id} className={`feature-item ${on?'on':''}`}>
             <button type="button" className="feature-main" onClick={()=>toggleFeature(id)}><i>{id==='collective'?<GiftMoneyIcon/>:<FeatureIcon type={id}/>} </i><span><strong>{label}</strong><small>{descriptions[id]}</small></span><b>{on?'✓':''}</b></button>
             {on&&needs&&<div className="feature-config">

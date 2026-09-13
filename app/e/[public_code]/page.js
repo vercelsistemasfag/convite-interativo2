@@ -109,7 +109,7 @@ const featureMeta = {
   gifts: { label: 'Lista de presentes', icon: '🎁' },
   collective: { label: 'Pix Presente', icon: '◇' },
   location: { label: 'Como chegar', icon: '⌖' },
-  calendar: { label: 'Adicionar à agenda', icon: '▣' }
+  calendar: { label: 'Compartilhar convite', icon: '↗' }
 };
 
 function formatDateBR(value) {
@@ -279,37 +279,38 @@ export default function PublicInvitePage() {
     }
   }
 
-  function addCalendar() {
-    const date = (event.event_date || '').replaceAll('-', '');
-    const time = (event.event_time || '00:00').replace(':', '').slice(0, 4) + '00';
-    const location = event.full_address || event.place_name || '';
+  async function shareInvite() {
+    const url = window.location.href;
+    const title = event?.title || 'Convite Celebra';
+    const shareData = {
+      title,
+      text: `Você recebeu um convite: ${title}`,
+      url,
+    };
 
-    const ics = [
-      'BEGIN:VCALENDAR',
-      'VERSION:2.0',
-      'BEGIN:VEVENT',
-      `DTSTART:${date}T${time}`,
-      `SUMMARY:${event.title || 'Evento Celebra'}`,
-      `LOCATION:${location}`,
-      `DESCRIPTION:${event.message || ''}`,
-      'END:VEVENT',
-      'END:VCALENDAR'
-    ].join('\r\n');
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+        return;
+      }
 
-    const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+      await navigator.clipboard.writeText(url);
+      window.alert('Link do convite copiado.');
+    } catch (error) {
+      if (error?.name === 'AbortError') return;
 
-    a.href = url;
-    a.download = 'convite-celebra.ics';
-    a.click();
-
-    URL.revokeObjectURL(url);
+      try {
+        await navigator.clipboard.writeText(url);
+        window.alert('Link do convite copiado.');
+      } catch {
+        window.prompt('Copie o link do convite:', url);
+      }
+    }
   }
 
   function runFeature(id) {
     if (id === 'location') return openLocation();
-    if (id === 'calendar') return addCalendar();
+    if (id === 'calendar') return shareInvite();
 
     setDialog('');
     setActiveFeature(id);
@@ -344,7 +345,7 @@ export default function PublicInvitePage() {
             </div>
 
             <div className="interaction-grid">
-              {['rsvp','music','location','calendar','gifts','collective']
+              {['rsvp', 'music', 'gifts', 'collective', 'location', 'calendar']
                 .filter(id => enabled.includes(id))
                 .map(id => {
                   const meta = featureMeta[id];
