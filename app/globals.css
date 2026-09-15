@@ -451,7 +451,7 @@
 /* Quebra automática para textos longos do convite */
 .floating-text{
   width:max-content;
-  max-width:88%;
+  max-width:68%;
 }
 
 .floating-text .object-content{
