@@ -347,6 +347,14 @@ Categorias já trabalhadas:
 - Natal.
 - Réveillon.
 
+Categorias internas atuais da galeria:
+
+- Infantil.
+- Aniversário de 15 anos.
+- Times de Futebol.
+- Roblox.
+- Clássicos.
+
 Padrão para fundos gerados:
 
 - 1080 × 1920 pixels.

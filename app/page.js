@@ -83,6 +83,25 @@ const backgroundCategories = {
       '/backgrounds/times-futebol/6.png',
     ],
   },
+  roblox: {
+    label: 'Roblox',
+    names: [
+      'Roblox 1',
+      'Roblox 2',
+      'Roblox 3',
+      'Roblox 4',
+      'Roblox 5',
+      'Roblox 6',
+    ],
+    images: [
+      '/backgrounds/roblox/1.png',
+      '/backgrounds/roblox/2.png',
+      '/backgrounds/roblox/3.png',
+      '/backgrounds/roblox/4.png',
+      '/backgrounds/roblox/5.png',
+      '/backgrounds/roblox/6.png',
+    ],
+  },
   classicos: {
     label: 'Clássicos',
     images: backgrounds,
