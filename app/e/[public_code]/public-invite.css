@@ -1473,8 +1473,8 @@
 
 /* Quebra automática dos textos no convite público */
 .cover-text{
-  width:max-content;
-  max-width:68%;
+  width:68% !important;
+  max-width:68% !important;
   white-space:normal;
   overflow-wrap:anywhere;
   word-break:normal;
