@@ -482,3 +482,14 @@
   line-height:1.45;
   text-align:center;
 }
+
+/* Mantém na publicação final a mesma quebra de texto do editor */
+.published-text{
+  width:max-content;
+  max-width:68%;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  word-break:normal;
+  text-align:center;
+  line-height:1.12;
+}
