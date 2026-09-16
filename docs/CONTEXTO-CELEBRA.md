@@ -167,12 +167,24 @@ A etapa “Conte os detalhes” foi removida. Os dados são configurados diretam
 
 ### Personalização com IA
 
-É uma função secundária e simplificada:
+Na categoria Aniversário, é uma função secundária e simplificada:
 
 1. Copiar as instruções preparadas.
 2. Abrir o ChatGPT para gerar a imagem.
 
-Não transformar essa área no foco principal do editor.
+No editor de Aniversário, não transformar essa área no foco principal.
+
+### Demais categorias: arte completa com ChatGPT (16/09/2026)
+
+- Casamento, Bebê, Formatura, Natal e Réveillon abrem a página `app/ai-invite-guide.js` na etapa de personalização; somente Aniversário abre o editor nativo e seu guia inicial.
+- O passo a passo tem instruções adaptadas à categoria, cópia com alternativa manual, abertura do ChatGPT, revisão e download, envio da arte pronta e prévia.
+- Pedir arte completa com textos, vertical 9:16, preferencialmente 1080 × 1920, sem botões ou moldura de celular.
+- O usuário volta ao Celebra e envia PNG, JPG ou WebP até 10 MB. O envio reutiliza o bucket `invite-backgrounds` e só libera o avanço após sucesso.
+- O nome opcional identifica o convite no painel; não é sobreposto à arte.
+- Nessas categorias, a publicação usa a imagem completa e listas vazias de textos e elementos flutuantes. Nenhuma mudança no banco ou na leitura dos convites já publicados.
+- Cada categoria mantém seu próprio rascunho em `categoryDrafts` dentro do rascunho local existente. A marca local `aiArtworkCategory` confirma o envio da arte da categoria, sem aceitar um fundo antigo como arte pronta automaticamente.
+- Voltar da seleção de recursos retorna à página apropriada à categoria.
+- As seis funções interativas continuam na etapa seguinte. O endereço de Como chegar precisa ser configurado mesmo quando aparece na imagem.
 
 ## 7. Funcionalidades públicas
 

@@ -1,5 +1,6 @@
 'use client';
 import { supabase } from '../lib/supabase';
+import AiInviteGuide from './ai-invite-guide';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -243,6 +244,10 @@ export default function Home() {
   const [hydrated, setHydrated] = useState(false);
   const { category, details, cover, background = 0, color, fontColor = '#f4e7d7', font, floatingElements = [], floatingTexts = defaultInvite.floatingTexts, enabled, featureConfig = defaultInvite.featureConfig } = invite;
   const [aiCopied, setAiCopied] = useState(false);
+  const [aiUploading, setAiUploading] = useState(false);
+  const [aiUploadError, setAiUploadError] = useState('');
+  const aiOnly = category !== 'aniversario';
+  const aiArtwork = invite.aiArtworkCategory === category ? invite.customBackground : '';
   const [linkCopied, setLinkCopied] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [dialog, setDialog] = useState(null);
@@ -345,6 +350,62 @@ Não presuma qual opção eu quero e não gere uma arte aleatória.
 Aguarde eu explicar exatamente como quero o convite antes de criar a imagem.`;
 
   function go(n) { setStep(Math.max(0, Math.min(3, n))); setInviteOpen(false); setDialog(null); setActiveEditorPanel(null); window?.scrollTo?.({ top: 0, behavior: 'smooth' }); }
+  function selectCategory(cat) {
+    if (aiUploading) return;
+    setInvite(current => {
+      if (current.category === cat.id) return current;
+      const { categoryDrafts = {}, ...currentDraft } = current;
+      const savedDrafts = { ...categoryDrafts, [current.category]: currentDraft };
+      return { ...defaultInvite, ...(savedDrafts[cat.id] || {}), category: cat.id, categoryDrafts: savedDrafts };
+    });
+    setCustomBg('');
+    setAiUploadError('');
+    setConfigError('');
+    setSelectedObject(null);
+    setAiCopied(false);
+    setShowEditorGuide(cat.id === 'aniversario');
+    if (cat.id !== 'aniversario') go(1);
+  }
+
+  async function uploadAiArtwork(file) {
+    if (aiUploading) return;
+    setAiUploadError('');
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+      setAiUploadError('Escolha uma imagem PNG, JPG ou WebP.');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setAiUploadError('A imagem deve ter até 10 MB. Escolha uma versão menor.');
+      return;
+    }
+    setAiUploading(true);
+    const uploadCategory = category;
+    try {
+      const ext = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' }[file.type];
+      const fileName = `${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage.from('invite-backgrounds').upload(fileName, file, { cacheControl: '3600', upsert: false });
+      if (error) throw error;
+      const { data } = supabase.storage.from('invite-backgrounds').getPublicUrl(fileName);
+      setInvite(current => current.category !== uploadCategory ? current : {
+        ...current,
+        customBackground: data.publicUrl,
+        aiArtworkCategory: uploadCategory,
+        floatingTexts: [],
+        floatingElements: [],
+      });
+    } catch {
+      setAiUploadError('Não foi possível enviar a imagem. Verifique sua conexão e tente novamente.');
+    } finally {
+      setAiUploading(false);
+    }
+  }
+
+  function continueAiArtwork() {
+    if (!aiArtwork || aiUploading) return;
+    patchInvite({ floatingTexts: [], floatingElements: [] });
+    go(2);
+  }
+
   function patchInvite(patch) { setInvite((current) => ({ ...current, ...patch })); }
   function patchDetails(patch) { setInvite((current) => ({ ...current, details: { ...current.details, ...patch } })); }
   function toggleFeature(id) { setInvite((current) => ({ ...current, enabled: current.enabled.includes(id) ? current.enabled.filter((x) => x !== id) : [...current.enabled, id] })); setConfigError(''); }
@@ -356,6 +417,11 @@ Aguarde eu explicar exatamente como quero o convite antes de criar a imagem.`;
     return true;
   }
   async function finishResources(){
+    if (aiOnly && (!aiArtwork || aiUploading)) {
+      setAiUploadError('Envie a arte pronta antes de continuar.');
+      go(1);
+      return;
+    }
     const missing=enabled.filter((id)=>!featureConfigured(id));
     if(missing.length){
       setConfigError('Preencha os campos obrigatórios ou desative o recurso que não deseja usar.');
@@ -400,8 +466,8 @@ Aguarde eu explicar exatamente como quero o convite antes de criar a imagem.`;
         font_color: invite.fontColor || '#f4e7d7',
         font_index: invite.font || 0,
         decor_index: invite.decor || 0,
-        floating_texts: invite.floatingTexts || [],
-        floating_elements: invite.floatingElements || [],
+        floating_texts: aiOnly ? [] : invite.floatingTexts || [],
+        floating_elements: aiOnly ? [] : invite.floatingElements || [],
         enabled_features: invite.enabled || [],
         pix_key: invite.featureConfig?.collective?.pixKey || null,
         pix_receiver_name: invite.featureConfig?.collective?.receiver || null,
@@ -685,7 +751,7 @@ Aguarde eu explicar exatamente como quero o convite antes de criar a imagem.`;
         <a href="/anfitriao/inicio" className="back-invites-button">← Voltar para meus convites</a>
         <div className="home-question">O que vamos<br/>comemorar <span>hoje?</span></div>
         <div className="category-grid">
-          {categories.map((cat) => <button key={cat.id} className="category-card" style={{'--cat': cat.color}} onClick={() => { setInvite((current) => ({ ...current, category: cat.id, details: { ...current.details, sub: '' } })); setShowEditorGuide(true); }}>
+          {categories.map((cat) => <button key={cat.id} className="category-card" style={{'--cat': cat.color}} onClick={() => selectCategory(cat)}>
             <CategoryIcon type={cat.icon}/>
             <strong>{cat.label}</strong>
             <i><span></span><b>◆</b><span></span></i>
@@ -693,7 +759,20 @@ Aguarde eu explicar exatamente como quero o convite antes de criar a imagem.`;
         </div>
       </section>}
 
-      {step === 1 && <section className="html-screen native-page personalize-page editor-v9">
+      {step === 1 && aiOnly && <AiInviteGuide
+        key={category}
+        category={selectedCategory}
+        image={aiArtwork}
+        uploading={aiUploading}
+        error={aiUploadError}
+        title={details.title}
+        onTitleChange={title => patchDetails({ title })}
+        onUpload={uploadAiArtwork}
+        onBack={() => go(0)}
+        onContinue={continueAiArtwork}
+      ><BrandHeader compact /></AiInviteGuide>}
+
+      {step === 1 && !aiOnly && <section className="html-screen native-page personalize-page editor-v9">
         <button className="back-button" onClick={() => go(0)}>‹</button><BrandHeader compact />
         <h1>Personalize seu convite</h1><div className="gold-divider"><span></span><b>◆</b><span></span></div><p className="page-subtitle">Edite os dados e o visual. A prévia muda na hora.</p>
 
@@ -843,7 +922,7 @@ Aguarde eu explicar exatamente como quero o convite antes de criar a imagem.`;
         <script type="application/json" id="celebra-backend-contract" dangerouslySetInnerHTML={{__html:JSON.stringify(backendEventPayload())}} />
       </section>}
     
-      {showEditorGuide && (
+      {showEditorGuide && !aiOnly && (
         <div className="editor-guide-overlay">
           <div className="editor-guide-card">
             <h3>Antes de começar, olha só 👀</h3>
