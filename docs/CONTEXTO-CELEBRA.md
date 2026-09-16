@@ -478,3 +478,8 @@ Atualize-o quando houver:
 - Alteração no fluxo de autenticação.
 - Mudança no processo do APK.
 - Substituição permanente de uma funcionalidade.
+
+
+### Aprovação da arte e retorno ao Celebra
+
+Todos os briefings orientam o ChatGPT a pedir aprovação após cada imagem ou revisão. Após aprovação, orientar o download real e oferecer o retorno a /anfitriao. Aniversário usa Fundos > Enviar minha imagem; as demais categorias usam Enviar meu convite ou Trocar imagem do convite. Depois do envio, Continuar leva às funções interativas. O envio é manual, sem integração automática ou links de download inventados.

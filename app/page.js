@@ -347,7 +347,16 @@ Depois eu vou escolher entre duas possibilidades:
 
 Não presuma qual opção eu quero e não gere uma arte aleatória.
 
-Aguarde eu explicar exatamente como quero o convite antes de criar a imagem.`;
+Aguarde eu explicar exatamente como quero o convite antes de criar a imagem.
+
+APROVAÇÃO E RETORNO AO CELEBRA
+Depois de cada imagem criada ou revisada, pergunte: "Você aprovou esta imagem ou deseja algum ajuste?" Aguarde minha resposta. Se eu pedir ajustes, faça a nova versão e pergunte novamente.
+Somente após minha aprovação, apresente estes passos:
+1. Baixe a imagem aprovada. Se houver um arquivo realmente disponível para download, ofereça o link "Clique aqui para baixar seu convite". Caso contrário, oriente a abrir a imagem e usar a opção de baixar ou salvar do ChatGPT. Nunca invente um link de download nem use uma captura de tela.
+2. Mostre este link clicável: [Clique aqui para voltar ao Celebra](https://celebra-convite.vercelsistemas.workers.dev/anfitriao).
+3. Explique como enviar a imagem e continuar, conforme a orientação abaixo. Se a tela inicial aparecer, peça para selecionar novamente a mesma categoria do convite.
+Não afirme que a imagem foi enviada automaticamente ao Celebra. O usuário deve baixá-la e selecioná-la no aplicativo.
+Ao retornar, selecione Aniversário, abra Fundos e toque em Enviar minha imagem. Escolha a arte baixada, aguarde o envio e clique em Continuar para incluir as opções interativas. Se criou somente o fundo, complete os textos no editor antes de continuar.`;
 
   function go(n) { setStep(Math.max(0, Math.min(3, n))); setInviteOpen(false); setDialog(null); setActiveEditorPanel(null); window?.scrollTo?.({ top: 0, behavior: 'smooth' }); }
   function selectCategory(cat) {

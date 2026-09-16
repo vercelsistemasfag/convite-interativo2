@@ -23,7 +23,16 @@ Pergunte também o tema, as cores, o estilo e a mensagem que desejo incluir. Nã
 Crie uma única arte vertical, na proporção 9:16, preferencialmente em 1080 × 1920 pixels, com alta resolução e leitura confortável na tela do celular.
 Inclua todos os textos e dados confirmados na própria imagem, em português do Brasil, com acentos corretos. Use letras legíveis, bom contraste e margens generosas em todos os lados. Não corte os textos nem os encoste nas bordas.
 Entregue somente a arte, sem moldura de celular, sem mockup, sem botões, sem QR code e sem marcas d'água. As funções interativas serão adicionadas depois no Celebra.
-Não faça apenas um fundo vazio: preciso do convite completo. Confirme comigo o conteúdo antes de gerar.`;
+Não faça apenas um fundo vazio: preciso do convite completo. Confirme comigo o conteúdo antes de gerar.
+
+APROVAÇÃO E RETORNO AO CELEBRA
+Depois de cada imagem criada ou revisada, pergunte: "Você aprovou esta imagem ou deseja algum ajuste?" Aguarde minha resposta. Se eu pedir ajustes, faça a nova versão e pergunte novamente.
+Somente após minha aprovação, apresente estes passos:
+1. Baixe a imagem aprovada. Se houver um arquivo realmente disponível para download, ofereça o link "Clique aqui para baixar seu convite". Caso contrário, oriente a abrir a imagem e usar a opção de baixar ou salvar do ChatGPT. Nunca invente um link de download nem use uma captura de tela.
+2. Mostre este link clicável: [Clique aqui para voltar ao Celebra](https://celebra-convite.vercelsistemas.workers.dev/anfitriao).
+3. Explique como enviar a imagem e continuar, conforme a orientação abaixo. Se a tela inicial aparecer, peça para selecionar novamente a mesma categoria do convite.
+Não afirme que a imagem foi enviada automaticamente ao Celebra. O usuário deve baixá-la e selecioná-la no aplicativo.
+Ao retornar, selecione a categoria ${category.label}, toque em Enviar meu convite (ou Trocar imagem do convite, se já houver uma imagem), escolha a arte baixada e aguarde o envio. Confira a prévia e clique em Continuar para incluir as opções interativas.`;
 
   async function copyPrompt() {
     try {
