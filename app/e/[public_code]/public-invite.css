@@ -1474,8 +1474,8 @@
 /* Quebra automática dos textos no convite público */
 .cover-text{
   box-sizing:border-box;
-  width:68% !important;
-  max-width:68% !important;
+  width:min(42.16vw, 224px)!important;
+  max-width:min(42.16vw, 224px)!important;
   white-space:pre-wrap;
   overflow-wrap:anywhere;
   word-break:normal;
