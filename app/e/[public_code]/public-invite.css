@@ -1473,9 +1473,10 @@
 
 /* Quebra automática dos textos no convite público */
 .cover-text{
+  box-sizing:border-box;
   width:68% !important;
   max-width:68% !important;
-  white-space:normal;
+  white-space:pre-wrap;
   overflow-wrap:anywhere;
   word-break:normal;
   text-align:center;
