@@ -407,6 +407,16 @@ Depois de instalar ou alterar plugins nativos:
 
 O build direto no Codespaces já falhou por incompatibilidade da versão Java. Preferir GitHub Actions.
 
+### Capa inicial nativa do Celebra Convidado (01/10/2026)
+
+- A capa de abertura do APK é criada em `android/app/src/main/java/br/com/celebra/convite/MainActivity.java`, sobre a WebView do Capacitor. Ela é diferente da página web `/convite`.
+- Preservar as imagens `capa_convidado` e `capa_convidado_9x20`, incluindo o cálculo de recorte para telas altas.
+- Uma faixa dourada opaca cobre o texto “Abrir meu convite” embutido na imagem e exibe um texto nativo “Carregando convite…” com contagem 3, 2, 1. A contagem não faz parte da imagem.
+- Após 3 segundos, remover a capa automaticamente e revelar a WebView. Não exigir toque nem alterar a abertura das interações dentro do convite público.
+- Cancelar a contagem anterior e remover a capa anterior ao receber outro convite; limpar o temporizador ao destruir a atividade.
+- O destino dos links `celebra://convite/<codigo>` permanece `/e/<codigo>`. Os 3 segundos são uma espera de apresentação, não uma garantia de conclusão do carregamento da rede.
+- A alteração exige um novo APK gerado pelo workflow `android-apk.yml` e validação no celular; conferir o alinhamento da faixa nas duas proporções de capa.
+
 ## 14. Git e colaboração
 
 Para novas melhorias:
