@@ -3,6 +3,11 @@ package br.com.celebra.convite;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
+import android.view.Gravity;
+import android.widget.TextView;
 import android.webkit.WebView;
 import android.graphics.Color;
 import android.view.View;
@@ -16,6 +21,27 @@ public class MainActivity extends BridgeActivity {
 
     private static final String BASE_URL =
         "https://celebra-convite.vercelsistemas.workers.dev/e/";
+
+    private FrameLayout capaAtual;
+    private CountDownTimer contagemCapa;
+
+    private void removerCapa() {
+        if (contagemCapa != null) {
+            contagemCapa.cancel();
+            contagemCapa = null;
+        }
+        if (capaAtual != null) {
+            ViewGroup parent = (ViewGroup) capaAtual.getParent();
+            if (parent != null) parent.removeView(capaAtual);
+            capaAtual = null;
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        removerCapa();
+        super.onDestroy();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,10 +59,13 @@ public class MainActivity extends BridgeActivity {
     }
 
     private void mostrarCapa() {
+        removerCapa();
         final ViewGroup raiz = findViewById(android.R.id.content);
         if (raiz == null) return;
 
         final FrameLayout capa = new FrameLayout(this);
+        capaAtual = capa;
+        capa.setClickable(true);
         capa.setBackgroundColor(Color.rgb(242, 211, 200));
 
         final ImageView imagem = new ImageView(this);
@@ -57,10 +86,20 @@ public class MainActivity extends BridgeActivity {
             ViewGroup.LayoutParams.MATCH_PARENT
         ));
 
-        final View botao = new View(this);
-        botao.setContentDescription("Abrir meu convite");
-        botao.setClickable(true);
-        capa.addView(botao, new FrameLayout.LayoutParams(1, 1));
+        final TextView carregando = new TextView(this);
+        carregando.setText("Carregando convite… 3");
+        carregando.setTextColor(Color.rgb(84, 17, 47));
+        carregando.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        carregando.setGravity(Gravity.CENTER);
+        carregando.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+        GradientDrawable faixa = new GradientDrawable(
+            GradientDrawable.Orientation.LEFT_RIGHT,
+            new int[] { Color.rgb(239, 168, 62), Color.rgb(255, 217, 139) }
+        );
+        faixa.setCornerRadius(48 * getResources().getDisplayMetrics().density);
+        faixa.setStroke(2, Color.rgb(255, 229, 175));
+        carregando.setBackground(faixa);
+        capa.addView(carregando, new FrameLayout.LayoutParams(1, 1));
 
         raiz.addView(capa, new ViewGroup.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
@@ -68,7 +107,7 @@ public class MainActivity extends BridgeActivity {
         ));
 
         capa.post(() -> {
-            if (imagem.getDrawable() == null) return;
+            if (capaAtual != capa || imagem.getDrawable() == null) return;
 
             float larguraTela = capa.getWidth();
             float alturaTela = capa.getHeight();
@@ -90,12 +129,24 @@ public class MainActivity extends BridgeActivity {
             );
             posicao.leftMargin = (int) (inicioX + larguraImagem * 0.20f);
             posicao.topMargin = (int) (inicioY + alturaImagem * 0.76f);
-            botao.setLayoutParams(posicao);
+            carregando.setLayoutParams(posicao);
+            float densidade = getResources().getDisplayMetrics().scaledDensity;
+            carregando.setTextSize(Math.max(12f, Math.min(20f, posicao.width / (18f * densidade))));
+
+            contagemCapa = new CountDownTimer(3000, 1000) {
+                @Override
+                public void onTick(long restante) {
+                    int segundos = (int) Math.ceil(restante / 1000.0);
+                    carregando.setText("Carregando convite… " + segundos);
+                }
+
+                @Override
+                public void onFinish() {
+                    if (capaAtual == capa) removerCapa();
+                }
+            }.start();
         });
 
-        View.OnClickListener abrirConvite = view -> raiz.removeView(capa);
-        botao.setOnClickListener(abrirConvite);
-        capa.setOnClickListener(abrirConvite);
     }
 
     private void abrirConviteDoIntent(Intent intent) {
