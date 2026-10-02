@@ -69,16 +69,8 @@ public class MainActivity extends BridgeActivity {
         capa.setBackgroundColor(Color.rgb(242, 211, 200));
 
         final ImageView imagem = new ImageView(this);
-        float proporcaoTela =
-                (float) getResources().getDisplayMetrics().heightPixels
-                / getResources().getDisplayMetrics().widthPixels;
-
-        imagem.setImageResource(
-                proporcaoTela >= 1.9f
-                        ? R.drawable.capa_convidado_9x20
-                        : R.drawable.capa_convidado
-        );
-        imagem.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        imagem.setImageResource(R.drawable.capa_convidado_premium);
+        imagem.setScaleType(ImageView.ScaleType.FIT_CENTER);
         imagem.setAdjustViewBounds(false);
 
         capa.addView(imagem, new FrameLayout.LayoutParams(
@@ -87,18 +79,23 @@ public class MainActivity extends BridgeActivity {
         ));
 
         final TextView carregando = new TextView(this);
-        carregando.setText("Carregando convite… 3");
+        carregando.setText("Carregando convite · 3");
         carregando.setTextColor(Color.rgb(84, 17, 47));
-        carregando.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        carregando.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
+        carregando.setTextSize(14);
+        carregando.setLetterSpacing(0.02f);
+        carregando.setSingleLine(true);
+        carregando.setIncludeFontPadding(false);
         carregando.setGravity(Gravity.CENTER);
         carregando.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
-        GradientDrawable faixa = new GradientDrawable(
-            GradientDrawable.Orientation.LEFT_RIGHT,
-            new int[] { Color.rgb(239, 168, 62), Color.rgb(255, 217, 139) }
-        );
-        faixa.setCornerRadius(48 * getResources().getDisplayMetrics().density);
-        faixa.setStroke(2, Color.rgb(255, 229, 175));
+        final float densidade = getResources().getDisplayMetrics().density;
+        GradientDrawable faixa = new GradientDrawable();
+        faixa.setColor(Color.argb(240, 255, 248, 239));
+        faixa.setCornerRadius(22 * densidade);
+        faixa.setStroke(Math.max(1, Math.round(densidade)), Color.argb(190, 184, 139, 69));
         carregando.setBackground(faixa);
+        carregando.setElevation(3 * densidade);
+        carregando.setPadding(Math.round(16 * densidade), 0, Math.round(16 * densidade), 0);
         capa.addView(carregando, new FrameLayout.LayoutParams(1, 1));
 
         raiz.addView(capa, new ViewGroup.LayoutParams(
@@ -109,35 +106,20 @@ public class MainActivity extends BridgeActivity {
         capa.post(() -> {
             if (capaAtual != capa || imagem.getDrawable() == null) return;
 
-            float larguraTela = capa.getWidth();
-            float alturaTela = capa.getHeight();
-            float larguraOriginal = imagem.getDrawable().getIntrinsicWidth();
-            float alturaOriginal = imagem.getDrawable().getIntrinsicHeight();
-            float escala = Math.max(
-                larguraTela / larguraOriginal,
-                alturaTela / alturaOriginal
-            );
-
-            float larguraImagem = larguraOriginal * escala;
-            float alturaImagem = alturaOriginal * escala;
-            float inicioX = (larguraTela - larguraImagem) / 2f;
-            float inicioY = (alturaTela - alturaImagem) / 2f;
-
+            int largura = Math.min(Math.round(280 * densidade), Math.round(capa.getWidth() * 0.78f));
             FrameLayout.LayoutParams posicao = new FrameLayout.LayoutParams(
-                (int) (larguraImagem * 0.60f),
-                (int) (alturaImagem * 0.09f)
+                largura,
+                Math.round(40 * densidade),
+                Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL
             );
-            posicao.leftMargin = (int) (inicioX + larguraImagem * 0.20f);
-            posicao.topMargin = (int) (inicioY + alturaImagem * 0.76f);
+            posicao.bottomMargin = Math.round(Math.max(24 * densidade, Math.min(48 * densidade, capa.getHeight() * 0.07f)));
             carregando.setLayoutParams(posicao);
-            float densidade = getResources().getDisplayMetrics().scaledDensity;
-            carregando.setTextSize(Math.max(12f, Math.min(20f, posicao.width / (18f * densidade))));
 
             contagemCapa = new CountDownTimer(3000, 1000) {
                 @Override
                 public void onTick(long restante) {
                     int segundos = (int) Math.ceil(restante / 1000.0);
-                    carregando.setText("Carregando convite… " + segundos);
+                    carregando.setText("Carregando convite · " + segundos);
                 }
 
                 @Override

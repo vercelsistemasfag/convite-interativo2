@@ -410,12 +410,13 @@ O build direto no Codespaces já falhou por incompatibilidade da versão Java. P
 ### Capa inicial nativa do Celebra Convidado (01/10/2026)
 
 - A capa de abertura do APK é criada em `android/app/src/main/java/br/com/celebra/convite/MainActivity.java`, sobre a WebView do Capacitor. Ela é diferente da página web `/convite`.
-- Preservar as imagens `capa_convidado` e `capa_convidado_9x20`, incluindo o cálculo de recorte para telas altas.
-- Uma faixa dourada opaca cobre o texto “Abrir meu convite” embutido na imagem e exibe um texto nativo “Carregando convite…” com contagem 3, 2, 1. A contagem não faz parte da imagem.
+- A capa ativa é `android/app/src/main/res/drawable-nodpi/capa_convidado_premium.jpg`, enviada pelo usuário sem botão embutido. Exibir com `FIT_CENTER` para preservar a arte inteira em diferentes proporções de tela; as imagens antigas não são usadas pela abertura.
+- O cronômetro é um elemento nativo independente da imagem: faixa de 40 dp, fundo marfim suave, borda dourada fina, tipografia de 14 sp e texto “Carregando convite · 3”, seguido de 2 e 1. Posicionar centralizado perto do rodapé com margens calculadas pela área visível da capa, sem depender de coordenadas do botão antigo.
 - Após 3 segundos, remover a capa automaticamente e revelar a WebView. Não exigir toque nem alterar a abertura das interações dentro do convite público.
 - Cancelar a contagem anterior e remover a capa anterior ao receber outro convite; limpar o temporizador ao destruir a atividade.
 - O destino dos links `celebra://convite/<codigo>` permanece `/e/<codigo>`. Os 3 segundos são uma espera de apresentação, não uma garantia de conclusão do carregamento da rede.
-- A alteração exige um novo APK gerado pelo workflow `android-apk.yml` e validação no celular; conferir o alinhamento da faixa nas duas proporções de capa.
+- Manter `onDestroy()` público, conforme a assinatura de `BridgeActivity`, para não impedir a compilação do APK.
+- A alteração exige um novo APK gerado pelo workflow `android-apk.yml` e validação no celular; conferir a arte inteira e a faixa fina em telas altas e curtas. Disparar uma nova execução na `main`, pois reexecutar um run antigo mantém seu commit original.
 
 ## 14. Git e colaboração
 
